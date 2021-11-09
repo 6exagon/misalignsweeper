@@ -117,8 +117,7 @@ public class MisalignSweeper {
                point = other;
                other = temp;
             }
-            Poly poly = new Poly(linesInPoly.toArray(new Line[linesInPoly.size()]), null);    // DON'T CHANGE THIS; IT BREAKS
-            
+            Poly poly = new Poly(linesInPoly.toArray(new Line[linesInPoly.size()]));    // DON'T CHANGE THIS; IT BREAKS
             if (!POLYS.contains(poly) && poly.lines.length < 15) POLYS.add(poly);   // if the poly is too big, it doesn't add it
          }                                                                          // as it's probably wrapped all around the board.
       }
@@ -127,13 +126,13 @@ public class MisalignSweeper {
    // Converts a Poly into a renderable Polygon
    public static void generateAWTPolygons() {
       for (Poly poly : POLYS) {
-         int num = poly.lines.length;
+         int num = poly.points.length;
          int[] x = new int[num];
          int[] y = new int[num];
          for (int i = 0; i < num; i++) {
-            Line l = poly.lines[i];
-            x[i] = l.points[0].x;
-            y[i] = l.points[0].y;
+            Point p = poly.points[i];
+            x[i] = p.x;
+            y[i] = p.y;
          }
          Polygon gon = new Polygon(x, y, num);
          POLY_TO_GON.put(poly, gon);
@@ -197,5 +196,5 @@ public class MisalignSweeper {
       MisalignInput input = new MisalignInput();
       //Schedule a job for the event-dispatching thread
       SwingUtilities.invokeLater(() -> MisalignSweeper.createAndShowGUI(input));
-   }
+   }    
 }
