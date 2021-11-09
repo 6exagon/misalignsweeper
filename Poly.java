@@ -1,4 +1,4 @@
-public static class Poly {
+public class Poly {
    public Line[] lines;
    public Point[] points;
       
