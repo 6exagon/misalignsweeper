@@ -4,7 +4,7 @@ import java.awt.event.*;
 import java.util.*;
 
 // According to my IDE, 'Misalign' isn't a word but who cares.
-public class MisalignSweeper implements KeyListener, MouseListener {
+public class MisalignSweeper {
 
    public static final int NUM_POINTS = 50;
    public static final int HEIGHT = 256;
@@ -17,7 +17,7 @@ public class MisalignSweeper implements KeyListener, MouseListener {
    public static final HashMap<Poly, Polygon> POLY_TO_GON = new HashMap<>();  // Doesn't actually need to be a map, but it'll prob be useful in future.
    public static JFrame FRAME;
 
-   public void createAndShowGUI() {
+   public static void createAndShowGUI(MisalignInput input) {
       Random rand = new Random();
       generateBoard(rand);
 
@@ -41,8 +41,8 @@ public class MisalignSweeper implements KeyListener, MouseListener {
          }
       };
       frame.setFocusable(true);
-      frame.addKeyListener(this);
-      frame.addMouseListener(this);
+      frame.addKeyListener(input);
+      frame.addMouseListener(input);
       frame.add(panel);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.setPreferredSize(new Dimension(WIDTH, HEIGHT + 22));   // 22 seems to be the height of the bar at the top
@@ -62,6 +62,9 @@ public class MisalignSweeper implements KeyListener, MouseListener {
       generateAWTPolygons();
 
       System.out.println(POLYS.size());    // just for debug.
+      POLYS.forEach((poly) -> {
+         //for (Line l : poly.lines) System.out.println(l.points[0].x + " " + l.points[0].y + "   " + l.points[1].x + " " + l.points[1].y);
+      });
    }
 
    public static void generatePoints(Random rand) {
@@ -100,19 +103,22 @@ public class MisalignSweeper implements KeyListener, MouseListener {
       for (Point p : POINTS) {                                 // For each point,
          for (Line startLine : p.lines) {                      // and each line coming off of that point,
             ArrayList<Line> linesInPoly = new ArrayList<>();   // move around to the next line counter-clockwise of that line.
-            Line line;                                         // Once you reach the original point, you'll have made a complete loop.
-            Point temp;                                        // This is then saved as a polygon (Poly).
+            linesInPoly.add(startLine);                        // Once you reach the original point, you'll have made a complete loop.
+            Line line;                                         // This is then saved as a polygon (Poly).
+            Point temp;
             Point point = p;
             Point other = startLine.getOtherPoint(point);
             while (other != p) {
                point = getNextCounterClockwisePoint(other, point);
                line = point.getLineWith(other);
+               for (Line l : linesInPoly) if (l.points[0].equals(line.points[0])) line.reversePoints();
                linesInPoly.add(line);
                temp = point;
                point = other;
                other = temp;
             }
-            Poly poly = new Poly(linesInPoly.toArray(new Line[linesInPoly.size()]));    // DON'T CHANGE THIS; IT BREAKS
+            Poly poly = new Poly(linesInPoly.toArray(new Line[linesInPoly.size()]), null);    // DON'T CHANGE THIS; IT BREAKS
+            
             if (!POLYS.contains(poly) && poly.lines.length < 15) POLYS.add(poly);   // if the poly is too big, it doesn't add it
          }                                                                          // as it's probably wrapped all around the board.
       }
@@ -123,13 +129,13 @@ public class MisalignSweeper implements KeyListener, MouseListener {
       for (Poly poly : POLYS) {
          int num = poly.lines.length;
          int[] x = new int[num];
-         int[] y = new int[poly.lines.length];
-         for (int i = 0; i < poly.lines.length; i++) {
+         int[] y = new int[num];
+         for (int i = 0; i < num; i++) {
             Line l = poly.lines[i];
             x[i] = l.points[0].x;
             y[i] = l.points[0].y;
          }
-         Polygon gon = new Polygon(x, y, poly.lines.length);
+         Polygon gon = new Polygon(x, y, num);
          POLY_TO_GON.put(poly, gon);
       }
    }
@@ -188,38 +194,8 @@ public class MisalignSweeper implements KeyListener, MouseListener {
    }
 
    public static void main(String[] args) {
-      MisalignSweeper ms = new MisalignSweeper();
+      MisalignInput input = new MisalignInput();
       //Schedule a job for the event-dispatching thread
-      SwingUtilities.invokeLater(ms::createAndShowGUI);
+      SwingUtilities.invokeLater(() -> MisalignSweeper.createAndShowGUI(input));
    }
-   
-   @Override
-   public void keyTyped(KeyEvent e) {
-      if (e.getKeyChar() == 'r') {
-         generateBoard(new Random());
-         FRAME.repaint();
-      }
-   }
-
-   // Required methods for KeyListener and MouseListener
-   @Override
-   public void keyPressed(KeyEvent e) { }
-
-   @Override
-   public void keyReleased(KeyEvent e) { }
-
-   @Override
-   public void mouseClicked(MouseEvent e) { }
-
-   @Override
-   public void mousePressed(MouseEvent e) { }
-
-   @Override
-   public void mouseReleased(MouseEvent e) { }
-
-   @Override
-   public void mouseEntered(MouseEvent e) { }
-
-   @Override
-   public void mouseExited(MouseEvent e) { }
 }
