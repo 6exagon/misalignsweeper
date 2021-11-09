@@ -1,8 +1,8 @@
 import java.util.*;
 
-public static class Point {
+public class Point {
    public ArrayList<Line> lines = new ArrayList<>();
-   public Point[] nears = new Point[NUM_NEARS];
+   public Point[] nears = new Point[MisalignSweeper.NUM_NEARS];
    public int x,y;
 
    public Line getLineWith(Point p2) {
