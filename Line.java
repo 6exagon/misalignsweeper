@@ -1,4 +1,4 @@
-public static class Line {
+public class Line {
    public Point[] points;
       
    public Line(Point p1, Point p2) {
