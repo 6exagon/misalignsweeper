@@ -3,7 +3,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-// According to my IDE, 'Misalign' isn't a word but who cares.
 public class MisalignSweeper {
 
    public static final int NUM_POINTS = 50;
@@ -15,40 +14,13 @@ public class MisalignSweeper {
    public static final ArrayList<Line> LINES = new ArrayList<>();
    public static final Point[] POINTS = new Point[NUM_POINTS];
    public static final HashMap<Poly, Polygon> POLY_TO_GON = new HashMap<>();  // Doesn't actually need to be a map, but it'll prob be useful in future.
-   public static JFrame FRAME;
-
-   public static void createAndShowGUI(MisalignInput input) {
+   public static MisalignGraphics graphics;
+   
+   public static void create(MisalignInput input) {
       Random rand = new Random();
       generateBoard(rand);
-
-      //Create and set up the window
-      JFrame frame = new JFrame("MisalignSweeper");
-      JPanel panel = new JPanel() {
-         @Override
-         public void paintComponent(Graphics g) {   // Anonymous class b/c it's only used once; it's pretty small; and I'm afraid of other files.
-            super.paintComponent(g);
-            Graphics2D g2 = (Graphics2D) g;
-
-            for (Polygon gon : POLY_TO_GON.values()) {
-               g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
-               g2.fillPolygon(gon);
-            }
-            
-            g2.setColor(Color.black);            
-            for (Line l : LINES) {
-               g2.drawLine(l.points[0].x, l.points[0].y, l.points[1].x, l.points[1].y);
-            }            
-         }
-      };
-      frame.setFocusable(true);
-      frame.addKeyListener(input);
-      frame.addMouseListener(input);
-      frame.add(panel);
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      frame.setPreferredSize(new Dimension(WIDTH, HEIGHT + 22));   // 22 seems to be the height of the bar at the top
-      frame.pack();
-      frame.setVisible(true);
-      FRAME = frame;
+      graphics = new MisalignGraphics(LINES, POLY_TO_GON);
+      graphics.createAndShowGUI(input, rand);
    }
    
    public static void generateBoard(Random rand) {
@@ -60,11 +32,6 @@ public class MisalignSweeper {
       generateLines();
       generatePolys();
       generateAWTPolygons();
-
-      System.out.println(POLYS.size());    // just for debug.
-      POLYS.forEach((poly) -> {
-         //for (Line l : poly.lines) System.out.println(l.points[0].x + " " + l.points[0].y + "   " + l.points[1].x + " " + l.points[1].y);
-      });
    }
 
    public static void generatePoints(Random rand) {
@@ -195,6 +162,6 @@ public class MisalignSweeper {
    public static void main(String[] args) {
       MisalignInput input = new MisalignInput();
       //Schedule a job for the event-dispatching thread
-      SwingUtilities.invokeLater(() -> MisalignSweeper.createAndShowGUI(input));
+      SwingUtilities.invokeLater(() -> MisalignSweeper.create(input));
    }    
 }
