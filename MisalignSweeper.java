@@ -6,10 +6,10 @@ import java.util.*;
 public class MisalignSweeper {
 
    public static final int NUM_POINTS = 50;
-   public static final int HEIGHT = 256;
-   public static final int WIDTH = 256;
-   public static final int MIN_DIST = 20;
-   public static final int NUM_NEARS = 4;
+   public static final int HEIGHT = 512;
+   public static final int WIDTH = 512;
+   public static final int MIN_DIST = 10;
+   public static final int NUM_NEARS = 6;
    public static final ArrayList<Poly> POLYS = new ArrayList<>();
    public static final ArrayList<Line> LINES = new ArrayList<>();
    public static final ArrayList<Point> POINTS = new ArrayList<>();
@@ -37,14 +37,22 @@ public class MisalignSweeper {
    }
 
    public static void generatePoints(Random rand) {
+      int num = 0;
       for (int i = 0; i < NUM_POINTS; i++) {
+         if (num >= 10000) { // to prevent "crashes"
+            generateBoard(rand);
+            break;
+         } 
          Point p = new Point(rand.nextInt(WIDTH), rand.nextInt(HEIGHT));
          boolean farEnough = true;
          for (Point p2 : POINTS) {
             if (p2 != null && getDistance(p, p2) < Math.pow(MIN_DIST, 2)) farEnough = false;
          }
          POINTS.add(p);
-         if (!farEnough) i--;   // if it's not far enough away, it decrements, effectively just running through this 'i' again until it is far enough.
+         if (!farEnough) {
+            i--;   // if it's not far enough away, it decrements, effectively just running through this 'i' again until it is far enough.
+            num++;
+         }
       }
    }
 
@@ -68,6 +76,7 @@ public class MisalignSweeper {
             }
          }
       }
+      removeLoneLines();
    }
 
    public static void generatePolys() {
@@ -93,7 +102,7 @@ public class MisalignSweeper {
             
             Poly poly = new Poly(linesInPoly.toArray(new Line[linesInPoly.size()]));    // DON'T CHANGE THIS; IT BREAKS
             poly.points = pointsInPoly.toArray(new Point[pointsInPoly.size()]);
-            if (!POLYS.contains(poly) && poly.lines.length < 15) POLYS.add(poly);   // if the poly is too big, it doesn't add it
+            if (!POLYS.contains(poly) && poly.lines.length < 20) POLYS.add(poly);   // if the poly is too big, it doesn't add it
          }                                                                          // as it's probably wrapped all around the board.
       }
    }
@@ -115,6 +124,7 @@ public class MisalignSweeper {
    }
    
    public static boolean intersects(Line line) {
+      //if (true) return false;
       for (Line line2 : LINES) {
          try { 
             double intersectX = (line2.b - line.b) / (line.m - line2.m);
@@ -125,6 +135,21 @@ public class MisalignSweeper {
           } catch (ArithmeticException ame) { return false; }
       }
       return false;
+   }
+   
+   public static void removeLoneLines() {
+      ArrayList<Point> pointsToRemove = new ArrayList<>();
+      for (Point p : POINTS) {
+         if (p.lines.size() == 1) {
+            Line l = p.lines.get(0);
+            LINES.remove(l);
+            for (int i = 0; i < l.getOtherPoint(p).lines.size(); i++) {
+               if (l.getOtherPoint(p).lines.get(i).equals(l)) l.getOtherPoint(p).lines.remove(i);
+            }
+            pointsToRemove.add(p);
+         }
+      }
+      pointsToRemove.forEach(p -> POINTS.remove(p));
    }
 
    // https://i.ibb.co/642qj4r/mspoints.png
