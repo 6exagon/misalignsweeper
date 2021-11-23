@@ -24,7 +24,6 @@ public class MisalignGraphics {
       // Creates window and main panel
       this.frame = new JFrame("Misalignsweeper");
       JPanel panel = new JPanel(new GridBagLayout());
-      panel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
       panel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
       frame.add(panel);
       
@@ -38,7 +37,7 @@ public class MisalignGraphics {
                g2.setColor(Color.BLACK);
                g2.fillRect(0, 0, MisalignGraphics.WIDTH, MisalignGraphics.HEIGHT);
                g2.setColor(Color.WHITE);
-               g2.setFont(new Font("TimesRoman", Font.PLAIN, 25)); 
+               g2.setFont(new Font("Consolas", Font.PLAIN, 25)); 
                g2.drawString("Paused", 50, 50);
                g2.setColor(Color.BLACK);
             } else {
@@ -51,9 +50,13 @@ public class MisalignGraphics {
                   g2.drawLine(l.points[0].x, l.points[0].y, l.points[1].x, l.points[1].y);
                }
             }
+            //g2.setColor(Color.RED);
+            //g2.drawRect(2, 2, MisalignGraphics.WIDTH, MisalignGraphics.HEIGHT); 
+            //somethings slightly off between this square and the size of the game panel
          }
       };
       gamePanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+      gamePanel.setPreferredSize(new Dimension(MisalignGraphics.WIDTH + 4, MisalignGraphics.HEIGHT + 4)); //add 4 for border?
       GridBagConstraints cMain = new GridBagConstraints(); //constraints for panel that covers entire window
       int insetMain = 5;
       cMain.insets = new Insets(insetMain, insetMain, insetMain, insetMain); //no, there isn't a better constructor
@@ -66,7 +69,7 @@ public class MisalignGraphics {
       cMain.weightx = 1;
       panel.add(gamePanel, cMain);
       
-      // Creates panel that buttons will go in
+      // Creates panel that buttons and timer will go in
       JPanel buttonPanel = new JPanel(new GridBagLayout());
       buttonPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
       cMain.gridx = 0;
@@ -79,6 +82,13 @@ public class MisalignGraphics {
       cButtons.insets = new Insets(insetButtons, insetButtons, insetButtons, insetButtons);
       cButtons.weightx = 1.0;
       
+      // Creates timer
+      CustomTimer timer = new CustomTimer(1000);
+      timer.start();
+      cButtons.gridx = 0;
+      cButtons.anchor = GridBagConstraints.LINE_START;
+      buttonPanel.add(timer, cButtons);
+      
       // Creates smile (reset) button
       ImageIcon smileIcon = getScaledImageIcon("minesweeper smile.png", 30, -1); 
       ImageIcon frownIcon = getScaledImageIcon("minesweeper frown.png", 30, -1);
@@ -88,8 +98,10 @@ public class MisalignGraphics {
       smile.addMouseListener(new MouseAdapter() {
          @Override
          public void mousePressed(MouseEvent e) {
-             if (!gamePaused)
+             if (!gamePaused) {
                smile.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+               timer.restart();
+            }
          }
 
          @Override
@@ -119,7 +131,7 @@ public class MisalignGraphics {
          @Override
          public void mousePressed(MouseEvent e) {
             pause.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-            //pause timer
+            timer.togglePause();
             gamePanel.repaint();
             gamePaused = !gamePaused;
          }
@@ -134,10 +146,11 @@ public class MisalignGraphics {
       buttonPanel.add(pause, cButtons);
       
       //this is bad (maybe change layout managers?)
-      JLabel blank = new JLabel();
-      blank.setPreferredSize(new Dimension(pause.getPreferredSize())); // adds blank space equal to width of pause button on left
-      cButtons.gridx = 0;                                              // in order to center the replay button
-      buttonPanel.add(blank, cButtons);
+//       JLabel blank = new JLabel();
+//       blank.setPreferredSize(new Dimension(pause.getPreferredSize())); // adds blank space equal to width of pause button on left
+//       cButtons.gridx = 0;                                              // in order to center the replay button
+//       buttonPanel.add(blank, cButtons);
+      
       
       frame.setFocusable(true);
       frame.addKeyListener(input);
