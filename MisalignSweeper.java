@@ -6,8 +6,8 @@ import java.util.*;
 public class MisalignSweeper {
 
    public static final int NUM_POINTS = 50;
-   public static final int HEIGHT = 512;
-   public static final int WIDTH = 512;
+   public static final int HEIGHT = 256;
+   public static final int WIDTH = 256;
    public static final int MIN_DIST = 15;
    public static final int NUM_NEARS = 6;
    public static final ArrayList<Poly> POLYS = new ArrayList<>();
