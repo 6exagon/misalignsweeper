@@ -17,7 +17,7 @@ public class Point {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Point point = (Point) o;
-      return x == point.x && y == point.y && Objects.equals(lines, point.lines) && Arrays.equals(nears, point.nears);
+      return x == point.x && y == point.y; //&& Objects.equals(lines, point.lines) && Arrays.equals(nears, point.nears);
    }
 
    public Point(int x, int y) {
