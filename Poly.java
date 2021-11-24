@@ -7,7 +7,7 @@ public class Poly {
    
    public Poly(Line[] lines) {
       this.lines = lines;
-      this.points = getPointsFromLines(lines);
+      //this.points = getPointsFromLines(lines);
       this.highlighted = false;
    }
    
@@ -19,6 +19,7 @@ public class Poly {
       return MisalignSweeper.areArraysEqualDisorderly(lines, other.lines);
    }
    
+   // Unused currently
    public Point[] getPointsFromLines(Line[] lines) {
       ArrayList<Point> ps = new ArrayList<>();
       for (int i = 0; i < lines.length; i++) {
