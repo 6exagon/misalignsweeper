@@ -8,7 +8,7 @@ public class MisalignSweeper {
    public static final int NUM_POINTS = 50;
    public static final int HEIGHT = 512;
    public static final int WIDTH = 512;
-   public static final int MIN_DIST = 10;
+   public static final int MIN_DIST = 15;
    public static final int NUM_NEARS = 6;
    public static final ArrayList<Poly> POLYS = new ArrayList<>();
    public static final ArrayList<Line> LINES = new ArrayList<>();
@@ -38,20 +38,22 @@ public class MisalignSweeper {
 
    public static void generatePoints(Random rand) {
       int num = 0;
-      for (int i = 0; i < NUM_POINTS; i++) {
-         if (num >= 10000) { // to prevent "crashes"
+      addEdgeAndCornerPoints(rand);
+      for (int i = 16; i < 50; i++) {
+         if (num >= 100000) { // to prevent "crashes"
             generateBoard(rand);
-            break;
+            return;
          } 
          Point p = new Point(rand.nextInt(WIDTH), rand.nextInt(HEIGHT));
          boolean farEnough = true;
          for (Point p2 : POINTS) {
-            if (p2 != null && getDistance(p, p2) < Math.pow(MIN_DIST, 2)) farEnough = false;
+            if (getDistance(p, p2) < Math.pow(MIN_DIST, 2)) farEnough = false;
          }
-         POINTS.add(p);
          if (!farEnough) {
             i--;   // if it's not far enough away, it decrements, effectively just running through this 'i' again until it is far enough.
             num++;
+         } else {
+            POINTS.add(p);
          }
       }
    }
@@ -90,7 +92,7 @@ public class MisalignSweeper {
             Point temp;
             Point point = p;
             Point other = startLine.getOtherPoint(point);
-            while (other != p) {
+            while (!pointsInPoly.contains(other)) {
                pointsInPoly.add(other);
                point = getNextCounterClockwisePoint(other, point);
                line = point.getLineWith(other);
@@ -99,10 +101,18 @@ public class MisalignSweeper {
                point = other;
                other = temp;
             }
+            ArrayList<Point> toBeRemoved = new ArrayList<>();
+            for (Point pointerino : pointsInPoly) {
+               if (pointerino.equals(other)) break;
+               toBeRemoved.add(pointerino);
+            }
+            for (Point dead : toBeRemoved) {
+               pointsInPoly.remove(dead);
+            }
             
             Poly poly = new Poly(linesInPoly.toArray(new Line[linesInPoly.size()]));    // DON'T CHANGE THIS; IT BREAKS
             poly.points = pointsInPoly.toArray(new Point[pointsInPoly.size()]);
-            if (!POLYS.contains(poly) && poly.lines.length < 20) POLYS.add(poly);   // if the poly is too big, it doesn't add it
+            if (!POLYS.contains(poly) && poly.points.length < 20) POLYS.add(poly);   // if the poly is too big, it doesn't add it
          }                                                                          // as it's probably wrapped all around the board.
       }
    }
@@ -120,6 +130,20 @@ public class MisalignSweeper {
          }
          Polygon gon = new Polygon(x, y, num);
          POLY_TO_GON.put(poly, gon);
+      }
+   }
+   
+   public static void addEdgeAndCornerPoints(Random rand) {
+      POINTS.add(new Point(0, 0));
+      POINTS.add(new Point(0, HEIGHT));
+      POINTS.add(new Point(WIDTH, 0));
+      POINTS.add(new Point(WIDTH, HEIGHT));
+      
+      for (int i = 1; i <= 3; i++) {
+         POINTS.add(new Point(0,     rand.nextInt(HEIGHT / 3) + HEIGHT * (i - 1) / 3));
+         POINTS.add(new Point(WIDTH, rand.nextInt(HEIGHT / 3) + HEIGHT * (i - 1) / 3));
+         POINTS.add(new Point(rand.nextInt(WIDTH / 3) + WIDTH * (i - 1) / 3, 0));
+         POINTS.add(new Point(rand.nextInt(WIDTH / 3) + WIDTH * (i - 1) / 3, HEIGHT));
       }
    }
    
@@ -175,6 +199,10 @@ public class MisalignSweeper {
    }
 
    public static double getAngle(Point vertex, Point other) {
+      if (vertex.x - other.x == 0)
+         return (other.y > vertex.y ? 1 : 3) * Math.PI / 2;
+      if (vertex.y - other.y == 0)
+         return other.x > vertex.x ? 0 : Math.PI;
       double base = Math.abs(Math.atan((double)(vertex.y - other.y) / (vertex.x - other.x)));
       return other.y < vertex.y
               ? (other.x < vertex.x ? Math.PI - base : base)
@@ -203,25 +231,6 @@ public class MisalignSweeper {
          }
       }
       return bl;
-   }
-   
-   //Returns the polygon surrounding a coordinate pair
-   public static Poly getClickedPolygon(int x, int y) {
-      Map<Integer, Line> distLine = new HashMap<>();
-      for (Line l : LINES) {
-         if (l.spans(x)) {
-            distLine.put((int) (Math.abs(l.m * x + l.b - y)), l);
-         }
-      }
-      Object[] sortedDists = distLine.keySet().toArray();
-      Arrays.sort(sortedDists);
-      Line closestLine = distLine.get(sortedDists[0]);
-      for (Poly p : POLYS) {
-         if (Arrays.asList(p.lines).contains(closestLine) && p.raycast(x, y) % 2 == 1) {
-            return p;
-         }
-      }
-      return null;
    }
 
    public static void main(String[] args) {
