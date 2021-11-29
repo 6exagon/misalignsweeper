@@ -147,6 +147,25 @@ public class MisalignSweeper {
       }
    }
    
+   //Returns the polygon surrounding a coordinate pair
+   public static Poly getClickedPolygon(int x, int y) {
+      Map<Integer, Line> distLine = new HashMap<>();
+      for (Line l : LINES) {
+         if (l.spans(x)) {
+            distLine.put((int) (Math.abs(l.m * x + l.b - y)), l);
+         }
+      }
+      Object[] sortedDists = distLine.keySet().toArray();
+      Arrays.sort(sortedDists);
+      Line closestLine = distLine.get(sortedDists[0]);
+      for (Poly p : POLYS) {
+         if (Arrays.asList(p.lines).contains(closestLine) && p.raycast(x, y) % 2 == 1) {
+            return p;
+         }
+      }
+      return null;
+   }
+   
    public static boolean intersects(Line line) {
       //if (true) return false;
       for (Line line2 : LINES) {
