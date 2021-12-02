@@ -1,15 +1,12 @@
 import java.util.*;
 
 public class Point {
-   public ArrayList<Line> lines = new ArrayList<>();
-   public Point[] nears = new Point[MisalignSweeper.NUM_NEARS];
-   public int x,y;
+   private ArrayList<Line> lines = new ArrayList<>();
+   private int x, y;
 
-   public Line getLineWith(Point p2) {
-      for (Line line : lines) {
-         if (line.getOtherPoint(this).equals(p2)) return line;
-      }
-      return null;
+   public Point(int x, int y) {
+      this.x = x;
+      this.y = y;
    }
 
    @Override
@@ -19,8 +16,23 @@ public class Point {
       Point point = (Point) o;
       return x == point.x && y == point.y; //&& Objects.equals(lines, point.lines) && Arrays.equals(nears, point.nears);
    }
-
-   public Point(int x, int y) {
-      this.x = x; this.y = y;
+   
+   public int getX() {
+      return this.x;
+   }
+   
+   public int getY() {
+      return this.y;
+   }
+   
+   public ArrayList<Line> getLines() {
+      return this.lines;
+   }
+   
+   public Line getLineWith(Point p2) {
+      for (Line line : lines) {
+         if (line.getOtherPoint(this).equals(p2)) return line;
+      }
+      return null;
    }
 }
