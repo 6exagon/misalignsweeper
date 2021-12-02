@@ -47,7 +47,7 @@ public class MisalignGraphics {
                }
                g2.setColor(Color.BLACK);            
                for (Line l : lines) {
-                  g2.drawLine(l.points[0].x, l.points[0].y, l.points[1].x, l.points[1].y);
+                  g2.drawLine(l.getPoint(0).getX(), l.getPoint(0).getY(), l.getPoint(1).getX(), l.getPoint(1).getY());
                }
             }
             //g2.setColor(Color.RED);

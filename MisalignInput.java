@@ -7,7 +7,7 @@ public class MisalignInput implements KeyListener, MouseListener {
    public void keyTyped(KeyEvent e) {
       if (e.getKeyChar() == 'r') {
          MisalignSweeper.generateBoard(new Random());
-         MisalignSweeper.graphics.frame.repaint();
+         MisalignSweeper.repaint();
       }
    }
 

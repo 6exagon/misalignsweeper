@@ -1,14 +1,12 @@
 import java.util.*;
 
 public class Poly {
-   public Line[] lines;
-   public Point[] points;
-   public boolean highlighted;
+   private Line[] lines;
+   private ArrayList<Point> points;
    
-   public Poly(Line[] lines) {
+   public Poly(Line[] lines, ArrayList<Point> points) {
       this.lines = lines;
-      //this.points = getPointsFromLines(lines);
-      this.highlighted = false;
+      this.points = points;
    }
    
    @Override
@@ -19,23 +17,28 @@ public class Poly {
       return MisalignSweeper.areArraysEqualDisorderly(lines, other.lines);
    }
    
-   // Unused currently
-   public Point[] getPointsFromLines(Line[] lines) {
-      ArrayList<Point> ps = new ArrayList<>();
-      for (int i = 0; i < lines.length; i++) {
-         Line l = lines[i];
-         if (!ps.contains(l.points[0])) ps.add(l.points[0]);
-         if (!ps.contains(l.points[1])) ps.add(l.points[1]);        
-      }
-      return ps.toArray(new Point[0]);
+   public Point getPoint(int index) {
+      return points.get(index);
    }
    
+   public int numPoints() {
+      return points.size();
+   }
+   
+   public boolean hasLine(Line line) {
+      for (Line x : lines) {
+         if (line == x) {
+            return true;
+         }
+      }
+      return false;
+   }
    
    //Returns number of intersections with line extending from point
    public int raycast(int x, int y) {
       int intersections = 0;
       for (Line l : this.lines) {
-         if (l.spans(x) && l.m * x + l.b > y) {
+         if (l.spans(x) && l.getM() * x + l.getB() > y) {
             intersections++;
          }
       }
