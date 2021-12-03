@@ -44,7 +44,17 @@ public class Line {
    }
    
    public Point getOtherPoint(Point p) {
-      return points[0] == p ? points[1] : points[0];
+      if (points[0] == p) {
+         return points[1];
+      } else if (points[1] == p) {
+         return points[0];
+      } else {
+         return null;
+      }
+   }
+   
+   public boolean sharesPointWith(Line other) {
+      return (getOtherPoint(other.getPoint(0)) != null || getOtherPoint(other.getPoint(1)) != null);
    }
    
    //Returns if the line's points are on either side of an x coordinate
