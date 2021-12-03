@@ -5,7 +5,7 @@ import java.util.*;
 
 public class MisalignSweeper {
 
-   public static final int NUM_points = 50;
+   public static final int NUM_POINTS = 50;
    public static final int HEIGHT = 256;
    public static final int WIDTH = 256;
    public static final int MIN_DIST = 15;
@@ -66,8 +66,8 @@ public class MisalignSweeper {
    public static void generateLines() {
       for (Point p : points) {
          Map<Integer, Point> distPoint = new HashMap<>();
-         int[] dists = new int[NUM_points];
-         for (int i = 0; i < NUM_points; i++) {
+         int[] dists = new int[NUM_POINTS];
+         for (int i = 0; i < NUM_POINTS; i++) {
             dists[i] = getDistance(p, points.get(i));     // get the distance to each point
             distPoint.put(dists[i], points.get(i));       // keep track of how far away each point is
          }
@@ -171,13 +171,15 @@ public class MisalignSweeper {
       return null;
    }
    
+   //Returns whether Line is intersecting any other Line
    public static boolean intersects(Line line) {
-      //if (true) return false;
       for (Line line2 : lines) {
-         try { 
-            double intersectX = (line2.getB() - line.getB()) / (line.getM() - line2.getM());
-            if (line.spans((int) intersectX) && line2.spans((int) intersectX)) {
-               return true;
+         try {
+            if (!line2.sharesPointWith(line)) {
+               double intersectX = (line2.getB() - line.getB()) / (line.getM() - line2.getM());
+               if (line.spans((int) intersectX) && line2.spans((int) intersectX)) {
+                  return true;
+               }
             }
           } catch (ArithmeticException ame) { return false; }
       }
