@@ -48,7 +48,7 @@ public class Poly {
    
    public boolean hasLine(Line line) {
       for (Line x : lines) {
-         if (line == x) {
+         if (line.equals(x)) {
             return true;
          }
       }
