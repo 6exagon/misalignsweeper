@@ -15,6 +15,7 @@ public class MisalignSweeper {
    private static final ArrayList<Line> lines = new ArrayList<>();
    private static final ArrayList<Point> points = new ArrayList<>();
    private static final HashMap<Poly, Polygon> polyToGon = new HashMap<>();  // Doesn't actually need to be a map, but it'll prob be useful in future.
+   public static final Point[] corners = new Point[4];
    private static MisalignGraphics graphics;
    
    public static void create() {
@@ -49,7 +50,7 @@ public class MisalignSweeper {
             generateBoard(rand);
             return;
          } 
-         Point p = new Point(rand.nextInt(WIDTH), rand.nextInt(HEIGHT));
+         Point p = new Point(rand.nextInt(MisalignGraphics.WIDTH), rand.nextInt(MisalignGraphics.HEIGHT));
          boolean farEnough = true;
          for (Point p2 : points) {
             if (getDistance(p, p2) < Math.pow(MIN_DIST, 2)) farEnough = false;
@@ -89,18 +90,14 @@ public class MisalignSweeper {
       for (Point p : points) {                                 // For each point,
          for (Line startLine : p.getLines()) {                      // and each line coming off of that point,
             ArrayList<Line> linesInPoly = new ArrayList<>();   // move around to the next line counter-clockwise of that line.
-            ArrayList<Point> pointsInPoly = new ArrayList<>();
-            pointsInPoly.add(p);
-            linesInPoly.add(startLine);                        // Once you reach the original point, you'll have made a complete loop.
-            Line line;                                         // This is then saved as a polygon (Poly).
+            ArrayList<Point> pointsInPoly = new ArrayList<>(); // Once you reach the original point, you'll have made a complete loop.
+            pointsInPoly.add(p);                               // This is then saved as a polygon (Poly).
             Point temp;
             Point point = p;
             Point other = startLine.getOtherPoint(point);
             while (!pointsInPoly.contains(other)) {
                pointsInPoly.add(other);
                point = getNextCounterClockwisePoint(other, point);
-               line = point.getLineWith(other);
-               linesInPoly.add(line);
                temp = point;
                point = other;
                other = temp;
@@ -114,11 +111,10 @@ public class MisalignSweeper {
                pointsInPoly.remove(dead);
             }
             
-            Poly poly = new Poly(linesInPoly.toArray(new Line[linesInPoly.size()]), pointsInPoly);
-            if (!polys.contains(poly) && poly.numPoints() < 20) {
-               polys.add(poly);   // if the poly is too big, it doesn't add it
-            }
-         }                                                                          // as it's probably wrapped all around the board.
+            Poly poly = new Poly(pointsInPoly.toArray(new Point[pointsInPoly.size()]));   // DON'T CHANGE THIS; IT BREAKS
+            if (!polys.contains(poly) && !containsAllCorners(poly))
+               polys.add(poly);   // if the poly includes the four corners, nopers
+         }                                                                          
       }
    }
 
@@ -139,10 +135,12 @@ public class MisalignSweeper {
    }
    
    public static void addEdgeAndCornerPoints(Random rand) {
-      points.add(new Point(0, 0));
-      points.add(new Point(0, HEIGHT));
-      points.add(new Point(WIDTH, 0));
-      points.add(new Point(WIDTH, HEIGHT));
+      corners[0] = new Point(0, 0);
+      corners[1] = new Point(MisalignGraphics.WIDTH, 0);
+      corners[2] = new Point(MisalignGraphics.WIDTH, MisalignGraphics.HEIGHT);
+      corners[3] = new Point(0, MisalignGraphics.HEIGHT);
+      
+      for (Point p : corners) points.add(p);
       
       for (int i = 1; i <= 3; i++) {
          points.add(new Point(0,     rand.nextInt(HEIGHT / 3) + HEIGHT * (i - 1) / 3));
@@ -150,6 +148,16 @@ public class MisalignSweeper {
          points.add(new Point(rand.nextInt(WIDTH / 3) + WIDTH * (i - 1) / 3, 0));
          points.add(new Point(rand.nextInt(WIDTH / 3) + WIDTH * (i - 1) / 3, HEIGHT));
       }
+   }
+   
+   public static Point makeSidePoint(int side, int otherVal) {
+      switch (side) {
+         case 0: return new Point(otherVal, 0);
+         case 1: return new Point(MisalignGraphics.WIDTH, otherVal);
+         case 2: return new Point(MisalignGraphics.WIDTH - otherVal, MisalignGraphics.HEIGHT);
+         case 3: return new Point(0, MisalignGraphics.HEIGHT - otherVal);
+      }
+      return null;
    }
    
    //Returns the polygon surrounding a coordinate pair
@@ -160,7 +168,7 @@ public class MisalignSweeper {
             distLine.put((int) (Math.abs(l.getM() * x + l.getB() - y)), l);
          }
       }
-      Object[] sortedDists = distLine.keySet().toArray();
+      Integer[] sortedDists = distLine.keySet().toArray(new Integer[0]);
       Arrays.sort(sortedDists);
       Line closestLine = distLine.get(sortedDists[0]);
       for (Poly p : polys) {
@@ -184,6 +192,17 @@ public class MisalignSweeper {
           } catch (ArithmeticException ame) { return false; }
       }
       return false;
+   }
+   
+   public static boolean containsAllCorners(Poly poly) {
+      boolean[] cornersBl = new boolean[4];
+      for (int j = 0; j < poly.numPoints(); j++) {
+         Point p = poly.getPoint(j);
+         for (int i = 0; i < 4; i++) {
+            if (corners[i].equals(p)) cornersBl[i] = true;
+         }
+      }
+      return cornersBl[0] && cornersBl[1] && cornersBl[2] && cornersBl[3];
    }
    
    public static void removeLoneLines() {

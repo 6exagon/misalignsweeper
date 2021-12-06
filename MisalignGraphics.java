@@ -41,8 +41,10 @@ public class MisalignGraphics {
                g2.drawString("Paused", 50, 50);
                g2.setColor(Color.BLACK);
             } else {
-               for (Polygon gon : polytogon.values()) { 
+               for (Poly poly : polytogon.keySet()) { 
                   g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256))); //probably should save colors so it's the same after pausing
+                  if (poly.isHighlighted()) g2.setColor(Color.white);
+                  Polygon gon = polytogon.get(poly);
                   g2.fillPolygon(gon);
                }
                g2.setColor(Color.BLACK);            
@@ -153,8 +155,8 @@ public class MisalignGraphics {
       
       
       frame.setFocusable(true);
-      frame.addKeyListener(input);
-      frame.addMouseListener(input);
+      gamePanel.addKeyListener(input);
+      gamePanel.addMouseListener(input);
       frame.add(panel);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       //frame.setPreferredSize(new Dimension(WIDTH, HEIGHT + 22) // 22 seems to be the height of the bar at the top
