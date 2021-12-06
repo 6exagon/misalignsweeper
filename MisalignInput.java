@@ -19,7 +19,10 @@ public class MisalignInput implements KeyListener, MouseListener {
    public void keyReleased(KeyEvent e) { }
 
    @Override
-   public void mouseClicked(MouseEvent e) { }
+   public void mouseClicked(MouseEvent e) {
+      MisalignSweeper.getClickedPolygon(e.getX(), e.getY()).setHighlighted(true);
+      MisalignSweeper.repaint();
+   }
 
    @Override
    public void mousePressed(MouseEvent e) { }
