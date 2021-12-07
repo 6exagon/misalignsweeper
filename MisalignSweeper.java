@@ -6,8 +6,6 @@ import java.util.*;
 public class MisalignSweeper {
 
    public static final int NUM_POINTS = 50;
-   public static final int HEIGHT = 256;
-   public static final int WIDTH = 256;
    public static final int MIN_DIST = 15;
    public static final int NUM_NEARS = 6;
    
@@ -116,6 +114,7 @@ public class MisalignSweeper {
                polys.add(poly);   // if the poly includes the four corners, nopers
          }                                                                          
       }
+      System.out.println(polys.size());
    }
 
    // Converts a Poly into a renderable Polygon
@@ -142,11 +141,27 @@ public class MisalignSweeper {
       
       for (Point p : corners) points.add(p);
       
-      for (int i = 1; i <= 3; i++) {
-         points.add(new Point(0,     rand.nextInt(HEIGHT / 3) + HEIGHT * (i - 1) / 3));
-         points.add(new Point(WIDTH, rand.nextInt(HEIGHT / 3) + HEIGHT * (i - 1) / 3));
-         points.add(new Point(rand.nextInt(WIDTH / 3) + WIDTH * (i - 1) / 3, 0));
-         points.add(new Point(rand.nextInt(WIDTH / 3) + WIDTH * (i - 1) / 3, HEIGHT));
+      for (int i = 0; i < 4; i++) {
+         int dim = i % 2 == 0 ? MisalignGraphics.WIDTH : MisalignGraphics.HEIGHT;
+         Point p1 = makeSidePoint(i, rand.nextInt(3 * dim / 16) + dim / 8);
+         Point p2 = makeSidePoint(i, rand.nextInt(3 * dim / 16) + 3 * dim / 8);
+         Point p3 = makeSidePoint(i, rand.nextInt(3 * dim / 16) + 5 * dim / 8);
+         
+         Line l1 = new Line(corners[i], p1);
+         corners[i].getLines().add(l1);
+         p1.getLines().add(l1);
+         Line l2 = new Line(p1, p2);
+         p1.getLines().add(l2);
+         p2.getLines().add(l2);
+         Line l3 = new Line(p2, p3);
+         p2.getLines().add(l3);
+         p3.getLines().add(l3);
+         Line l4 = new Line(p3, corners[(i+1)%4]);
+         p3.getLines().add(l4);
+         corners[(i+1)%4].getLines().add(l4);
+         
+         lines.add(l1); lines.add(l2); lines.add(l3); lines.add(l4);
+         points.add(p1); points.add(p2); points.add(p3);
       }
    }
    

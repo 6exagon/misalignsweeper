@@ -5,8 +5,8 @@ import java.util.*;
 import javax.swing.border.BevelBorder;
 
 public class MisalignGraphics {
-   public static final int HEIGHT = 256;
-   public static final int WIDTH = 256;
+   public static final int HEIGHT = 512;
+   public static final int WIDTH = 512;
    public ArrayList<Line> lines;
    public HashMap<Poly, Polygon> polytogon;
    public JFrame frame;

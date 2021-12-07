@@ -20,8 +20,13 @@ public class MisalignInput implements KeyListener, MouseListener {
 
    @Override
    public void mouseClicked(MouseEvent e) {
-      MisalignSweeper.getClickedPolygon(e.getX(), e.getY()).setHighlighted(true);
-      MisalignSweeper.repaint();
+      Poly poly = MisalignSweeper.getClickedPolygon(e.getX(), e.getY());
+      if (poly != null) {
+         poly.setHighlighted(true);
+         MisalignSweeper.repaint();
+      } else {
+         System.err.println("Could not find a polygon at that location. :(");
+      }
    }
 
    @Override
