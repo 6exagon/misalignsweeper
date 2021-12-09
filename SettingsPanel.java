@@ -12,11 +12,11 @@ public class SettingsPanel extends JPanel {
       GridBagConstraints c = new GridBagConstraints();
       this.add(new JLabel("Settings"));
       c.gridy = 1;
-      this.addLabeledSpinner("Points", 50, 10, 100, 5, c);
+      this.addLabeledSpinner("Number of Points", 50, 10, 100, 5, c);
       c.gridy = 2;
-      this.addLabeledSpinner("Mines", 10, 5, 25, 1, c); 
+      this.addLabeledSpinner("Number of Mines", 15, 5, 50, 1, c); 
       c.gridy = 3;
-      this.addLabeledSpinner("Connections", 10, 5, 25, 1, c);  
+      this.addLabeledSpinner("Max Lines Per Point", 6, 3, 25, 1, c);  
    }
    
    // Adds a panel containing a label and spinner to the settings panel
@@ -46,7 +46,7 @@ public class SettingsPanel extends JPanel {
    }
    
    // Returns connections spinner value
-   public int getConnection() {
+   public int getNears() {
       return (Integer)spinners.get(2).getValue();
    }
    

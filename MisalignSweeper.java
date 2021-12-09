@@ -5,15 +5,16 @@ import java.util.*;
 
 public class MisalignSweeper {
 
-   public static final int NUM_POINTS = 50;
-   public static final int MIN_DIST = 15;
-   public static final int NUM_NEARS = 6;
+   public static int numPoints = 50;
+   public static int numMines = 15;
+   public static int minDist = 15;
+   public static int numNears = 6;
    
    private static final ArrayList<Poly> polys = new ArrayList<>();
    private static final ArrayList<Line> lines = new ArrayList<>();
    private static final ArrayList<Point> points = new ArrayList<>();
    private static final HashMap<Poly, Polygon> polyToGon = new HashMap<>();  // Doesn't actually need to be a map, but it'll prob be useful in future.
-   public static final Point[] corners = new Point[4];
+   private static final Point[] corners = new Point[4];
    private static MisalignGraphics graphics;
    
    public static void create() {
@@ -43,7 +44,7 @@ public class MisalignSweeper {
    public static void generatePoints(Random rand) {
       int num = 0;
       addEdgeAndCornerPoints(rand);
-      for (int i = 16; i < 50; i++) {
+      for (int i = 16; i < numPoints; i++) {
          if (num >= 100000) { // to prevent "crashes"
             generateBoard(rand);
             return;
@@ -51,7 +52,7 @@ public class MisalignSweeper {
          Point p = new Point(rand.nextInt(MisalignGraphics.WIDTH), rand.nextInt(MisalignGraphics.HEIGHT));
          boolean farEnough = true;
          for (Point p2 : points) {
-            if (getDistance(p, p2) < Math.pow(MIN_DIST, 2)) farEnough = false;
+            if (getDistance(p, p2) < Math.pow(minDist, 2)) farEnough = false;
          }
          if (!farEnough) {
             i--;   // if it's not far enough away, it decrements, effectively just running through this 'i' again until it is far enough.
@@ -65,13 +66,13 @@ public class MisalignSweeper {
    public static void generateLines() {
       for (Point p : points) {
          Map<Integer, Point> distPoint = new HashMap<>();
-         int[] dists = new int[NUM_POINTS];
-         for (int i = 0; i < NUM_POINTS; i++) {
+         int[] dists = new int[numPoints];
+         for (int i = 0; i < numPoints; i++) {
             dists[i] = getDistance(p, points.get(i));     // get the distance to each point
             distPoint.put(dists[i], points.get(i));       // keep track of how far away each point is
          }
          Arrays.sort(dists);     // sort the distances in ascending order
-         for (int i = 1; i <= NUM_NEARS; i++) {          // dists[0] is itself
+         for (int i = 1; i <= numNears; i++) {          // dists[0] is itself
             Point ithNear = distPoint.get(dists[i]);
             Line l = new Line(p, ithNear);                        // Add the newly-made Line object to:
             if (!intersects(l)) {
@@ -114,7 +115,7 @@ public class MisalignSweeper {
                polys.add(poly);   // if the poly includes the four corners, nopers
          }                                                                          
       }
-      System.out.println(polys.size());
+      //System.out.println(polys.size());
    }
 
    // Converts a Poly into a renderable Polygon
@@ -226,13 +227,16 @@ public class MisalignSweeper {
          if (p.getLines().size() == 1) {
             Line l = p.getLines().get(0);
             lines.remove(l);
-            for (int i = 0; i < l.getOtherPoint(p).getLines().size(); i++) {
-               if (l.getOtherPoint(p).getLines().get(i).equals(l)) l.getOtherPoint(p).getLines().remove(i);
+            
+            ArrayList<Line> otherPointLines = l.getOtherPoint(p).getLines();
+            for (int i = 0; i < otherPointLines.size(); i++) {
+               if (otherPointLines.get(i).equals(l))
+                  otherPointLines.remove(i);
             }
             pointsToRemove.add(p);
          }
       }
-      pointsToRemove.forEach(p -> points.remove(p));
+      pointsToRemove.forEach(points::remove);
    }
 
    // https://i.ibb.co/642qj4r/mspoints.png

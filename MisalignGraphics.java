@@ -7,10 +7,13 @@ import javax.swing.border.*;
 public class MisalignGraphics {
    public static final int HEIGHT = 256;
    public static final int WIDTH = 256;
+   public static double xMultiplier = 1.0;
+   public static double yMultiplier = 1.0;
    public ArrayList<Line> lines;
    public HashMap<Poly, Polygon> polytogon;
    public JFrame frame;
    public boolean gamePaused = false;
+   private SettingsPanel settings;
    
    public MisalignGraphics(ArrayList<Line> lines, HashMap<Poly, Polygon> polytogon) {
       this.lines = lines;
@@ -24,7 +27,6 @@ public class MisalignGraphics {
 
       // Creates window and main mainPanel
       this.frame = new JFrame("Misalignsweeper");
-      frame.setResizable(false);
       JPanel mainPanel = new JPanel(new GridBagLayout());
       //JPanel mainPanel = new JPanel(new CardLayout());
       mainPanel.setBorder(raised);
@@ -62,19 +64,21 @@ public class MisalignGraphics {
                g2.drawString("Paused", 50, 50);
                g2.setColor(Color.BLACK);
             } else {
+               MisalignGraphics.xMultiplier = this.getWidth() / (double)MisalignGraphics.WIDTH;
+               MisalignGraphics.yMultiplier = this.getHeight() / (double)MisalignGraphics.HEIGHT;
+               g2.scale(MisalignGraphics.xMultiplier, MisalignGraphics.yMultiplier);
+               
                for (Poly poly : polytogon.keySet()) { 
                   g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256))); //probably should save colors so it's the same after pausing
 //                   g2.setColor(getPolygonColor(gon, rand)); //will eventually get value from poly
-                  if (poly.isHighlighted()) g2.setColor(Color.white);
-                     Polygon gon = polytogon.get(poly);
+                  if (poly.isHighlighted())
+                     g2.setColor(Color.white);
+                  Polygon gon = polytogon.get(poly);
                   g2.fillPolygon(gon);
                }
                g2.setColor(Color.BLACK);            
-               for (Line l : lines) {
+               for (Line l : lines)
                   g2.drawLine(l.getPoint(0).getX(), l.getPoint(0).getY(), l.getPoint(1).getX(), l.getPoint(1).getY());
-               }
-               
-               //check if settings have changed, generate new board somewhere in here
             }
          }
       };
@@ -83,6 +87,7 @@ public class MisalignGraphics {
       cardPanel.add(gamePanel, "gamePanel");
       
       SettingsPanel settings = new SettingsPanel();
+      this.settings = settings;
       cardPanel.add(settings, "settingsPanel");
       
       JPanel buttonPanel = new JPanel(new GridBagLayout());
@@ -142,6 +147,12 @@ public class MisalignGraphics {
             pause.setBorder(lowered);
             timer.togglePause();
             
+            if (gamePaused) {
+               MisalignSweeper.numPoints = MisalignGraphics.this.settings.getPoints();
+               MisalignSweeper.numMines = MisalignGraphics.this.settings.getMines();
+               MisalignSweeper.numNears = MisalignGraphics.this.settings.getNears();
+            }
+            
             CardLayout c = (CardLayout)(cardPanel.getLayout());
             c.next(cardPanel);
 //             System.out.println("Points:" + settings.getPoints());
@@ -188,5 +199,9 @@ public class MisalignGraphics {
       Image image = icon.getImage();
       Image newImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
       return new ImageIcon(newImage);
+    }
+    
+    public SettingsPanel getSettings() {
+      return this.settings;
     }
 }
