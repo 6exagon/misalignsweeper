@@ -2,7 +2,6 @@ import java.util.*;
 
 public class Line {
    private Point[] points;
-   private ArrayList<Poly> polys;
    private double m;        // slope
    private double b;        // y-intercept
    
@@ -14,7 +13,6 @@ public class Line {
          this.m = Double.MAX_VALUE;
       }
       this.b = p1.getY() - this.m * p1.getX();
-      this.polys = new ArrayList<>();
    }
 
    @Override
