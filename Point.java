@@ -14,7 +14,7 @@ public class Point {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Point point = (Point) o;
-      return x == point.x && y == point.y; //&& Objects.equals(lines, point.lines) && Arrays.equals(nears, point.nears);
+      return x == point.x && y == point.y;
    }
    
    public int getX() {
@@ -30,9 +30,14 @@ public class Point {
    }
    
    public Line getLineWith(Point p2) {
-      for (Line line : lines) {
-         if (line.getOtherPoint(this).equals(p2)) return line;
-      }
+      for (Line line : lines)
+         if (line.getOtherPoint(this).equals(p2))
+            return line;
       return null;
+   }
+   
+   @Override
+   public String toString() {
+      return "(" + x + ", " + y + ")"; 
    }
 }

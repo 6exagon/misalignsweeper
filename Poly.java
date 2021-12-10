@@ -23,6 +23,10 @@ public class Poly {
       return points[index];
    }
    
+   public Point[] getPoints() {
+      return this.points;
+   }
+   
    public int numPoints() {
       return points.length;
    }
@@ -38,31 +42,23 @@ public class Poly {
    public void getLinesFromPoints() {
       this.lines = new Line[this.points.length];
       for (int i = 0; i < this.points.length; i++) {
-         if (i == this.points.length - 1) {
+         if (i == this.points.length - 1)
             this.lines[i] = new Line(this.points[i], this.points[0]);
-         } else {
+         else
             this.lines[i] = new Line(this.points[i], this.points[i+1]);
-         }
       }
    }
    
    public boolean hasLine(Line line) {
-      for (Line x : lines) {
-         if (line.equals(x)) {
-            return true;
-         }
-      }
-      return false;
+      return Arrays.asList(lines).contains(line);
    }
    
    //Returns number of intersections with line extending from point
    public int raycast(int x, int y) {
       int intersections = 0;
-      for (Line l : this.lines) {
-         if (l.spans(x) && l.getM() * x + l.getB() > y) {
+      for (Line l : this.lines)
+         if (l.spans(x) && l.getM() * x + l.getB() > y)
             intersections++;
-         }
-      }
       return intersections;
    }
 }
