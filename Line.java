@@ -6,13 +6,16 @@ public class Line {
    private double b;        // y-intercept
    
    public Line(Point p1, Point p2) {
-      try {
-         this.points = new Point[] {p1, p2};
-         this.m = ((double) p2.getY() - p1.getY()) / (p2.getX() - p1.getX());
-      } catch (ArithmeticException ame) {
+      this.points = new Point[] {p1, p2};
+      double denom = p2.getX() - p1.getX();
+      if (denom == 0)
          this.m = Double.MAX_VALUE;
-      }
+      else
+         this.m = (p2.getY() - p1.getY()) / denom;
       this.b = p1.getY() - this.m * p1.getX();
+      if (m == Double.MAX_VALUE || Double.isNaN(b) || !Double.isFinite(b))
+         this.b = Double.MAX_VALUE;
+      this.polys = new ArrayList<>();
    }
 
    @Override
@@ -30,7 +33,7 @@ public class Line {
    public double getB() {
       return b;
    }
-
+ 
    public void reversePoints() {
       Point temp = points[0];
       points[0] = points[1];
@@ -42,17 +45,15 @@ public class Line {
    }
    
    public Point getOtherPoint(Point p) {
-      if (points[0] == p) {
+      if (points[0] == p)
          return points[1];
-      } else if (points[1] == p) {
+      else if (points[1] == p)
          return points[0];
-      } else {
-         return null;
-      }
+      return null;
    }
    
    public boolean sharesPointWith(Line other) {
-      return (getOtherPoint(other.getPoint(0)) != null || getOtherPoint(other.getPoint(1)) != null);
+      return getOtherPoint(other.getPoint(0)) != null || getOtherPoint(other.getPoint(1)) != null;
    }
    
    //Returns if the line's points are on either side of an x coordinate

@@ -5,16 +5,17 @@ import java.util.*;
 
 public class MisalignSweeper {
 
-   public static final int NUM_POINTS = 50;
-   public static final int MIN_DIST = 15;
-   public static final int NUM_NEARS = 6;
+   public static int numPoints = 50;
+   public static int numMines = 15;
+   public static int minDist = 15;
+   public static int numNears = 6;
    
    private static final ArrayList<Poly> polys = new ArrayList<>();
    private static final ArrayList<Line> lines = new ArrayList<>();
    private static final ArrayList<Point> points = new ArrayList<>();
    private static final HashMap<Poly, Polygon> polyToGon = new HashMap<>();  // Doesn't actually need to be a map, but it'll prob be useful in future.
-   public static final Point[] corners = new Point[4];
    private static MisalignGraphics graphics;
+   private static Point[] corners;
    
    public static void create() {
       MisalignInput input = new MisalignInput();
@@ -23,16 +24,18 @@ public class MisalignSweeper {
       graphics = new MisalignGraphics(lines, polyToGon);
       graphics.createAndShowGUI(input, rand);
    }
-   
+     
+   // Re-draws the game board without re-generating
    public static void repaint() {
       graphics.frame.repaint();
    }
    
+   // Called whenever the board is generated or re-generated
    public static void generateBoard(Random rand) {
       points.clear();
       lines.clear();
       polys.clear();
-      polyToGon.clear();
+      polyToGon.clear();      
       
       generatePoints(rand);
       generateLines();
@@ -40,58 +43,52 @@ public class MisalignSweeper {
       generateAWTPolygons();
    }
 
+   // Generates the Points for the game board
    public static void generatePoints(Random rand) {
-      int num = 0;
       addEdgeAndCornerPoints(rand);
-      for (int i = 16; i < 50; i++) {
-         if (num >= 100000) { // to prevent "crashes"
-            generateBoard(rand);
-            return;
-         } 
+      for (int i = 16; i < numPoints; i++) { // start at 16 b/c of edges and corners
          Point p = new Point(rand.nextInt(MisalignGraphics.WIDTH), rand.nextInt(MisalignGraphics.HEIGHT));
          boolean farEnough = true;
-         for (Point p2 : points) {
-            if (getDistance(p, p2) < Math.pow(MIN_DIST, 2)) farEnough = false;
-         }
-         if (!farEnough) {
+         for (Point p2 : points)
+            if (getDistance(p, p2) < Math.pow(minDist, 2))
+               farEnough = false;
+         if (!farEnough)
             i--;   // if it's not far enough away, it decrements, effectively just running through this 'i' again until it is far enough.
-            num++;
-         } else {
+         else
             points.add(p);
-         }
       }
    }
 
+   // Generates the Lines for the game board
    public static void generateLines() {
       for (Point p : points) {
          Map<Integer, Point> distPoint = new HashMap<>();
-         int[] dists = new int[NUM_POINTS];
-         for (int i = 0; i < NUM_POINTS; i++) {
+         int[] dists = new int[numPoints];
+         for (int i = 0; i < numPoints; i++) {
             dists[i] = getDistance(p, points.get(i));     // get the distance to each point
             distPoint.put(dists[i], points.get(i));       // keep track of how far away each point is
          }
          Arrays.sort(dists);     // sort the distances in ascending order
-         for (int i = 1; i <= NUM_NEARS; i++) {          // dists[0] is itself
+         for (int i = 1; i <= numNears; i++) {          // dists[0] is itself
             Point ithNear = distPoint.get(dists[i]);
             Line l = new Line(p, ithNear);                        // Add the newly-made Line object to:
             if (!intersects(l)) {
-               if         (!lines.contains(l)) lines.add(l);            // the class-wide list of all lines
-               if       (!p.getLines().contains(l)) p.getLines().add(l);          // the first point's list of lines
-               if (!ithNear.getLines().contains(l)) ithNear.getLines().add(l);    // the second point's list of lines
+               addTo(lines, l);               // the class-wide list of all lines
+               addTo(p.getLines(), l);          // the first point's list of lines
+               addTo(ithNear.getLines(), l);    // the second point's list of lines
             }
          }
       }
       removeLoneLines();
    }
 
+   // Generates all the Polys for the game board
    public static void generatePolys() {
       for (Point p : points) {                                 // For each point,
-         for (Line startLine : p.getLines()) {                      // and each line coming off of that point,
-            ArrayList<Line> linesInPoly = new ArrayList<>();   // move around to the next line counter-clockwise of that line.
-            ArrayList<Point> pointsInPoly = new ArrayList<>(); // Once you reach the original point, you'll have made a complete loop.
-            pointsInPoly.add(p);                               // This is then saved as a polygon (Poly).
-            Point temp;
-            Point point = p;
+         for (Line startLine : p.getLines()) {                 // and each line coming off of that point,
+            ArrayList<Point> pointsInPoly = new ArrayList<>(); // move around to the next line counter-clockwise of that line.
+            Point temp;                                        // Once you reach the original point, you'll have made a complete loop.
+            Point point = p;                                   // This is then saved as a polygon (Poly).
             Point other = startLine.getOtherPoint(point);
             while (!pointsInPoly.contains(other)) {
                pointsInPoly.add(other);
@@ -100,21 +97,17 @@ public class MisalignSweeper {
                point = other;
                other = temp;
             }
-            ArrayList<Point> toBeRemoved = new ArrayList<>();
+            ArrayList<Point> toBeRemoved = new ArrayList<>();  // This is my solution for getting rid of invisible tails
             for (Point pointerino : pointsInPoly) {
                if (pointerino.equals(other)) break;
                toBeRemoved.add(pointerino);
             }
-            for (Point dead : toBeRemoved) {
-               pointsInPoly.remove(dead);
-            }
-            
+            toBeRemoved.forEach(pointsInPoly::remove);
             Poly poly = new Poly(pointsInPoly.toArray(new Point[pointsInPoly.size()]));   // DON'T CHANGE THIS; IT BREAKS
-            if (!polys.contains(poly) && !containsAllCorners(poly))
-               polys.add(poly);   // if the poly includes the four corners, nopers
+            if (!hasAllCorners(poly))
+               addTo(polys, poly);          // if the poly includes all four corners, nopers
          }                                                                          
       }
-      System.out.println(polys.size());
    }
 
    // Converts a Poly into a renderable Polygon
@@ -133,20 +126,23 @@ public class MisalignSweeper {
       }
    }
    
+   // Adds mandatory points on the edges and corners.
    public static void addEdgeAndCornerPoints(Random rand) {
-      corners[0] = new Point(0, 0);
-      corners[1] = new Point(MisalignGraphics.WIDTH, 0);
-      corners[2] = new Point(MisalignGraphics.WIDTH, MisalignGraphics.HEIGHT);
-      corners[3] = new Point(0, MisalignGraphics.HEIGHT);
+      corners = new Point[] {
+         new Point(0, 0),
+         new Point(MisalignGraphics.WIDTH, 0),
+         new Point(MisalignGraphics.WIDTH, MisalignGraphics.HEIGHT),
+         new Point(0, MisalignGraphics.HEIGHT)
+      };
       
       for (Point p : corners) points.add(p);
       
       for (int i = 0; i < 4; i++) {
          int dim = i % 2 == 0 ? MisalignGraphics.WIDTH : MisalignGraphics.HEIGHT;
-         Point p1 = makeSidePoint(i, rand.nextInt(3 * dim / 16) + dim / 8);
-         Point p2 = makeSidePoint(i, rand.nextInt(3 * dim / 16) + 3 * dim / 8);
+         Point p1 = makeSidePoint(i, rand.nextInt(3 * dim / 16) + dim / 8);       // The three edge points are distributed so they're
+         Point p2 = makeSidePoint(i, rand.nextInt(3 * dim / 16) + 3 * dim / 8);   // relatively far away from each other but still random.
          Point p3 = makeSidePoint(i, rand.nextInt(3 * dim / 16) + 5 * dim / 8);
-         
+         // We have to force the edge points to connect, otherwise we'd get empty tiles
          Line l1 = new Line(corners[i], p1);
          corners[i].getLines().add(l1);
          p1.getLines().add(l1);
@@ -159,12 +155,13 @@ public class MisalignSweeper {
          Line l4 = new Line(p3, corners[(i+1)%4]);
          p3.getLines().add(l4);
          corners[(i+1)%4].getLines().add(l4);
-         
+         // Only four statements per line? Child's play.
          lines.add(l1); lines.add(l2); lines.add(l3); lines.add(l4);
          points.add(p1); points.add(p2); points.add(p3);
       }
    }
    
+   // Creates a point on one of the edges, which one is determined by 'side'
    public static Point makeSidePoint(int side, int otherVal) {
       switch (side) {
          case 0: return new Point(otherVal, 0);
@@ -175,121 +172,106 @@ public class MisalignSweeper {
       return null;
    }
    
-   //Returns the polygon surrounding a coordinate pair
+   // Returns the polygon surrounding a coordinate pair
    public static Poly getClickedPolygon(int x, int y) {
-      Map<Integer, Line> distLine = new HashMap<>();
-      for (Line l : lines) {
-         if (l.spans(x)) {
-            distLine.put((int) (Math.abs(l.getM() * x + l.getB() - y)), l);
-         }
-      }
-      Integer[] sortedDists = distLine.keySet().toArray(new Integer[0]);
+      Map<Double, Line> distLine = new HashMap<>();
+      for (Line line : lines)
+         if (line.spans(x))
+            distLine.put(Math.abs(line.getM() * x + line.getB() - y), line);
+      Double[] sortedDists = distLine.keySet().toArray(new Double[0]);
       Arrays.sort(sortedDists);
       Line closestLine = distLine.get(sortedDists[0]);
-      for (Poly p : polys) {
-         if (p.hasLine(closestLine) && p.raycast(x, y) % 2 == 1) {
+      for (Poly p : polys)
+         if (p.hasLine(closestLine) && p.raycast(x, y) % 2 == 1)
             return p;
-         }
-      }
       return null;
    }
    
-   //Returns whether Line is intersecting any other Line
+   // Returns whether line is intersecting any other Line
    public static boolean intersects(Line line) {
       for (Line line2 : lines) {
          try {
             if (!line2.sharesPointWith(line)) {
                double intersectX = (line2.getB() - line.getB()) / (line.getM() - line2.getM());
-               if (line.spans((int) intersectX) && line2.spans((int) intersectX)) {
+               if (line.spans((int)Math.round(intersectX)) && line2.spans((int)Math.round(intersectX))) {
                   return true;
                }
+               // These lines fix most of the weird vertical lines, but cause a weird block on the right.
+               //if ((line.getM() == Double.MAX_VALUE || line.getB() == Double.MAX_VALUE) && line2.spans(line.getPoint(1).getX())) return true;
+               //if ((line2.getM() == Double.MAX_VALUE || line2.getB() == Double.MAX_VALUE) && line.spans(line2.getPoint(1).getX())) return true;
             }
-          } catch (ArithmeticException ame) { return false; }
+          } catch (ArithmeticException ame) { }
       }
       return false;
    }
    
-   public static boolean containsAllCorners(Poly poly) {
-      boolean[] cornersBl = new boolean[4];
-      for (int j = 0; j < poly.numPoints(); j++) {
-         Point p = poly.getPoint(j);
-         for (int i = 0; i < 4; i++) {
-            if (corners[i].equals(p)) cornersBl[i] = true;
-         }
-      }
-      return cornersBl[0] && cornersBl[1] && cornersBl[2] && cornersBl[3];
+   // Checks if the poly has all four corner Points in it.
+   // this should maybe be changed to including any 2 points, but I haven't seen any issue recently
+   public static boolean hasAllCorners(Poly poly) {
+      return Arrays.asList(poly.getPoints()).containsAll(Arrays.asList(corners));
    }
    
+   // Removes all the points and lines that aren't connected to anything
    public static void removeLoneLines() {
       ArrayList<Point> pointsToRemove = new ArrayList<>();
       for (Point p : points) {
          if (p.getLines().size() == 1) {
-            Line l = p.getLines().get(0);
-            lines.remove(l);
-            for (int i = 0; i < l.getOtherPoint(p).getLines().size(); i++) {
-               if (l.getOtherPoint(p).getLines().get(i).equals(l)) l.getOtherPoint(p).getLines().remove(i);
-            }
             pointsToRemove.add(p);
+            Line line = p.getLines().get(0);
+            lines.remove(line);
+            // We also have to get rid of references to this line from other points.
+            line.getOtherPoint(p).getLines().remove(line);
          }
       }
-      pointsToRemove.forEach(p -> points.remove(p));
+      pointsToRemove.forEach(points::remove);  // To avoid ConcurrentModificationException
    }
 
-   // https://i.ibb.co/642qj4r/mspoints.png
+   // Goes through all the points connected to 'pivot', and returns the one with
+   // the lowest angle (as defined by getAngle) greater than 'old'
    public static Point getNextCounterClockwisePoint(Point pivot, Point old) {
       Map<Double, Point> angleToPoint = new HashMap<>();
-      ArrayList<Double> angles = new ArrayList<>();
       double oldAngle = getAngle(pivot, old);
-      pivot.getLines().forEach((line) -> {              // ooh look, a lambda!
+      pivot.getLines().forEach(line -> {              // ooh look, a lambda!
          Point other = line.getOtherPoint(pivot);
-         angles.add(getAngle(pivot, other));
          angleToPoint.put(getAngle(pivot, other), other);
       });
-      angles.sort(null);
-      double newAngle = -100000;
-      for (double angle : angles) {
-         if (angle > oldAngle) { 
+      double newAngle = 100000;
+      for (double angle : angleToPoint.keySet())
+         if (angle > oldAngle && angle < newAngle) // allows us to find the smallest angle > the old angle
             newAngle = angle;
-            break;
-         }
-      }
-      if (newAngle == -100000) newAngle = angles.get(0);
+      if (newAngle == 100000)  // If none are greater than old, we want the lowest value.
+         newAngle = angleToPoint.keySet().stream().min(Comparator.comparing(Double::valueOf)).get();   // thanks, stackoverflow
       return angleToPoint.get(newAngle);
    }
 
+   // Returns the angle between a horizontal line going to the right of 'vertex' and a line from 'vertex' to 'other'
    public static double getAngle(Point vertex, Point other) {
-      if (vertex.getX() - other.getY() == 0)
-         return (other.getY() > vertex.getY() ? 1 : 3) * Math.PI / 2;
-      if (vertex.getY() - other.getY() == 0)
-         return other.getX() > vertex.getX() ? 0 : Math.PI;
-      double base = Math.abs(Math.atan((double)(vertex.getY() - other.getY()) / (vertex.getX() - other.getX())));
+      double base = Math.abs(Math.atan((double)(other.getY() - vertex.getY()) / (other.getX() - vertex.getX())));
+      // The inverse tangent only goes between 0 and pi/2, so we need to find out what quadrant it's in and change it.
       return other.getY() < vertex.getY()
-              ? (other.getX() < vertex.getX() ? Math.PI - base : base)
-              : (other.getX() < vertex.getX() ? Math.PI + base : 2 * Math.PI - base);
+              ? (other.getX() < vertex.getX() ? Math.PI - base : base)                 // 2nd and 1st Quadrants
+              : (other.getX() < vertex.getX() ? Math.PI + base : 2 * Math.PI - base);  // 3rd and 1st Quadrants
    }
 
    // Returns the distance (squared) between two points
    public static int getDistance(Point p1, Point p2) {
       return (int)Math.pow(p2.getX() - p1.getX(), 2) + (int)Math.pow(p2.getY() - p1.getY(), 2);
    }
+   
+   // Adds an item to an ArrayList if it is not already there
+   public static <T> void addTo(ArrayList<T> list, T item) {
+      if (!list.contains(item)) list.add(item);
+   }
 
    // Checks if the two arrays have the same elements, but not necessarily in the same order
    public static <T> boolean areArraysEqualDisorderly(T[] a1, T[] a2) {
-      boolean bl = true;
-      for (T a : a1) {
-         boolean bl2 = false;
-         for (T b : a2) {
-            if (b.equals(a)) {
-               bl2 = true;
-               break;
-            }
-         }
-         if (!bl2) {
-            bl = false;
-            break;
-         }
+      array1: for (T a : a1) {
+         for (T b : a2)
+            if (b.equals(a))
+               continue array1;
+         return false;
       }
-      return bl;
+      return true;
    }
 
    public static void main(String[] args) {
