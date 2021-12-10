@@ -22,7 +22,6 @@ public class MisalignInput implements KeyListener, MouseListener {
    public void mouseClicked(MouseEvent e) {
       Poly poly = MisalignSweeper.getClickedPolygon((int)(e.getX() / MisalignGraphics.xMultiplier), (int)(e.getY() / MisalignGraphics.yMultiplier));
       if (poly != null) {
-         poly.setHighlighted(true);
          MisalignSweeper.repaint();
       } else {
          System.err.println("Could not find a polygon at that location. :(");

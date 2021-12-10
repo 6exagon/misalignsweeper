@@ -3,12 +3,15 @@ import java.util.*;
 public class Poly {
    private Line[] lines;
    private Point[] points;
-   private boolean highlighted;
+   private int surroundingMines;
+   private int visible;
    
    public Poly(Point[] points) {
       this.points = points;
       getLinesFromPoints();
-      this.highlighted = false;
+      addPolysToLines();
+      this.surroundingMines = 0;
+      this.visible = 0;
    }
    
    @Override
@@ -23,46 +26,69 @@ public class Poly {
       return points[index];
    }
    
+   public Point[] getPoints() {
+      return this.points;
+   }
+   
    public int numPoints() {
       return points.length;
    }
    
-   public boolean isHighlighted() {
-      return this.highlighted;
+   //Returns -1 if mine, -2 if activated mine, or number of surrounding mines
+   public int getDisplayState() {
+      return this.surroundingMines;
    }
    
-   public void setHighlighted(boolean highlight) {
-      this.highlighted = highlight;
+   public void setMine() {
+      this.surroundingMines = -1;
+   }
+   
+   public void reveal() {
+      if (this.visible == 0) {
+         this.visible = 1;
+         if (this.surroundingMines == -1) {
+            this.surroundingMines = -2;
+         }
+      }
+   }
+   
+   //Updates surrounding mine (should be done once all mines are placed)
+   public void updateMines() {
+      if (this.surroundingMines == 0) {
+         for (Line l : lines) {
+            for (Poly p : l.getPolys()) {
+               this.surroundingMines += (p.getDisplayState() == -1) ? 1 : 0;
+            }
+         }
+      }
    }
    
    public void getLinesFromPoints() {
       this.lines = new Line[this.points.length];
       for (int i = 0; i < this.points.length; i++) {
-         if (i == this.points.length - 1) {
+         if (i == this.points.length - 1)
             this.lines[i] = new Line(this.points[i], this.points[0]);
-         } else {
+         else
             this.lines[i] = new Line(this.points[i], this.points[i+1]);
-         }
       }
    }
    
+   // Adds references to Polys in Lines
+   public void addPolysToLines() {
+      for (Line l : this.lines)
+         l.getPolys().add(this);
+   }
+   
    public boolean hasLine(Line line) {
-      for (Line x : lines) {
-         if (line.equals(x)) {
-            return true;
-         }
-      }
-      return false;
+      return Arrays.asList(lines).contains(line);
    }
    
    //Returns number of intersections with line extending from point
    public int raycast(int x, int y) {
       int intersections = 0;
-      for (Line l : this.lines) {
-         if (l.spans(x) && l.getM() * x + l.getB() > y) {
+      for (Line l : this.lines)
+         if (l.spans(x) && l.getM() * x + l.getB() > y)
             intersections++;
-         }
-      }
       return intersections;
    }
 }

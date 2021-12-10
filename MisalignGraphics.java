@@ -61,8 +61,6 @@ public class MisalignGraphics {
                for (Poly poly : polytogon.keySet()) { 
                   g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
                   //g2.setColor(colorPoly(poly.getDisplayState())); // does not work
-                  if (poly.isHighlighted())
-                     g2.setColor(Color.white);
                   Polygon gon = polytogon.get(poly);
                   g2.fillPolygon(gon);
                }
