@@ -195,7 +195,7 @@ public class MisalignSweeper {
             if (line.spans((int)Math.round(intersectX)) && line2.spans((int)Math.round(intersectX)))
                return true;
             // These lines fix most of the weird vertical lines, but cause a weird block on the right.
-            //if ((line.getM() == Double.MAX_VALUE || line.getB() == Double.MAX_VALUE) && line2.spans(line.getPoint(1).getX())) return true;
+            if ((line.getM() == Double.MAX_VALUE || line.getB() == Double.MAX_VALUE) && line2.spans(line.getPoint(1).getX())) return true;
             //if ((line2.getM() == Double.MAX_VALUE || line2.getB() == Double.MAX_VALUE) && line.spans(line2.getPoint(1).getX())) return true;
          }
       }
