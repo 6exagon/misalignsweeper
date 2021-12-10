@@ -4,14 +4,14 @@ public class Poly {
    private Line[] lines;
    private Point[] points;
    private int surroundingMines;
-   private int visible;
+   private Visibility visible;
    
    public Poly(Point[] points) {
       this.points = points;
       getLinesFromPoints();
       addPolysToLines();
       this.surroundingMines = 0;
-      this.visible = 0;
+      this.visible = Visibility.NORMAL;
    }
    
    @Override
@@ -44,8 +44,8 @@ public class Poly {
    }
    
    public void reveal() {
-      if (this.visible == 0) {
-         this.visible = 1;
+      if (this.visible == Visibility.NORMAL) {
+         this.visible = Visibility.PRESSED;
          if (this.surroundingMines == -1) {
             this.surroundingMines = -2;
          }
@@ -90,5 +90,11 @@ public class Poly {
          if (l.spans(x) && l.getM() * x + l.getB() > y)
             intersections++;
       return intersections;
+   }
+   
+   enum Visibility {
+      NORMAL,
+      PRESSED,
+      FLAG;
    }
 }
