@@ -34,11 +34,9 @@ public class Line {
    public double getB() {
       return b;
    }
- 
-   public void reversePoints() {
-      Point temp = points[0];
-      points[0] = points[1];
-      points[1] = temp;
+   
+   public ArrayList<Poly> getPolys() {
+      return polys;
    }
    
    public Point getPoint(int index) {

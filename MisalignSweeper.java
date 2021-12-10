@@ -24,7 +24,7 @@ public class MisalignSweeper {
       graphics = new MisalignGraphics(lines, polyToGon);
       graphics.createAndShowGUI(input, rand);
    }
-     
+
    // Re-draws the game board without re-generating
    public static void repaint() {
       graphics.frame.repaint();
@@ -190,23 +190,20 @@ public class MisalignSweeper {
    // Returns whether line is intersecting any other Line
    public static boolean intersects(Line line) {
       for (Line line2 : lines) {
-         try {
-            if (!line2.sharesPointWith(line)) {
-               double intersectX = (line2.getB() - line.getB()) / (line.getM() - line2.getM());
-               if (line.spans((int)Math.round(intersectX)) && line2.spans((int)Math.round(intersectX))) {
-                  return true;
-               }
-               // These lines fix most of the weird vertical lines, but cause a weird block on the right.
-               //if ((line.getM() == Double.MAX_VALUE || line.getB() == Double.MAX_VALUE) && line2.spans(line.getPoint(1).getX())) return true;
-               //if ((line2.getM() == Double.MAX_VALUE || line2.getB() == Double.MAX_VALUE) && line.spans(line2.getPoint(1).getX())) return true;
-            }
-          } catch (ArithmeticException ame) { }
+         if (!line2.sharesPointWith(line) && line.getM() != line2.getM()) {
+            double intersectX = (line2.getB() - line.getB()) / (line.getM() - line2.getM());
+            if (line.spans((int)Math.round(intersectX)) && line2.spans((int)Math.round(intersectX)))
+               return true;
+            // These lines fix most of the weird vertical lines, but cause a weird block on the right.
+            //if ((line.getM() == Double.MAX_VALUE || line.getB() == Double.MAX_VALUE) && line2.spans(line.getPoint(1).getX())) return true;
+            //if ((line2.getM() == Double.MAX_VALUE || line2.getB() == Double.MAX_VALUE) && line.spans(line2.getPoint(1).getX())) return true;
+         }
       }
       return false;
    }
    
    // Checks if the poly has all four corner Points in it.
-   // this should maybe be changed to including any 2 points, but I haven't seen any issue recently
+   // this should maybe be changed to including any 2 corners, but I haven't seen any issue recently
    public static boolean hasAllCorners(Poly poly) {
       return Arrays.asList(poly.getPoints()).containsAll(Arrays.asList(corners));
    }

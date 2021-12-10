@@ -8,6 +8,7 @@ public class Poly {
    public Poly(Point[] points) {
       this.points = points;
       getLinesFromPoints();
+      addPolysToLines();
       this.highlighted = false;
    }
    
@@ -47,6 +48,12 @@ public class Poly {
          else
             this.lines[i] = new Line(this.points[i], this.points[i+1]);
       }
+   }
+   
+   // Adds references to Polys in Lines
+   public void addPolysToLines() {
+      for (Line l : this.lines)
+         l.getPolys().add(this);
    }
    
    public boolean hasLine(Line line) {
