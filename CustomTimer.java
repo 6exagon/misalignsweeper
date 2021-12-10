@@ -32,7 +32,7 @@ public class CustomTimer extends JLabel {
       this.setText("00:00"); 
       this.setBackground(Color.BLACK);
       this.setOpaque(true);
-      this.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
+      this.setBorder(BorderFactory.createEmptyBorder(2, 5, 0, 5));
    }
    
    // Default timer increments every second

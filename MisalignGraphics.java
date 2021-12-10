@@ -28,7 +28,6 @@ public class MisalignGraphics {
       // Creates window and main mainPanel
       this.frame = new JFrame("Misalignsweeper");
       JPanel mainPanel = new JPanel(new GridBagLayout());
-      //JPanel mainPanel = new JPanel(new CardLayout());
       mainPanel.setBorder(raised);
       frame.add(mainPanel);
       
@@ -45,7 +44,6 @@ public class MisalignGraphics {
       cMain.gridy = 1;
       cMain.weighty = 1;
       cMain.weightx = 1;
-      
       mainPanel.add(cardPanel, cMain);
       
       // Creates game panel
@@ -55,22 +53,14 @@ public class MisalignGraphics {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g;
             
-            //change from repainting to swithcing jpanels/labels eventually (CardLayout?https://stackoverflow.com/questions/218155/how-do-i-change-jmainPanel-inside-a-jframe-on-the-fly?scrlybrkr=072f3525)
-            if (gamePaused) {
-               g2.setColor(Color.BLACK);
-               g2.fillRect(0, 0, MisalignGraphics.WIDTH, MisalignGraphics.HEIGHT);
-               g2.setColor(Color.WHITE);
-               g2.setFont(new Font("Consolas", Font.PLAIN, 25)); 
-               g2.drawString("Paused", 50, 50);
-               g2.setColor(Color.BLACK);
-            } else {
+            if (!gamePaused) {
                MisalignGraphics.xMultiplier = this.getWidth() / (double)MisalignGraphics.WIDTH;
                MisalignGraphics.yMultiplier = this.getHeight() / (double)MisalignGraphics.HEIGHT;
                g2.scale(MisalignGraphics.xMultiplier, MisalignGraphics.yMultiplier);
                
                for (Poly poly : polytogon.keySet()) { 
-                  g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256))); //probably should save colors so it's the same after pausing
-//                   g2.setColor(getPolygonColor(gon, rand)); //will eventually get value from poly
+                  g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
+                  //g2.setColor(colorPoly(poly.getDisplayState())); // does not work
                   if (poly.isHighlighted())
                      g2.setColor(Color.white);
                   Polygon gon = polytogon.get(poly);
@@ -83,16 +73,16 @@ public class MisalignGraphics {
          }
       };
       gamePanel.setPreferredSize(new Dimension(MisalignGraphics.WIDTH, MisalignGraphics.HEIGHT)); //add 4 for border?
-
       cardPanel.add(gamePanel, "gamePanel");
       
+      // Creates settings panel
       SettingsPanel settings = new SettingsPanel();
       this.settings = settings;
-      cardPanel.add(settings, "settingsPanel");
+      cardPanel.add(settings, "settings");
       
+      // Creates panel to hold buttons, timer, mine counter
       JPanel buttonPanel = new JPanel(new GridBagLayout());
       buttonPanel.setBorder(lowered);
-
       cMain.gridx = 0;
       cMain.gridy = 0;
       cMain.weighty = 0;
@@ -109,10 +99,22 @@ public class MisalignGraphics {
       cButtons.gridx = 0;
       cButtons.anchor = GridBagConstraints.LINE_START;
       buttonPanel.add(timer, cButtons);
-      
+
+      // Creates mine counter
+      JLabel mineCounter = new JLabel(String.format("%03d", MisalignSweeper.numMines));
+      mineCounter.setForeground(Color.RED);
+      mineCounter.setBackground(Color.BLACK);
+      mineCounter.setOpaque(true);
+      mineCounter.setBorder(BorderFactory.createEmptyBorder(2, 5, 0, 5));
+      mineCounter.setFont(new Font("Consolas", Font.PLAIN, 20));
+      cButtons.gridx = 2;
+      buttonPanel.add(mineCounter, cButtons);
+      //update minecount after every poly click
+
       // Creates smile (reset) button
-      ImageIcon smileIcon = getScaledImageIcon("minesweeper smile.png", 30, -1); 
-      ImageIcon frownIcon = getScaledImageIcon("pause.png", 30, -1);
+      int iconSize = 30;
+      ImageIcon smileIcon = getScaledImageIcon("minesweeper smile.png", iconSize, -1); 
+      ImageIcon frownIcon = getScaledImageIcon("pause.png", iconSize, -1);
       this.frame.setIconImage(smileIcon.getImage());
       JLabel smile = new JLabel(smileIcon);
       smile.setBorder(raised);
@@ -130,6 +132,7 @@ public class MisalignGraphics {
             if (!gamePaused) {
                smile.setBorder(raised);
                MisalignSweeper.generateBoard(new Random());
+               mineCounter.setText(String.format("%03d", MisalignSweeper.numMines));
                mainPanel.repaint();
             }
          }
@@ -154,10 +157,7 @@ public class MisalignGraphics {
             }
             
             CardLayout c = (CardLayout)(cardPanel.getLayout());
-            c.next(cardPanel);
-//             System.out.println("Points:" + settings.getPoints());
-//             System.out.println("Mines:" + settings.getMines());
-//             System.out.println("Connections:" + settings.getConnections());  
+            c.next(cardPanel);  
             gamePaused = !gamePaused;
          }
 
@@ -166,7 +166,7 @@ public class MisalignGraphics {
             pause.setBorder(raised);
          }
       });
-      cButtons.gridx = 2;
+      cButtons.gridx = 3;
       cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(pause, cButtons);
       
@@ -179,20 +179,20 @@ public class MisalignGraphics {
       frame.setVisible(true);
    }
    
-//    // Colors polygon based on number of adjacent mines (doesn't work - just picks random from class constants)
-//    private Color getPolygonColor(Polygon p, Random rand) {
-//       int random = rand.nextInt(4);
-//       if (random == 0)
-//          return Color.GRAY;
-//       else if (random == 1)
-//          return Color.BLUE;
-//       else if (random == 2)
-//          return Color.MAGENTA;
-//       else if (random == 3)
-//          return Color.RED;
-//       return Color.GREEN;
-//    }
-   
+    // Colors polygon based on number of adjacent mines (doesn't work - just picks random from class constants)
+//     private Color getPolygonColor(Polygon p, Random rand) {
+//        int random = rand.nextInt(4);
+//        if (random == 0)
+//           return Color.GRAY;
+//        else if (random == 1)
+//           return Color.BLUE;
+//        else if (random == 2)
+//           return Color.MAGENTA;
+//        else if (random == 3)
+//           return Color.RED;
+//        return Color.GREEN;
+// /    }
+    
    // Resizes an ImageIcon given file path (there's probably a better way to do this)
    private ImageIcon getScaledImageIcon(String path, int width, int height) {
       ImageIcon icon = new ImageIcon(path);
