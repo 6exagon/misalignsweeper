@@ -71,8 +71,6 @@ public class MisalignGraphics {
                for (Poly poly : polytogon.keySet()) { 
                   g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256))); //probably should save colors so it's the same after pausing
 //                   g2.setColor(getPolygonColor(gon, rand)); //will eventually get value from poly
-                  if (poly.isHighlighted())
-                     g2.setColor(Color.white);
                   Polygon gon = polytogon.get(poly);
                   g2.fillPolygon(gon);
                }

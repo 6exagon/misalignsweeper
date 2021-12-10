@@ -1,6 +1,7 @@
 import java.util.*;
 
 public class Line {
+   private ArrayList<Poly> polys;
    private Point[] points;
    private double m;        // slope
    private double b;        // y-intercept

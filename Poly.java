@@ -10,7 +10,6 @@ public class Poly {
       this.points = points;
       getLinesFromPoints();
       addPolysToLines();
-      this.highlighted = false;
       this.surroundingMines = 0;
       this.visible = 0;
    }
@@ -44,7 +43,7 @@ public class Poly {
       this.surroundingMines = -1;
    }
    
-   public boolean reveal() {
+   public void reveal() {
       if (this.visible == 0) {
          this.visible = 1;
          if (this.surroundingMines == -1) {
