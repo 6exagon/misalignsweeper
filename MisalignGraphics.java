@@ -60,7 +60,9 @@ public class MisalignGraphics {
                
                for (Poly poly : polytogon.keySet()) { 
                   if (poly.isPressed())
-                     g2.setColor(Color.white);
+                     g2.setColor(Color.WHITE);
+                  else if (poly.isFlag())
+                     g2.setColor(Color.RED);
                   else
                      g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
                   //g2.setColor(colorPoly(poly.getDisplayState())); // does not work
@@ -111,6 +113,7 @@ public class MisalignGraphics {
       mineCounter.setBorder(BorderFactory.createEmptyBorder(2, 5, 0, 5));
       mineCounter.setFont(new Font("Consolas", Font.PLAIN, 20));
       cButtons.gridx = 2;
+      cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(mineCounter, cButtons);
       //update minecount after every poly click
 

@@ -47,7 +47,7 @@ public class Poly {
    }
    
    public void drawNum(Graphics2D g2) {
-      g2.setColor(Color.black);
+      g2.setColor(Color.BLACK);
       g2.drawString(this.surroundingMines + "", this.midpoint.getX(), this.midpoint.getY());
    }
    
@@ -58,6 +58,13 @@ public class Poly {
             this.surroundingMines = -2;
          }
       }
+   }
+   
+   public void flag() {
+      if (this.visible == Visibility.NORMAL)
+         this.visible = Visibility.FLAG;
+      else if (this.visible == Visibility.FLAG)
+         this.visible = Visibility.NORMAL;
    }
    
    //Updates surrounding mine (should be done once all mines are placed)
@@ -108,6 +115,10 @@ public class Poly {
    
    public boolean isPressed() {
       return this.visible == Visibility.PRESSED;
+   }
+   
+   public boolean isFlag() {
+      return this.visible == Visibility.FLAG;
    }
    
    enum Visibility {
