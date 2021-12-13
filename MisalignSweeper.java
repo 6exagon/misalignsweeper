@@ -84,29 +84,23 @@ public class MisalignSweeper {
 
    // Generates all the Polys for the game board
    public static void generatePolys() {
+      Point temp;
       for (Point p : points) {                                 // For each point,
          for (Line startLine : p.getLines()) {                 // and each line coming off of that point,
             ArrayList<Point> pointsInPoly = new ArrayList<>(); // move around to the next line counter-clockwise of that line.
-            Point temp;                                        // Once you reach the original point, you'll have made a complete loop.
-            Point point = p;                                   // This is then saved as a polygon (Poly).
-            Point other = startLine.getOtherPoint(point);
+            Point point = p;                                   // Once you reach the original point, you'll have made a complete loop.
+            Point other = startLine.getOtherPoint(point);      // This is then saved as a polygon (Poly).
             while (!pointsInPoly.contains(other)) {
                pointsInPoly.add(other);
-               point = getNextCounterClockwisePoint(other, point);
-               temp = point;
-               point = other;
-               other = temp;
+               temp = other;
+               other = getNextCounterClockwisePoint(other, point);
+               point = temp;
             }
-            ArrayList<Point> toBeRemoved = new ArrayList<>();  // This is my solution for getting rid of invisible tails
-            for (Point pointerino : pointsInPoly) {
-               if (pointerino.equals(other)) break;
-               toBeRemoved.add(pointerino);
-            }
-            toBeRemoved.forEach(pointsInPoly::remove);
-            Poly poly = new Poly(pointsInPoly.toArray(new Point[pointsInPoly.size()]));   // DON'T CHANGE THIS; IT BREAKS
-            if (!hasAllCorners(poly))
-               addTo(polys, poly);          // if the poly includes all four corners, nopers
-         }                                                                          
+            while (!pointsInPoly.get(0).equals(other))  // This is my solution for getting rid of invisible tails
+               pointsInPoly.remove(0);
+            if (!pointsInPoly.containsAll(Arrays.asList(corners)))
+               addTo(polys, new Poly(pointsInPoly));  // Checks if the poly has all four corner Points in it.
+         }                    // this should maybe be changed to including any 2 corners, but I haven't seen any issue recently                                                                          
       }
    }
 
@@ -121,8 +115,7 @@ public class MisalignSweeper {
             x[i] = p.getX();
             y[i] = p.getY();
          }
-         Polygon gon = new Polygon(x, y, num);
-         polyToGon.put(poly, gon);
+         polyToGon.put(poly, new Polygon(x, y, num));
       }
    }
    
@@ -178,9 +171,7 @@ public class MisalignSweeper {
       for (Line line : lines)
          if (line.spans(x))
             distLine.put(Math.abs(line.getM() * x + line.getB() - y), line);
-      Double[] sortedDists = distLine.keySet().toArray(new Double[0]);
-      Arrays.sort(sortedDists);
-      Line closestLine = distLine.get(sortedDists[0]);
+      Line closestLine = distLine.get(Collections.min(distLine.keySet()));
       for (Poly p : polys)
          if (p.hasLine(closestLine) && p.raycast(x, y) % 2 == 1)
             return p;
@@ -189,23 +180,16 @@ public class MisalignSweeper {
    
    // Returns whether line is intersecting any other Line
    public static boolean intersects(Line line) {
+      if (line.getM() == Double.MAX_VALUE && line.getPoint(0).getX() % MisalignGraphics.WIDTH != 0) 
+            return true;   // This is a weird (but apparently mostly functional) fix for those weird vertical lines
       for (Line line2 : lines) {
          if (!line2.sharesPointWith(line) && line.getM() != line2.getM()) {
             double intersectX = (line2.getB() - line.getB()) / (line.getM() - line2.getM());
             if (line.spans((int)Math.round(intersectX)) && line2.spans((int)Math.round(intersectX)))
                return true;
-            // These lines fix most of the weird vertical lines, but cause a weird block on the right.
-            if ((line.getM() == Double.MAX_VALUE || line.getB() == Double.MAX_VALUE) && line2.spans(line.getPoint(1).getX())) return true;
-            //if ((line2.getM() == Double.MAX_VALUE || line2.getB() == Double.MAX_VALUE) && line.spans(line2.getPoint(1).getX())) return true;
          }
       }
       return false;
-   }
-   
-   // Checks if the poly has all four corner Points in it.
-   // this should maybe be changed to including any 2 corners, but I haven't seen any issue recently
-   public static boolean hasAllCorners(Poly poly) {
-      return Arrays.asList(poly.getPoints()).containsAll(Arrays.asList(corners));
    }
    
    // Removes all the points and lines that aren't connected to anything
@@ -237,7 +221,7 @@ public class MisalignSweeper {
          if (angle > oldAngle && angle < newAngle) // allows us to find the smallest angle > the old angle
             newAngle = angle;
       if (newAngle == 100000)  // If none are greater than old, we want the lowest value.
-         newAngle = angleToPoint.keySet().stream().min(Comparator.comparing(Double::valueOf)).get();   // thanks, stackoverflow
+         newAngle = Collections.min(angleToPoint.keySet());
       return angleToPoint.get(newAngle);
    }
 
@@ -262,7 +246,8 @@ public class MisalignSweeper {
 
    // Checks if the two arrays have the same elements, but not necessarily in the same order
    public static <T> boolean areArraysEqualDisorderly(T[] a1, T[] a2) {
-      array1: for (T a : a1) {
+      array1:
+      for (T a : a1) {
          for (T b : a2)
             if (b.equals(a))
                continue array1;

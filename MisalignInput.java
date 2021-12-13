@@ -1,26 +1,14 @@
 import java.awt.event.*;
 import java.util.*;
 
-public class MisalignInput implements KeyListener, MouseListener {
+public class MisalignInput implements MouseListener {
    
-   @Override
-   public void keyTyped(KeyEvent e) {
-      if (e.getKeyChar() == 'r') {
-         MisalignSweeper.generateBoard(new Random());
-         MisalignSweeper.repaint();
-      }
-   }
-
-   // Required methods for KeyListener and MouseListener
-   @Override
-   public void keyPressed(KeyEvent e) { }
-
-   @Override
-   public void keyReleased(KeyEvent e) { }
-
+   // Required methods for MouseListener
    @Override
    public void mouseClicked(MouseEvent e) {
+      long t = System.nanoTime();
       Poly poly = MisalignSweeper.getClickedPolygon((int)(e.getX() / MisalignGraphics.xMultiplier), (int)(e.getY() / MisalignGraphics.yMultiplier));
+      System.out.println(System.nanoTime() - t);
       if (poly != null) {
          MisalignSweeper.repaint();
       } else {

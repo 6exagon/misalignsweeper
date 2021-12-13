@@ -2,11 +2,11 @@ import java.util.*;
 
 public class Poly {
    private Line[] lines;
-   private Point[] points;
+   private ArrayList<Point> points;
    private int surroundingMines;
    private Visibility visible;
    
-   public Poly(Point[] points) {
+   public Poly(ArrayList<Point> points) {
       this.points = points;
       getLinesFromPoints();
       addPolysToLines();
@@ -23,15 +23,15 @@ public class Poly {
    }
    
    public Point getPoint(int index) {
-      return points[index];
+      return points.get(index);
    }
    
-   public Point[] getPoints() {
+   public ArrayList<Point> getPoints() {
       return this.points;
    }
    
    public int numPoints() {
-      return points.length;
+      return points.size();
    }
    
    //Returns -1 if mine, -2 if activated mine, or number of surrounding mines
@@ -64,12 +64,12 @@ public class Poly {
    }
    
    public void getLinesFromPoints() {
-      this.lines = new Line[this.points.length];
-      for (int i = 0; i < this.points.length; i++) {
-         if (i == this.points.length - 1)
-            this.lines[i] = new Line(this.points[i], this.points[0]);
+      this.lines = new Line[this.points.size()];
+      for (int i = 0; i < this.lines.length; i++) {
+         if (i == this.points.size() - 1)
+            this.lines[i] = new Line(this.points.get(i), this.points.get(0));
          else
-            this.lines[i] = new Line(this.points[i], this.points[i+1]);
+            this.lines[i] = new Line(this.points.get(i), this.points.get(i+1));
       }
    }
    

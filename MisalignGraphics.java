@@ -169,7 +169,6 @@ public class MisalignGraphics {
       buttonPanel.add(pause, cButtons);
       
       frame.setFocusable(true);
-      gamePanel.addKeyListener(input);
       gamePanel.addMouseListener(input);
       frame.add(mainPanel);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
