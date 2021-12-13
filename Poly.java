@@ -110,6 +110,10 @@ public class Poly {
       return this.visible == Visibility.PRESSED;
    }
    
+   public boolean isFlagged() {
+      return this.visible == Visibility.FLAG;
+   }
+   
    enum Visibility {
       NORMAL,
       PRESSED,
