@@ -1,15 +1,18 @@
 import java.util.*;
+import java.awt.*;
 
 public class Poly {
    private Line[] lines;
    private ArrayList<Point> points;
    private int surroundingMines;
    private Visibility visible;
+   private Point midpoint;
    
    public Poly(ArrayList<Point> points) {
       this.points = points;
       getLinesFromPoints();
       addPolysToLines();
+      calcMidpoint();
       this.surroundingMines = 0;
       this.visible = Visibility.NORMAL;
    }
@@ -43,6 +46,11 @@ public class Poly {
       this.surroundingMines = -1;
    }
    
+   public void drawNum(Graphics2D g2) {
+      g2.setColor(Color.black);
+      g2.drawString(this.surroundingMines + "", this.midpoint.getX(), this.midpoint.getY());
+   }
+   
    public void reveal() {
       if (this.visible == Visibility.NORMAL) {
          this.visible = Visibility.PRESSED;
@@ -54,13 +62,19 @@ public class Poly {
    
    //Updates surrounding mine (should be done once all mines are placed)
    public void updateMines() {
-      if (this.surroundingMines == 0) {
-         for (Line l : lines) {
-            for (Poly p : l.getPolys()) {
+      if (this.surroundingMines == 0)
+         for (Line l : lines)
+            for (Poly p : l.getPolys())
                this.surroundingMines += (p.getDisplayState() == -1) ? 1 : 0;
-            }
-         }
+   }
+   
+   public void calcMidpoint() {
+      int x = 0, y = 0;
+      for (Point p : this.points) {
+         x += p.getX();
+         y += p.getY();
       }
+      this.midpoint = new Point(x / this.numPoints(), y / this.numPoints());
    }
    
    public void getLinesFromPoints() {
@@ -90,6 +104,10 @@ public class Poly {
          if (l.spans(x) && l.getM() * x + l.getB() > y)
             intersections++;
       return intersections;
+   }
+   
+   public boolean isPressed() {
+      return this.visible == Visibility.PRESSED;
    }
    
    enum Visibility {

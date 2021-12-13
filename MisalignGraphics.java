@@ -59,10 +59,15 @@ public class MisalignGraphics {
                g2.scale(MisalignGraphics.xMultiplier, MisalignGraphics.yMultiplier);
                
                for (Poly poly : polytogon.keySet()) { 
-                  g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
+                  if (poly.isPressed())
+                     g2.setColor(Color.white);
+                  else
+                     g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
                   //g2.setColor(colorPoly(poly.getDisplayState())); // does not work
-                  Polygon gon = polytogon.get(poly);
-                  g2.fillPolygon(gon);
+                  g2.fillPolygon(polytogon.get(poly));
+                  
+                  if (poly.isPressed())
+                     poly.drawNum(g2);
                }
                g2.setColor(Color.BLACK);            
                for (Line l : lines)
