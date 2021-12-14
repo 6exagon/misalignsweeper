@@ -58,18 +58,37 @@ public class MisalignGraphics {
                MisalignGraphics.yMultiplier = this.getHeight() / (double)MisalignGraphics.HEIGHT;
                g2.scale(MisalignGraphics.xMultiplier, MisalignGraphics.yMultiplier);
                
-               for (Poly poly : polytogon.keySet()) { 
-                  if (poly.isPressed())
-                     g2.setColor(Color.WHITE);
-                  else if (poly.isFlag())
-                     g2.setColor(Color.RED);
-                  else
-                     g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
+               // for (Poly poly : polytogon.keySet()) { 
+//                   if (poly.isPressed())
+//                      g2.setColor(Color.WHITE);
+//                   else if (poly.isFlagged())
+//                      g2.setColor(Color.RED);
+//                   else
+//                      g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
+//                }
                   //g2.setColor(colorPoly(poly.getDisplayState())); // does not work
+               for (Poly poly : polytogon.keySet()) {
+                  if (poly.isPressed()) {
+                     switch (poly.getDisplayState()) {
+                        case -2:
+                        case -1:
+                           g2.setColor(Color.BLACK);
+                           break;
+                        default:
+                           g2.setColor(getColor(poly.getDisplayState()));
+                     }
+                  } else if (poly.isFlagged()) {
+                     //g2.drawImage(new ImageIcon("flag.png").getImage(), 5, 5, null); //null for ImageObserver parameter
+                     g2.setColor(Color.YELLOW);
+                  } else {
+                     g2.setColor(Color.WHITE);
+                  }
                   g2.fillPolygon(polytogon.get(poly));
                   
                   if (poly.isPressed())
                      poly.drawNum(g2);
+                  else if (poly.isFlagged()) //must draw flag after updating color
+                     poly.drawFlag(g2);
                }
                g2.setColor(Color.BLACK);            
                for (Line l : lines)
@@ -184,29 +203,28 @@ public class MisalignGraphics {
       frame.setVisible(true);
    }
    
-    // Colors polygon based on number of adjacent mines (doesn't work - just picks random from class constants)
-//     private Color getPolygonColor(Polygon p, Random rand) {
-//        int random = rand.nextInt(4);
-//        if (random == 0)
-//           return Color.GRAY;
-//        else if (random == 1)
-//           return Color.BLUE;
-//        else if (random == 2)
-//           return Color.MAGENTA;
-//        else if (random == 3)
-//           return Color.RED;
-//        return Color.GREEN;
-// /    }
-    
    // Resizes an ImageIcon given file path (there's probably a better way to do this)
    private ImageIcon getScaledImageIcon(String path, int width, int height) {
       ImageIcon icon = new ImageIcon(path);
       Image image = icon.getImage();
       Image newImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
       return new ImageIcon(newImage);
-    }
-    
-    public SettingsPanel getSettings() {
+   }
+   
+   public SettingsPanel getSettings() {
       return this.settings;
-    }
+   }
+   
+   public Color getColor(int level) {
+      Color[] colors = {
+         Color.GRAY, Color.BLUE, Color.GREEN, Color.RED, new Color(0, 0, 60),
+         Color.MAGENTA, Color.CYAN, Color.BLACK, Color.GRAY, Color.PINK, Color.YELLOW};
+      if (level < 11) {
+         return colors[level];
+      } else if (level < 30) {
+         return new Color(256 - level * 8, 300 - level * 10, 0);
+      } else {
+         return Color.WHITE;
+      }
+   }
 }

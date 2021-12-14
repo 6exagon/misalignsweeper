@@ -1,5 +1,6 @@
 import java.util.*;
 import java.awt.*;
+import javax.swing.ImageIcon;
 
 public class Poly {
    private Line[] lines;
@@ -49,6 +50,17 @@ public class Poly {
    public void drawNum(Graphics2D g2) {
       g2.setColor(Color.BLACK);
       g2.drawString(this.surroundingMines + "", this.midpoint.getX(), this.midpoint.getY());
+   }
+   
+   public void drawFlag(Graphics2D g2) {
+      int midX = this.midpoint.getX() - 15;
+      int midY = this.midpoint.getY() - 15;
+      // if (midX >= 15 && midY >= 15) { //avoids negative coordinates 
+//          midX -= 15; //minus fifteen so image is centered (15 is half its width/height)
+//          midY -= 15;
+//       }
+      g2.drawImage(new ImageIcon("flag.png").getImage(), midX, midY, null);
+      
    }
    
    public void reveal() {
@@ -117,8 +129,12 @@ public class Poly {
       return this.visible == Visibility.PRESSED;
    }
    
-   public boolean isFlag() {
+   public boolean isFlagged() {
       return this.visible == Visibility.FLAG;
+   }
+   
+   public boolean isNormal() {
+      return this.visible == Visibility.NORMAL;
    }
    
    enum Visibility {
