@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Point {
+public class Point implements Comparable<Point> {
    private ArrayList<Line> lines = new ArrayList<>();
    private int x, y;
 
@@ -39,5 +39,12 @@ public class Point {
    @Override
    public String toString() {
       return "(" + x + ", " + y + ")"; 
+   }
+   
+   // Compares by y
+   @Override
+   public int compareTo(Point other) {
+      if (this.equals(other)) return 0;
+      return other.y > this.y ? -1 : 1;
    }
 }

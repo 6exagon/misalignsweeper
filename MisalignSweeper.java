@@ -11,7 +11,7 @@ public class MisalignSweeper {
    public static int numNears = 6;
    
    private static final ArrayList<Poly> polys = new ArrayList<>();
-   private static final ArrayList<Line> lines = new ArrayList<>();
+   public  static final ArrayList<Line> lines = new ArrayList<>();
    private static final ArrayList<Point> points = new ArrayList<>();
    private static final HashMap<Poly, Polygon> polyToGon = new HashMap<>();  // Doesn't actually need to be a map, but it'll prob be useful in future.
    private static MisalignGraphics graphics;
@@ -98,9 +98,14 @@ public class MisalignSweeper {
             }
             while (!pointsInPoly.get(0).equals(other))  // This is my solution for getting rid of invisible tails
                pointsInPoly.remove(0);
-            if (!pointsInPoly.containsAll(Arrays.asList(corners)))
-               addTo(polys, new Poly(pointsInPoly));  // Checks if the poly has all four corner Points in it.
-         }                    // this should maybe be changed to including any 2 corners, but I haven't seen any issue recently                                                                          
+            if (!pointsInPoly.containsAll(Arrays.asList(corners))) {  // Checks if the poly has all four corner Points in it.
+               Poly poly = new Poly(pointsInPoly);                    // this should maybe be changed to including any 2 corners, but I haven't seen any issues recently               
+               if (addTo(polys, poly)) {
+                  poly.addPolysToLines();
+                  poly.updateMines();
+               }
+            }
+         }
       }
    }
 
@@ -231,7 +236,7 @@ public class MisalignSweeper {
       // The inverse tangent only goes between 0 and pi/2, so we need to find out what quadrant it's in and change it.
       return other.getY() < vertex.getY()
               ? (other.getX() < vertex.getX() ? Math.PI - base : base)                 // 2nd and 1st Quadrants
-              : (other.getX() < vertex.getX() ? Math.PI + base : 2 * Math.PI - base);  // 3rd and 1st Quadrants
+              : (other.getX() < vertex.getX() ? Math.PI + base : 2 * Math.PI - base);  // 3rd and 4th Quadrants
    }
 
    // Returns the distance (squared) between two points
@@ -240,8 +245,12 @@ public class MisalignSweeper {
    }
    
    // Adds an item to an ArrayList if it is not already there
-   public static <T> void addTo(ArrayList<T> list, T item) {
-      if (!list.contains(item)) list.add(item);
+   public static <T> boolean addTo(ArrayList<T> list, T item) {
+      if (!list.contains(item)) {
+         list.add(item);
+         return true;
+      }
+      return false;
    }
 
    // Checks if the two arrays have the same elements, but not necessarily in the same order

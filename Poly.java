@@ -11,9 +11,9 @@ public class Poly {
    public Poly(ArrayList<Point> points) {
       this.points = points;
       getLinesFromPoints();
-      addPolysToLines();
       calcMidpoint();
       this.surroundingMines = 0;
+      if (new Random().nextInt(10) == 0) this.surroundingMines = -1;  // CHANGE ME
       this.visible = Visibility.NORMAL;
    }
    
@@ -48,8 +48,9 @@ public class Poly {
    
    public void drawNum(Graphics2D g2) {
       g2.setColor(Color.black);
-      g2.drawString(this.surroundingMines + "", this.midpoint.getX(), this.midpoint.getY());
-   }
+      int pt = g2.getFont().getSize();
+      g2.drawString(this.surroundingMines + "", this.midpoint.getX() - pt / 4, this.midpoint.getY() + pt / 2);
+   }  
    
    public void reveal() {
       if (this.visible == Visibility.NORMAL) {
@@ -62,35 +63,51 @@ public class Poly {
    
    //Updates surrounding mine (should be done once all mines are placed)
    public void updateMines() {
-      if (this.surroundingMines == 0)
-         for (Line l : lines)
+      if (this.surroundingMines == 0) {
+         for (Line l : lines) {
             for (Poly p : l.getPolys())
                this.surroundingMines += (p.getDisplayState() == -1) ? 1 : 0;
+         }
+      }
    }
    
    public void calcMidpoint() {
-      int x = 0, y = 0;
-      for (Point p : this.points) {
-         x += p.getX();
-         y += p.getY();
+      if (this.numPoints() == 3) { // calculates the centroid if a triangle
+         Line l1 = new Line(getPoint(0), new Point((getPoint(1).getX() + getPoint(2).getX()) / 2, (getPoint(1).getY() + getPoint(2).getY()) / 2));
+         Line l2 = new Line(getPoint(1), new Point((getPoint(0).getX() + getPoint(2).getX()) / 2, (getPoint(0).getY() + getPoint(2).getY()) / 2));
+         double intersectX = (l2.getB() - l1.getB()) / (l1.getM() - l2.getM());
+         this.midpoint = new Point((int)intersectX, (int)(l1.getM() * intersectX + l1.getB()));
+      } else {    // if not a triangle, just take the average of all the points
+         int x = 0, y = 0;
+         for (Point p : this.points) {
+            x += p.getX();
+            y += p.getY();
+         }
+         this.midpoint = new Point(x / this.numPoints(), y / this.numPoints());
       }
-      this.midpoint = new Point(x / this.numPoints(), y / this.numPoints());
    }
    
    public void getLinesFromPoints() {
       this.lines = new Line[this.points.size()];
       for (int i = 0; i < this.lines.length; i++) {
-         if (i == this.points.size() - 1)
-            this.lines[i] = new Line(this.points.get(i), this.points.get(0));
-         else
-            this.lines[i] = new Line(this.points.get(i), this.points.get(i+1));
+         Line l;
+         if (i == this.points.size() - 1) {
+            l = new Line(this.points.get(i), this.points.get(0));
+         } else {
+            l = new Line(this.points.get(i), this.points.get(i+1));
+         }
+         if (MisalignSweeper.lines.contains(l)) {
+            this.lines[i] = MisalignSweeper.lines.get(MisalignSweeper.lines.indexOf(l));
+         }
       }
    }
    
    // Adds references to Polys in Lines
    public void addPolysToLines() {
-      for (Line l : this.lines)
+      for (Line l : this.lines) {
          l.getPolys().add(this);
+      }
+      
    }
    
    public boolean hasLine(Line line) {
