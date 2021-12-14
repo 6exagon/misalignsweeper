@@ -58,6 +58,15 @@ public class MisalignGraphics {
                MisalignGraphics.yMultiplier = this.getHeight() / (double)MisalignGraphics.HEIGHT;
                g2.scale(MisalignGraphics.xMultiplier, MisalignGraphics.yMultiplier);
                
+               // for (Poly poly : polytogon.keySet()) { 
+//                   if (poly.isPressed())
+//                      g2.setColor(Color.WHITE);
+//                   else if (poly.isFlagged())
+//                      g2.setColor(Color.RED);
+//                   else
+//                      g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
+//                }
+                  //g2.setColor(colorPoly(poly.getDisplayState())); // does not work
                for (Poly poly : polytogon.keySet()) {
                   if (poly.isPressed()) {
                      switch (poly.getDisplayState()) {
@@ -68,6 +77,9 @@ public class MisalignGraphics {
                         default:
                            g2.setColor(getColor(poly.getDisplayState()));
                      }
+                  } else if (poly.isFlagged()) {
+                     //g2.drawImage(new ImageIcon("flag.png").getImage(), 5, 5, null); //null for ImageObserver parameter
+                     g2.setColor(Color.YELLOW);
                   } else {
                      g2.setColor(Color.WHITE);
                   }
@@ -75,6 +87,8 @@ public class MisalignGraphics {
                   
                   if (poly.isPressed())
                      poly.drawNum(g2);
+                  else if (poly.isFlagged()) //must draw flag after updating color
+                     poly.drawFlag(g2);
                }
                g2.setColor(Color.BLACK);            
                for (Line l : lines)
@@ -118,6 +132,7 @@ public class MisalignGraphics {
       mineCounter.setBorder(BorderFactory.createEmptyBorder(2, 5, 0, 5));
       mineCounter.setFont(new Font("Consolas", Font.PLAIN, 20));
       cButtons.gridx = 2;
+      cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(mineCounter, cButtons);
       //update minecount after every poly click
 
