@@ -40,6 +40,9 @@ public class MisalignSweeper {
       generatePoints(rand);
       generateLines();
       generatePolys();
+      for (Poly x : polys) {
+         x.updateMines();
+      }
       generateAWTPolygons();
    }
 
@@ -96,13 +99,13 @@ public class MisalignSweeper {
                other = getNextCounterClockwisePoint(other, point);
                point = temp;
             }
-            while (!pointsInPoly.get(0).equals(other))  // This is my solution for getting rid of invisible tails
+            while (!pointsInPoly.get(0).equals(other)) {  // This is my solution for getting rid of invisible tails
                pointsInPoly.remove(0);
+            }
             if (!pointsInPoly.containsAll(Arrays.asList(corners))) {  // Checks if the poly has all four corner Points in it.
                Poly poly = new Poly(pointsInPoly);                    // this should maybe be changed to including any 2 corners, but I haven't seen any issues recently               
                if (addTo(polys, poly)) {
                   poly.addPolysToLines();
-                  poly.updateMines();
                }
             }
          }
