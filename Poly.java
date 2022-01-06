@@ -14,7 +14,6 @@ public class Poly {
       getLinesFromPoints();
       calcMidpoint();
       this.surroundingMines = 0;
-      if (new Random().nextInt(10) == 0) this.surroundingMines = -1;  // CHANGE ME
       this.visible = Visibility.NORMAL;
    }
    
@@ -48,7 +47,7 @@ public class Poly {
    }
    
    public void drawNum(Graphics2D g2) {
-      g2.setColor(Color.black);
+      g2.setColor(Color.WHITE);
       int pt = g2.getFont().getSize();
       g2.drawString(this.surroundingMines + "", this.midpoint.getX() - pt / 4, this.midpoint.getY() + pt / 2);
    }
@@ -74,9 +73,10 @@ public class Poly {
    }
    
    public void flag() {
-      if (this.visible == Visibility.NORMAL)
+      if (this.visible == Visibility.NORMAL) {
          this.visible = Visibility.FLAG;
-      else if (this.visible == Visibility.FLAG)
+         MisalignSweeper.numMines--;
+      } else if (this.visible == Visibility.FLAG)
          this.visible = Visibility.NORMAL;
    }
    

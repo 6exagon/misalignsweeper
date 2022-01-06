@@ -41,6 +41,7 @@ public class MisalignSweeper {
       generateLines();
       generatePolys();
       generateAWTPolygons();
+      generateMines();
    }
 
    // Generates the Points for the game board
@@ -121,6 +122,18 @@ public class MisalignSweeper {
             y[i] = p.getY();
          }
          polyToGon.put(poly, new Polygon(x, y, num));
+      }
+   }
+   
+   // Places mines into random Polys
+   public static void generateMines() {
+      Random rand = new Random();
+      for (int i = 0; i < numMines; i++) {
+         Poly poly = polys.get(rand.nextInt(polys.size()));
+         if (poly.getDisplayState() != -1)
+            poly.setMine();
+         else
+            i--;
       }
    }
    

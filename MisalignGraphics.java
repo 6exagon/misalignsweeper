@@ -85,7 +85,7 @@ public class MisalignGraphics {
                   }
                   g2.fillPolygon(polytogon.get(poly));
                   
-                  if (poly.isPressed())
+                  if (poly.isPressed() && poly.getDisplayState() >= 0)
                      poly.drawNum(g2);
                   else if (poly.isFlagged()) //must draw flag after updating color
                      poly.drawFlag(g2);
@@ -125,7 +125,13 @@ public class MisalignGraphics {
       buttonPanel.add(timer, cButtons);
 
       // Creates mine counter
-      JLabel mineCounter = new JLabel(String.format("%03d", MisalignSweeper.numMines));
+      JLabel mineCounter = new JLabel(String.format("%03d", MisalignSweeper.numMines)) {
+         @Override
+         public void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            this.setText(MisalignSweeper.numMines + "");
+         }
+      };
       mineCounter.setForeground(Color.RED);
       mineCounter.setBackground(Color.BLACK);
       mineCounter.setOpaque(true);
