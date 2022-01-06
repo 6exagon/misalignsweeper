@@ -66,10 +66,16 @@ public class Poly {
    
    public void reveal() {
       if (this.visible == Visibility.NORMAL) {
-           this.visible = Visibility.PRESSED;
-           if (this.surroundingMines == -1) {
-              this.surroundingMines = -2;
-           }
+         this.visible = Visibility.PRESSED;
+         if (this.surroundingMines == -1) {
+            this.surroundingMines = -2;
+         } else if (this.surroundingMines == 0) {
+            for (Line l : lines) {
+               for (Poly p : l.getPolys()) {
+                  p.reveal();
+               }
+            }
+         }
       }
    }
    
