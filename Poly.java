@@ -68,6 +68,12 @@ public class Poly {
          this.visible = Visibility.PRESSED;
          if (this.surroundingMines == -1) {
             this.surroundingMines = -2;
+         } else if (this.surroundingMines == 0) {
+            for (Line l : lines) {
+               for (Poly p : l.getPolys()) {
+                  p.reveal();
+               }
+            }
          }
       }
    }
@@ -76,8 +82,10 @@ public class Poly {
       if (this.visible == Visibility.NORMAL) {
          this.visible = Visibility.FLAG;
          MisalignSweeper.numMines--;
-      } else if (this.visible == Visibility.FLAG)
+      } else if (this.visible == Visibility.FLAG) {
          this.visible = Visibility.NORMAL;
+         MisalignSweeper.numMines++;
+      }
    }
    
    //Updates surrounding mine (should be done once all mines are placed)
