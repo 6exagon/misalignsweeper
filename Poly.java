@@ -53,13 +53,19 @@ public class Poly {
    }
    
    public void drawFlag(Graphics2D g2) {
-      int midX = this.midpoint.getX() - 15;
-      int midY = this.midpoint.getY() - 15;
-      // if (midX >= 15 && midY >= 15) { //avoids negative coordinates 
-//          midX -= 15; //minus fifteen so image is centered (15 is half its width/height)
-//          midY -= 15;
-//       }
-      g2.drawImage(new ImageIcon("flag.png").getImage(), midX, midY, null);
+      int midX = this.midpoint.getX();
+      int midY = this.midpoint.getY();
+      
+      double polyHeight = 0;
+      for (Line edge : this.lines)
+         if (edge.spans(midX))
+            polyHeight = Math.abs(polyHeight - (edge.getM() * midX + edge.getB()));
+      
+      polyHeight *= 2/3.0;
+      midX -= polyHeight/2;
+      midY -= polyHeight/2;
+      
+      g2.drawImage(new ImageIcon("flag.png").getImage(), midX, midY, (int)polyHeight, (int)polyHeight, null);
       
    }
    
