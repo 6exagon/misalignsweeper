@@ -85,7 +85,7 @@ public class MisalignGraphics {
                   }
                   g2.fillPolygon(polytogon.get(poly));
                   
-                  if (poly.isPressed() && poly.getDisplayState() >= 0)
+                  if (poly.isPressed() && poly.getDisplayState() > 0)
                      poly.drawNum(g2);
                   else if (poly.isFlagged()) //must draw flag after updating color
                      poly.drawFlag(g2);

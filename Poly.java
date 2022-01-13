@@ -48,8 +48,20 @@ public class Poly {
    
    public void drawNum(Graphics2D g2) {
       g2.setColor(Color.WHITE);
-      int pt = g2.getFont().getSize();
-      g2.drawString(this.surroundingMines + "", this.midpoint.getX() - pt / 4, this.midpoint.getY() + pt / 2);
+      
+      int midX = this.midpoint.getX();
+      int midY = this.midpoint.getY();
+      
+      double polyHeight = 0;
+      for (Line edge : this.lines)
+         if (edge.spans(midX))
+            polyHeight = Math.abs(polyHeight - (edge.getM() * midX + edge.getB()));
+      
+      midX -= polyHeight/6;
+      midY += polyHeight*2/9;
+      g2.setFont(new Font(g2.getFont().getName(), g2.getFont().getStyle(), (int)(polyHeight * 2/3)));
+      
+      g2.drawString(this.surroundingMines + "", midX, midY);
    }
    
    public void drawFlag(Graphics2D g2) {
