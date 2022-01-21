@@ -39,7 +39,7 @@ public class Line {
    //Returns sum of distances to Point from line ends
    public int distanceTo(Point pt) {
       return (int) (Math.pow(Math.pow(pt.getX() - this.p.getX(), 2) + Math.pow(pt.getY() - this.p.getY(), 2), 0.5)
-         + Math.pow(Math.pow(pt.getX() - this.p.getX(), 2) + Math.pow(pt.getY() - this.q.getY(), 2), 0.5));
+         + Math.pow(Math.pow(pt.getX() - this.q.getX(), 2) + Math.pow(pt.getY() - this.q.getY(), 2), 0.5));
    }
    
    //Returns area of triangle formed with Point
@@ -50,22 +50,15 @@ public class Line {
    }
 
    //Gets new Point on the correct side of the line pulled from the list and not outside of lstack
-   public Point getNewPoint(
-      ArrayList<Point> plist, HashSet<Point> freshPoints, ArrayDeque<Line> lstack) {
-      int numPoints = plist.size();
-      HashMap<Integer, Point> distPoint = new HashMap<>();
-      int[] dists = new int[numPoints];
-      for (int i = 0; i < numPoints; i++) {
-         dists[i] = this.distanceTo(plist.get(i));    // get the distance to each point
-         distPoint.put(dists[i], plist.get(i));       // keep track of how far away each point is
-      }
-      Arrays.sort(dists);
-      for (int topchoice : dists) {
+   public Point getNewPoint(ArrayList<Point> plist, HashSet<Point> freshPoints, ArrayDeque<Line> lstack) {
+      TreeMap<Integer, Point> distPoint = new TreeMap<>();
+      for (int i = 0; i < plist.size(); i++)
+         distPoint.put(this.distanceTo(plist.get(i)), plist.get(i));       // keep track of how far away each point is
+      for (int topchoice : distPoint.keySet()) {
          Point np = distPoint.get(topchoice);
          int area = areaWith(np);
          if (isOnExtendedSide(np) && area < AREA_MAX && area > 0) {
-            if (freshPoints.contains(np)) {
-               freshPoints.remove(np);
+            if (freshPoints.remove(np)) {
                return np;
             } else if (np.validate(lstack)) {
                Line testl1 = new Line(this.q, np);
@@ -89,14 +82,6 @@ public class Line {
       }
       return null;
    }
-
-   // @Override
-   // public boolean equals(Object o) {
-   //    if (this == o) return true;
-   //    if (o == null || getClass() != o.getClass()) return false;
-   //    Line other = (Line) o;
-   //    return MisalignSweeper.areArraysEqualDisorderly(points, other.points);
-   // }
    
    public double getM() {
       return m;
@@ -122,18 +107,6 @@ public class Line {
    public Point getQ() {
       return this.q;
    }
-   
-   // public Point getOtherPoint(Point p) {
-   //    if (points[0] == p)
-   //       return points[1];
-   //    else if (points[1] == p)
-   //       return points[0];
-   //    return null;
-   // }
-   
-   // public boolean sharesPointWith(Line other) {
-   //    return getOtherPoint(other.getPoint(0)) != null || getOtherPoint(other.getPoint(1)) != null;
-   // }
    
    //Returns if the line's points are on either side of an x coordinate
    public boolean spans(int x) {

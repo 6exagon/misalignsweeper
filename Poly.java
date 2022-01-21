@@ -21,6 +21,7 @@ public class Poly {
       l3.extend(!l3.isOnExtendedSide(start.getQ()));
       Line[] linearray = {start, l2, l3};
       this.lines = linearray;
+      this.addPolysToLines();
       HashSet<Point> pointSet = new HashSet<Point>();
       for (Line l : this.lines) {
          pointSet.add(l.getP());
@@ -30,14 +31,6 @@ public class Poly {
       this.surroundingMines = 0;
       this.visible = Visibility.NORMAL;
    }
-   
-   // @Override
-   // public boolean equals(Object o) {
-   //    if (this == o) return true;
-   //    if (o == null || getClass() != o.getClass()) return false;
-   //    Poly other = (Poly) o;
-   //    return MisalignSweeper.areArraysEqualDisorderly(lines, other.lines);
-   // }
    
    //Not sure what the "Point" of having both of these methods here is but I'll leave it for now
    public Point getPoint(int index) {
@@ -51,10 +44,6 @@ public class Poly {
    public Line[] getLines() {
       return this.lines;
    }
-   
-   // public int numPoints() {
-   //    return points.size();
-   // }
    
    //Returns -1 if mine, -2 if activated mine, or number of surrounding mines
    public int getDisplayState() {
@@ -103,15 +92,13 @@ public class Poly {
    public void reveal() {
       if (this.visible == Visibility.NORMAL) {
          this.visible = Visibility.PRESSED;
-         if (this.surroundingMines == -1) {
+         if (this.surroundingMines == -1)
             this.surroundingMines = -2;
-         } else if (this.surroundingMines == 0) {
-            for (Line l : lines) {
-               for (Poly p : l.getPolys()) {
-                  p.reveal();
-               }
-            }
-         }
+         else if (this.surroundingMines == 0)
+            for (Line l : lines)
+               for (Poly p : l.getPolys())
+                  if (p != this)
+                     p.reveal();
       }
    }
    
@@ -127,12 +114,10 @@ public class Poly {
    
    //Updates surrounding mine (should be done once all mines are placed)
    public void updateMines() {
-      if (this.surroundingMines == 0) {
-         for (Line l : lines) {
+      if (this.surroundingMines == 0)
+         for (Line l : lines)
             for (Poly p : l.getPolys())
                this.surroundingMines += (p.getDisplayState() == -1) ? 1 : 0;
-         }
-      }
    }
    
    public void calcMidpoint() {
@@ -151,26 +136,10 @@ public class Poly {
 //       }
    }
    
-   // public void getLinesFromPoints() {
-   //    this.lines = new Line[this.points.size()];
-   //    for (int i = 0; i < this.lines.length; i++) {
-   //       Line l;
-   //       if (i == this.points.size() - 1) {
-   //          l = new Line(this.points.get(i), this.points.get(0));
-   //       } else {
-   //          l = new Line(this.points.get(i), this.points.get(i+1));
-   //       }
-   //       if (MisalignSweeper.lines.contains(l)) {
-   //          this.lines[i] = MisalignSweeper.lines.get(MisalignSweeper.lines.indexOf(l));
-   //       }
-   //    }
-   // }
-   
    // Adds references to Polys in Lines
    public void addPolysToLines() {
-      for (Line l : this.lines) {
+      for (Line l : this.lines)
          l.addPoly(this);
-      }
    }
    
    //Faster than any iteration, conversion to ArrayList, etc.

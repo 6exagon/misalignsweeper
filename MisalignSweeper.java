@@ -147,106 +147,18 @@ public class MisalignSweeper {
       }
    }
    
-   // // Creates a point on one of the edges, which one is determined by 'side'
-   // public static Point makeSidePoint(int side, int otherVal) {
-   //    switch (side) {
-   //       case 0: return new Point(otherVal, 0);
-   //       case 1: return new Point(MisalignGraphics.WIDTH, otherVal);
-   //       case 2: return new Point(MisalignGraphics.WIDTH - otherVal, MisalignGraphics.HEIGHT);
-   //       case 3: return new Point(0, MisalignGraphics.HEIGHT - otherVal);
-   //    }
-   //    return null;
-   // }
-   
    // Returns the polygon surrounding a coordinate pair
    public static Poly getClickedPolygon(int x, int y) {
-      Map<Double, Line> distLine = new HashMap<>();
+      TreeMap<Double, Line> distLine = new TreeMap<>();
       for (Line line : lines)
          if (line.spans(x))
             distLine.put(Math.abs(line.getM() * x + line.getB() - y), line);
-      Line closestLine = distLine.get(Collections.min(distLine.keySet()));
+      Line closestLine = distLine.get(distLine.firstKey());
       for (Poly p : polys)
          if (p.hasLine(closestLine) && p.raycast(x, y) % 2 == 1)
             return p;
       return null;
    }
-   
-   // // Returns whether line is intersecting any other Line
-   // public static boolean intersects(Line line) {
-   //    if (line.getM() == Double.MAX_VALUE && line.getPoint(0).getX() % MisalignGraphics.WIDTH != 0)
-   //          return true;   // This is a weird (but apparently mostly functional) fix for those weird vertical lines
-   //    for (Line line2 : lines) {
-   //       if (!line2.sharesPointWith(line) && line.getM() != line2.getM()) {
-   //          double intersectX = (line2.getB() - line.getB()) / (line.getM() - line2.getM());
-   //          if (line.spans((int)Math.round(intersectX)) && line2.spans((int)Math.round(intersectX)))
-   //             return true;
-   //       }
-   //    }
-   //    return false;
-   // }
-   
-   // // Removes all the points and lines that aren't connected to anything
-   // public static void removeLoneLines() {
-   //    ArrayList<Point> pointsToRemove = new ArrayList<>();
-   //    for (Point p : points) {
-   //       if (p.getLines().size() == 1) {
-   //          pointsToRemove.add(p);
-   //          Line line = p.getLines().get(0);
-   //          lines.remove(line);
-   //          // We also have to get rid of references to this line from other points.
-   //          line.getOtherPoint(p).getLines().remove(line);
-   //       }
-   //    }
-   //    pointsToRemove.forEach(points::remove);  // To avoid ConcurrentModificationException
-   // }
-
-   // // Goes through all the points connected to 'pivot', and returns the one with
-   // // the lowest angle (as defined by getAngle) greater than 'old'
-   // public static Point getNextCounterClockwisePoint(Point pivot, Point old) {
-   //    Map<Double, Point> angleToPoint = new HashMap<>();
-   //    double oldAngle = getAngle(pivot, old);
-   //    pivot.getLines().forEach(line -> {              // ooh look, a lambda!
-   //       Point other = line.getOtherPoint(pivot);
-   //       angleToPoint.put(getAngle(pivot, other), other);
-   //    });
-   //    double newAngle = 100000;
-   //    for (double angle : angleToPoint.keySet())
-   //       if (angle > oldAngle && angle < newAngle) // allows us to find the smallest angle > the old angle
-   //          newAngle = angle;
-   //    if (newAngle == 100000)  // If none are greater than old, we want the lowest value.
-   //       newAngle = Collections.min(angleToPoint.keySet());
-   //    return angleToPoint.get(newAngle);
-   // }
-
-   // // Returns the angle between a horizontal line going to the right of 'vertex' and a line from 'vertex' to 'other'
-   // public static double getAngle(Point vertex, Point other) {
-   //    double base = Math.abs(Math.atan((double)(other.getY() - vertex.getY()) / (other.getX() - vertex.getX())));
-   //    // The inverse tangent only goes between 0 and pi/2, so we need to find out what quadrant it's in and change it.
-   //    return other.getY() < vertex.getY()
-   //            ? (other.getX() < vertex.getX() ? Math.PI - base : base)                 // 2nd and 1st Quadrants
-   //            : (other.getX() < vertex.getX() ? Math.PI + base : 2 * Math.PI - base);  // 3rd and 4th Quadrants
-   // }
-   
-   // // Adds an item to an ArrayList if it is not already there
-   // public static <T> boolean addTo(ArrayList<T> list, T item) {
-   //    if (!list.contains(item)) {
-   //       list.add(item);
-   //       return true;
-   //    }
-   //    return false;
-   // }
-
-   // // Checks if the two arrays have the same elements, but not necessarily in the same order
-   // public static <T> boolean areArraysEqualDisorderly(T[] a1, T[] a2) {
-   //    array1:
-   //    for (T a : a1) {
-   //       for (T b : a2)
-   //          if (b.equals(a))
-   //             continue array1;
-   //       return false;
-   //    }
-   //    return true;
-   // }
 
    public static void main(String[] args) {
       //Schedule a job for the event-dispatching thread
