@@ -1,31 +1,102 @@
 import java.util.*;
 
 public class Line {
-   private ArrayList<Poly> polys;
-   private Point[] points;
+   private Poly[] polys;
+   private final double VERTICAL_SLOPE = 100000;
+   private final int AREA_MAX = 5000;
+   private Point p;
+   private Point q;
+   private boolean extUp;
    private double m;        // slope
    private double b;        // y-intercept
    
-   public Line(Point p1, Point p2) {
-      this.points = new Point[] {p1, p2};
-      double denom = p2.getX() - p1.getX();
+   public Line(Point p, Point q) {
+      this.p = p;
+      this.q = q;
+      this.extUp = true;
+      double denom = q.getX() - p.getX();
       if (denom == 0)
-         this.m = Double.MAX_VALUE;
+         this.m = VERTICAL_SLOPE;
       else
-         this.m = (p2.getY() - p1.getY()) / denom;
-      this.b = p1.getY() - this.m * p1.getX();
-      if (m == Double.MAX_VALUE || Double.isNaN(b) || !Double.isFinite(b))
-         this.b = Double.MAX_VALUE;
-      this.polys = new ArrayList<>();
+         this.m = (q.getY() - p.getY()) / denom;
+      this.b = p.getY() - this.m * p.getX();
+      this.polys = new Poly[2];
+   }
+   
+   //Lines must create triangles from their extended sides only, to prevent overlap
+   public boolean isOnExtendedSide(Point pt) {
+      return (pt.getY() > this.m * pt.getX() + this.b) == this.extUp;
+   }
+   
+   public void extend(boolean up) {
+      this.extUp = up;
+   }
+   
+   public boolean getExt() {
+      return this.extUp;
+   }
+   
+   //Returns sum of distances to Point from line ends
+   public int distanceTo(Point pt) {
+      return (int) (Math.pow(Math.pow(pt.getX() - this.p.getX(), 2) + Math.pow(pt.getY() - this.p.getY(), 2), 0.5)
+         + Math.pow(Math.pow(pt.getX() - this.p.getX(), 2) + Math.pow(pt.getY() - this.q.getY(), 2), 0.5));
+   }
+   
+   //Returns area of triangle formed with Point
+   public int areaWith(Point pt) {
+      return Math.abs((this.p.getX() * (this.q.getY() - pt.getY())
+         + this.q.getX() * (pt.getY() - this.p.getY())
+         + pt.getX() * (this.p.getY() - this.q.getY())) / 2);
    }
 
-   @Override
-   public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Line other = (Line) o;
-      return MisalignSweeper.areArraysEqualDisorderly(points, other.points);
+   //Gets new Point on the correct side of the line pulled from the list and not outside of lstack
+   public Point getNewPoint(
+      ArrayList<Point> plist, HashSet<Point> freshPoints, ArrayDeque<Line> lstack) {
+      int numPoints = plist.size();
+      HashMap<Integer, Point> distPoint = new HashMap<>();
+      int[] dists = new int[numPoints];
+      for (int i = 0; i < numPoints; i++) {
+         dists[i] = this.distanceTo(plist.get(i));    // get the distance to each point
+         distPoint.put(dists[i], plist.get(i));       // keep track of how far away each point is
+      }
+      Arrays.sort(dists);
+      for (int topchoice : dists) {
+         Point np = distPoint.get(topchoice);
+         int area = areaWith(np);
+         if (isOnExtendedSide(np) && area < AREA_MAX && area > 0) {
+            if (freshPoints.contains(np)) {
+               freshPoints.remove(np);
+               return np;
+            } else if (np.validate(lstack)) {
+               Line testl1 = new Line(this.q, np);
+               Line testl2 = new Line(np, this.p);
+               if (testl1.getSimilarLine(lstack) != null || testl2.getSimilarLine(lstack) != null) {
+                  return np;
+               }
+            }
+         }
+      }
+      return null;
    }
+   
+   //Gets line in list that shares points, if applicable
+   public Line getSimilarLine(AbstractCollection<Line> linelist) {
+      for (Line l : linelist) {
+         if ((this.p == l.getP() && this.q == l.getQ())
+            || (this.p == l.getQ() && this.q == l.getP())) {
+            return l;
+         }
+      }
+      return null;
+   }
+
+   // @Override
+   // public boolean equals(Object o) {
+   //    if (this == o) return true;
+   //    if (o == null || getClass() != o.getClass()) return false;
+   //    Line other = (Line) o;
+   //    return MisalignSweeper.areArraysEqualDisorderly(points, other.points);
+   // }
    
    public double getM() {
       return m;
@@ -35,28 +106,37 @@ public class Line {
       return b;
    }
    
-   public ArrayList<Poly> getPolys() {
-      return polys;
+   public Poly[] getPolys() {
+      return this.polys;
    }
    
-   public Point getPoint(int index) {
-      return points[index];
+   //Assumes there will be no more than 2 Polys added
+   public void addPoly(Poly p) {
+      this.polys[(this.polys[0] == null) ? 0 : 1] = p;
    }
    
-   public Point getOtherPoint(Point p) {
-      if (points[0] == p)
-         return points[1];
-      else if (points[1] == p)
-         return points[0];
-      return null;
+   public Point getP() {
+      return this.p;
    }
    
-   public boolean sharesPointWith(Line other) {
-      return getOtherPoint(other.getPoint(0)) != null || getOtherPoint(other.getPoint(1)) != null;
+   public Point getQ() {
+      return this.q;
    }
+   
+   // public Point getOtherPoint(Point p) {
+   //    if (points[0] == p)
+   //       return points[1];
+   //    else if (points[1] == p)
+   //       return points[0];
+   //    return null;
+   // }
+   
+   // public boolean sharesPointWith(Line other) {
+   //    return getOtherPoint(other.getPoint(0)) != null || getOtherPoint(other.getPoint(1)) != null;
+   // }
    
    //Returns if the line's points are on either side of an x coordinate
    public boolean spans(int x) {
-      return (x > this.points[0].getX()) ^ (x > this.points[1].getX());
+      return (x > this.p.getX()) ^ (x > this.q.getX());
    }
 }

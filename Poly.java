@@ -4,38 +4,57 @@ import javax.swing.ImageIcon;
 
 public class Poly {
    private Line[] lines;
-   private ArrayList<Point> points;
+   private Point[] points;
    private int surroundingMines;
    private Visibility visible;
    private Point midpoint;
    
-   public Poly(ArrayList<Point> points) {
-      this.points = points;
-      getLinesFromPoints();
-      calcMidpoint();
+   //Correctly initializes using Line and list of points to pull from
+   public Poly(Line start, ArrayList<Point> pts, HashSet<Point> fps, ArrayDeque<Line> lstack) throws IndexOutOfBoundsException {
+      Point pt = start.getNewPoint(pts, fps, lstack);
+      if (pt == null) {
+         throw new IndexOutOfBoundsException();
+      }
+      Line l2 = new Line(start.getQ(), pt);
+      l2.extend(!l2.isOnExtendedSide(start.getP()));
+      Line l3 = new Line(pt, start.getP());
+      l3.extend(!l3.isOnExtendedSide(start.getQ()));
+      Line[] linearray = {start, l2, l3};
+      this.lines = linearray;
+      HashSet<Point> pointSet = new HashSet<Point>();
+      for (Line l : this.lines) {
+         pointSet.add(l.getP());
+         pointSet.add(l.getQ());
+      }
+      this.points = pointSet.toArray(new Point[3]);
       this.surroundingMines = 0;
       this.visible = Visibility.NORMAL;
    }
    
-   @Override
-   public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Poly other = (Poly) o;
-      return MisalignSweeper.areArraysEqualDisorderly(lines, other.lines);
-   }
+   // @Override
+   // public boolean equals(Object o) {
+   //    if (this == o) return true;
+   //    if (o == null || getClass() != o.getClass()) return false;
+   //    Poly other = (Poly) o;
+   //    return MisalignSweeper.areArraysEqualDisorderly(lines, other.lines);
+   // }
    
+   //Not sure what the "Point" of having both of these methods here is but I'll leave it for now
    public Point getPoint(int index) {
-      return points.get(index);
+      return this.points[index];
    }
    
-   public ArrayList<Point> getPoints() {
+   public Point[] getPoints() {
       return this.points;
    }
    
-   public int numPoints() {
-      return points.size();
+   public Line[] getLines() {
+      return this.lines;
    }
+   
+   // public int numPoints() {
+   //    return points.size();
+   // }
    
    //Returns -1 if mine, -2 if activated mine, or number of surrounding mines
    public int getDisplayState() {
@@ -117,54 +136,56 @@ public class Poly {
    }
    
    public void calcMidpoint() {
-      if (this.numPoints() == 3) { // calculates the centroid if a triangle
+//       if (this.numPoints() == 3) { // calculates the centroid if a triangle
          Line l1 = new Line(getPoint(0), new Point((getPoint(1).getX() + getPoint(2).getX()) / 2, (getPoint(1).getY() + getPoint(2).getY()) / 2));
          Line l2 = new Line(getPoint(1), new Point((getPoint(0).getX() + getPoint(2).getX()) / 2, (getPoint(0).getY() + getPoint(2).getY()) / 2));
          double intersectX = (l2.getB() - l1.getB()) / (l1.getM() - l2.getM());
          this.midpoint = new Point((int)intersectX, (int)(l1.getM() * intersectX + l1.getB()));
-      } else {    // if not a triangle, just take the average of all the points
-         int x = 0, y = 0;
-         for (Point p : this.points) {
-            x += p.getX();
-            y += p.getY();
-         }
-         this.midpoint = new Point(x / this.numPoints(), y / this.numPoints());
-      }
+//       } else {    // if not a triangle, just take the average of all the points
+//          int x = 0, y = 0;
+//          for (Point p : this.points) {
+//             x += p.getX();
+//             y += p.getY();
+//          }
+//          this.midpoint = new Point(x / this.numPoints(), y / this.numPoints());
+//       }
    }
    
-   public void getLinesFromPoints() {
-      this.lines = new Line[this.points.size()];
-      for (int i = 0; i < this.lines.length; i++) {
-         Line l;
-         if (i == this.points.size() - 1) {
-            l = new Line(this.points.get(i), this.points.get(0));
-         } else {
-            l = new Line(this.points.get(i), this.points.get(i+1));
-         }
-         if (MisalignSweeper.lines.contains(l)) {
-            this.lines[i] = MisalignSweeper.lines.get(MisalignSweeper.lines.indexOf(l));
-         }
-      }
-   }
+   // public void getLinesFromPoints() {
+   //    this.lines = new Line[this.points.size()];
+   //    for (int i = 0; i < this.lines.length; i++) {
+   //       Line l;
+   //       if (i == this.points.size() - 1) {
+   //          l = new Line(this.points.get(i), this.points.get(0));
+   //       } else {
+   //          l = new Line(this.points.get(i), this.points.get(i+1));
+   //       }
+   //       if (MisalignSweeper.lines.contains(l)) {
+   //          this.lines[i] = MisalignSweeper.lines.get(MisalignSweeper.lines.indexOf(l));
+   //       }
+   //    }
+   // }
    
    // Adds references to Polys in Lines
    public void addPolysToLines() {
       for (Line l : this.lines) {
-         l.getPolys().add(this);
+         l.addPoly(this);
       }
-      
    }
    
+   //Faster than any iteration, conversion to ArrayList, etc.
    public boolean hasLine(Line line) {
-      return Arrays.asList(lines).contains(line);
+      return (lines[0] == line || lines[1] == line || lines[2] == line);
    }
    
    //Returns number of intersections with line extending from point
    public int raycast(int x, int y) {
       int intersections = 0;
-      for (Line l : this.lines)
-         if (l.spans(x) && l.getM() * x + l.getB() > y)
+      for (Line l : this.lines) {
+         if (l.spans(x) && l.getM() * x + l.getB() > y) {
             intersections++;
+         }
+      }
       return intersections;
    }
    
