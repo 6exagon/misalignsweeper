@@ -52,7 +52,7 @@ public class MisalignSweeper {
       generateEdgePoints(pts, fps);
       for (int x = 0; x < numPoints; x++) {
          Point p = new Point(
-            rand.nextInt(MisalignGraphics.WIDTH - 100) + 50, rand.nextInt(MisalignGraphics.HEIGHT - 100) + 50);
+            rand.nextInt(MisalignGraphics.WIDTH), rand.nextInt(MisalignGraphics.HEIGHT));
          boolean farEnough = true;
          for (Point p2 : pts) {
             if (Math.abs(p.getX() - p2.getX()) + Math.abs(p.getY() - p2.getY()) < SEP_DIST) {
@@ -100,7 +100,7 @@ public class MisalignSweeper {
          lines.add(l);
       }
       polys.add(initialTriangle);
-      for (int x = 0; x < 40; x++) {
+      while (fps.size() > 0) {
          try {
             Poly tri = new Poly(linestack.getFirst(), pts, fps, linestack);
             polys.add(tri);

@@ -54,8 +54,9 @@ public class Line {
       TreeMap<Integer, Point> distPoint = new TreeMap<>();
       for (int i = 0; i < plist.size(); i++)
          distPoint.put(this.distanceTo(plist.get(i)), plist.get(i));       // keep track of how far away each point is
-      for (int topchoice : distPoint.keySet()) {
-         Point np = distPoint.get(topchoice);
+      for (int i = 1; i < 6; i++) {
+         Point np = distPoint.get(distPoint.firstKey());
+         distPoint.remove(distPoint.firstKey());
          int area = areaWith(np);
          if (isOnExtendedSide(np) && area < AREA_MAX && area > 0) {
             if (freshPoints.remove(np)) {

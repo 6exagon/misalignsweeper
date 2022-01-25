@@ -97,7 +97,7 @@ public class Poly {
          else if (this.surroundingMines == 0)
             for (Line l : lines)
                for (Poly p : l.getPolys())
-                  if (p != this)
+                  if (p != this && p != null)
                      p.reveal();
       }
    }
@@ -137,9 +137,9 @@ public class Poly {
    }
    
    // Adds references to Polys in Lines
-   public void addPolysToLines() {
-      for (Line l : this.lines)
-         l.addPoly(this);
+  public void addPolysToLines() {
+     for (Line l : this.lines)
+        l.addPoly(this);
    }
    
    //Faster than any iteration, conversion to ArrayList, etc.
