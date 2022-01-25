@@ -30,6 +30,7 @@ public class Poly {
       this.points = pointSet.toArray(new Point[3]);
       this.surroundingMines = 0;
       this.visible = Visibility.NORMAL;
+      calcMidpoint();
    }
    
    //Not sure what the "Point" of having both of these methods here is but I'll leave it for now
@@ -119,10 +120,11 @@ public class Poly {
       if (this.surroundingMines == 0)
          for (Line l : lines)
             for (Poly p : l.getPolys())
-               this.surroundingMines += (p.getDisplayState() == -1) ? 1 : 0;
+               if (p != null)
+                  this.surroundingMines += (p.getDisplayState() == -1) ? 1 : 0;
    }
    
-   public void calcMidpoint() {
+   private void calcMidpoint() {
 //       if (this.numPoints() == 3) { // calculates the centroid if a triangle
          Line l1 = new Line(getPoint(0), new Point((getPoint(1).getX() + getPoint(2).getX()) / 2, (getPoint(1).getY() + getPoint(2).getY()) / 2));
          Line l2 = new Line(getPoint(1), new Point((getPoint(0).getX() + getPoint(2).getX()) / 2, (getPoint(0).getY() + getPoint(2).getY()) / 2));

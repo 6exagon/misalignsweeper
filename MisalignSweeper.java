@@ -41,10 +41,10 @@ public class MisalignSweeper {
       generatePoints(rand, points, freshPoints);
       generatePolys(points, freshPoints);
       generateAWTPolygons();
-      //generateMines();
-//       for (Poly x : polys) {
-//          x.updateMines();
-//       }
+      generateMines();
+      for (Poly x : polys) {
+         x.updateMines();
+      }
    }
 
    // Generates the Points for the game board
