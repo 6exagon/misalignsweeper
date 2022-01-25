@@ -218,10 +218,11 @@ public class MisalignGraphics {
             CardLayout c = (CardLayout)(cardPanel.getLayout());
 
             if (gamePaused) {
-               MisalignSweeper.numPoints = MisalignGraphics.this.settings.getPoints();
-               MisalignSweeper.numMines = MisalignGraphics.this.settings.getMines();
+               c.show(cardPanel, "gamePanel");
+            } else {
+               c.show(cardPanel, "settings");
             }
-                        
+            
             //c.next(cardPanel);
             gamePaused = !gamePaused;
          }
@@ -245,7 +246,7 @@ public class MisalignGraphics {
    
    // Resizes an ImageIcon given file path (there's probably a better way to do this)
    private ImageIcon getScaledImageIcon(String path, int width, int height) {
-      ImageIcon icon = new ImageIcon(path);
+      ImageIcon icon = new ImageIcon(getClass().getResource(path));
       Image image = icon.getImage();
       Image newImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
       return new ImageIcon(newImage);

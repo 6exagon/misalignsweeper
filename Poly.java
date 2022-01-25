@@ -86,7 +86,7 @@ public class Poly {
       midX -= polyHeight/2;
       midY -= polyHeight/2;
       
-      g2.drawImage(new ImageIcon("flag.png").getImage(), midX, midY, (int)polyHeight, (int)polyHeight, null);
+      g2.drawImage(new ImageIcon(getClass().getResource("flag.png")).getImage(), midX, midY, (int)polyHeight, (int)polyHeight, null);
       
    }
    
