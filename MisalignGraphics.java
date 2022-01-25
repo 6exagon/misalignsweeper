@@ -5,8 +5,8 @@ import java.util.*;
 import javax.swing.border.*;
 
 public class MisalignGraphics {
-   public static final int HEIGHT = 256;
-   public static final int WIDTH = 256;
+   public static final int HEIGHT = 500;
+   public static final int WIDTH = 500;
    public static double xMultiplier = 1.0;
    public static double yMultiplier = 1.0;
    public ArrayList<Line> lines;
@@ -100,10 +100,11 @@ public class MisalignGraphics {
                      poly.drawNum(g2);
                   else if (poly.isFlagged()) //must draw flag after updating color
                      poly.drawFlag(g2);
+               }           
+               for (Line l : lines) {
+                  g2.setColor(l.getExt() ? Color.RED : Color.BLUE); 
+                  g2.drawLine(l.getP().getX(), l.getP().getY(), l.getQ().getX(), l.getQ().getY());
                }
-               g2.setColor(Color.BLACK);            
-               for (Line l : lines)
-                  g2.drawLine(l.getPoint(0).getX(), l.getPoint(0).getY(), l.getPoint(1).getX(), l.getPoint(1).getY());
             }
          }
       };
@@ -217,10 +218,8 @@ public class MisalignGraphics {
             CardLayout c = (CardLayout)(cardPanel.getLayout());
 
             if (gamePaused) {
-               
-               c.show(cardPanel, "gamePanel");
-            } else {
-               c.show(cardPanel, "settings");
+               MisalignSweeper.numPoints = MisalignGraphics.this.settings.getPoints();
+               MisalignSweeper.numMines = MisalignGraphics.this.settings.getMines();
             }
                         
             //c.next(cardPanel);
