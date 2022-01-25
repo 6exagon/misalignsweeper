@@ -74,6 +74,8 @@ public class Poly {
          this.visible = Visibility.PRESSED;
          if (this.surroundingMines == -1) {
             this.surroundingMines = -2;
+            System.out.println("You lost");
+            //lose game
          } else if (this.surroundingMines == 0) {
             for (Line l : lines) {
                for (Poly p : l.getPolys()) {
@@ -85,12 +87,12 @@ public class Poly {
    }
    
    public void flag() {
-      if (this.visible == Visibility.NORMAL) {
-         this.visible = Visibility.FLAG;
-         MisalignSweeper.numMines--;
-      } else if (this.visible == Visibility.FLAG) {
+      if (this.visible == Visibility.FLAG) {
          this.visible = Visibility.NORMAL;
-         MisalignSweeper.numMines++;
+         MisalignSweeper.numFlags++;
+      } else if (MisalignSweeper.numFlags != 0 && this.visible == Visibility.NORMAL) {
+         this.visible = Visibility.FLAG;
+         MisalignSweeper.numFlags--;
       }
    }
    

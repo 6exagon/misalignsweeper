@@ -42,6 +42,7 @@ public class CustomTimer extends JLabel {
    
    // Starts timer
    public void start() {
+      this.timerPaused = false;
       this.timer.start();
    }
    
@@ -55,6 +56,7 @@ public class CustomTimer extends JLabel {
       this.timer.stop();
       this.secondsPassed = 0;
       this.setText("00:00");
+      this.timerPaused = false;
       this.timer.start();
    }
    

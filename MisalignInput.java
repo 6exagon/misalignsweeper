@@ -22,6 +22,10 @@ public class MisalignInput implements MouseListener {
       } else if (poly.isFlagged()) { // left clicked on flagged tile
          System.out.println("Cannot reveal flagged tile");
       }
+      
+    //  if (MisalignSweeper.getWinState().equals("Win"))
+      //   System.out.println("3 mines / win");
+
    }
 
    @Override
