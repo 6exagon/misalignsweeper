@@ -16,7 +16,14 @@ public class SettingsPanel extends JPanel {
       c.gridy = 2;
       this.addLabeledSpinner("Number of Mines", 15, 5, 50, 1, c); 
       c.gridy = 3;
-      this.addLabeledSpinner("Max Lines Per Point", 6, 3, 25, 1, c);  
+      this.addLabeledSpinner("Max Lines Per Point", 6, 3, 25, 1, c);
+//       c.gridy = 4;
+//       this.add(new JLabel(" "), c); //this is bad
+//       c.gridy = 5;
+//       this.add(new JLabel(" "), c); //this is bad (again)
+//       c.gridy = 6;
+//       c.anchor = GridBagConstraints.PAGE_END;  
+//       this.add(new JLabel("Reset game for new settings"), c);
    }
    
    // Adds a panel containing a label and spinner to the settings panel

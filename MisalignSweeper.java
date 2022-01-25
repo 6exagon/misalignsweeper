@@ -5,8 +5,10 @@ import java.util.*;
 
 public class MisalignSweeper {
 
+   public static int numFlags = 15;
    public static int numMines = 15;
    public static int numPoints = 200;
+   public static int numNears = 6;
    public static final int SEP_DIST = 30;
    
    private static final ArrayList<Poly> polys = new ArrayList<>();
@@ -163,5 +165,33 @@ public class MisalignSweeper {
    public static void main(String[] args) {
       //Schedule a job for the event-dispatching thread
       SwingUtilities.invokeLater(MisalignSweeper::create);
-   }    
+   }
+   
+//    public static String getWinState() {
+//    
+//       if (numMines == 3)
+//          return "Win";
+//       return "None";
+//       
+//    }
+//    public static String getWinState() {
+//       
+//       //checks loss
+//       for (int i = 0; i <= polys.size(); i++) {
+//          if (polys.get(i).getDisplayState() == -2)
+//             return "Loss";     
+//       }
+//       
+//       //checks win
+//       if (numFlags == numMines) {
+//          for (int i = 0; i <= polys.size(); i++) {
+//             if (!polys.get(i).isPressed())
+//                break
+//          }
+//          
+//       }
+//    }      
+//       
+//       
+//          
 }
