@@ -9,15 +9,6 @@ public class Point {
       this.y = y;
    }
 
-   public boolean validate(AbstractCollection<Line> linelist) {
-      for (Line l : linelist) {
-         if (this == l.getP() || this == l.getQ()) {
-            return true;
-         }
-      }
-      return false;
-   }
-   
    public int getX() {
       return this.x;
    }
