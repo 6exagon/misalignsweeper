@@ -9,8 +9,8 @@ public class MisalignGraphics {
    public static final int WIDTH = 500;
    public static double xMultiplier = 1.0;
    public static double yMultiplier = 1.0;
-   public ArrayList<Line> lines;
-   public HashMap<Poly, Polygon> polytogon;
+   public HashSet<Line> lines;
+   public HashMap<Tri, Polygon> tritogon;
    public JFrame frame;
    public boolean gamePaused = false;
    private SettingsPanel settings;
@@ -20,10 +20,10 @@ public class MisalignGraphics {
    private JLabel smile;
    
    public JPanel gamePanel;
-   
-   public MisalignGraphics(ArrayList<Line> lines, HashMap<Poly, Polygon> polytogon) {
+
+   public MisalignGraphics(HashSet<Line> lines, HashMap<Tri, Polygon> tritogon) {
       this.lines = lines;
-      this.polytogon = polytogon;
+      this.tritogon = tritogon;
    }
    
    public void createAndShowGUI(MisalignInput input, Random rand) {
@@ -81,27 +81,27 @@ public class MisalignGraphics {
 //                      g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
 //                }
                   //g2.setColor(colorPoly(poly.getDisplayState())); // does not work
-               for (Poly poly : polytogon.keySet()) {
-                  if (poly.isPressed()) {
-                     switch (poly.getDisplayState()) {
+               for (Tri tri : tritogon.keySet()) {
+                  if (tri.isPressed()) {
+                     switch (tri.getDisplayState()) {
                         case -2:
                         case -1:
                            g2.setColor(Color.BLACK);
                            break;
                         default:
-                           g2.setColor(getColor(poly.getDisplayState()));
+                           g2.setColor(getColor(tri.getDisplayState()));
                      }
-                  } else if (poly.isFlagged()) {
+                  } else if (tri.isFlagged()) {
                      g2.setColor(Color.YELLOW);
                   } else {
                      g2.setColor(Color.WHITE);
                   }
-                  g2.fillPolygon(polytogon.get(poly));
+                  g2.fillPolygon(tritogon.get(tri));
                   
-                  if (poly.isPressed() && poly.getDisplayState() > 0)
-                     poly.drawNum(g2);
-                  else if (poly.isFlagged()) //must draw flag after updating color
-                     poly.drawFlag(g2);
+                  if (tri.isPressed() && tri.getDisplayState() > 0)
+                     tri.drawNum(g2);
+                  else if (tri.isFlagged()) //must draw flag after updating color
+                     tri.drawFlag(g2);
                }           
                for (Line l : lines) {
                   g2.setColor(l.getExt() ? Color.RED : Color.BLUE); 
@@ -197,7 +197,7 @@ public class MisalignGraphics {
                CardLayout c = (CardLayout)(cardPanel.getLayout());
                smile.setBorder(raised);
                smile.setIcon(smileIcon);
-               MisalignSweeper.generateBoard(new Random());
+               MisalignSweeper.generateBoard();
                mineCounter.setText(String.format("%03d", MisalignSweeper.numFlags));
                c.show(cardPanel, "gamePanel");
                mainPanel.repaint();
@@ -289,8 +289,8 @@ public class MisalignGraphics {
   
    // Checks if player won the game (all non-mines are revealed) 
    public boolean gameWon(ImageIcon winIcon) {
-      for (Poly p : polytogon.keySet()) {
-         if (p.getDisplayState() != -1 && !p.isPressed())
+      for (Tri t : tritogon.keySet()) {
+         if (t.getDisplayState() != -1 && !t.isPressed())
             return false; //if a non-mine is not reavealed, game continues
       }
       smile.setIcon(winIcon);
@@ -299,8 +299,8 @@ public class MisalignGraphics {
    
    // Checks if the player lost (clicked a mine)
    public boolean gameLost(ImageIcon loseIcon) {
-      for (Poly poly : polytogon.keySet()) {
-         if (poly.getDisplayState() == -2) {
+      for (Tri t : tritogon.keySet()) {
+         if (t.getDisplayState() == -2) {
             smile.setIcon(loseIcon);
             return true;
          }
@@ -310,8 +310,8 @@ public class MisalignGraphics {
    
    // Reveals all mines and swtiches to losing screen
    public void revealAllMines() { 
-      ArrayList<Poly> mines = new ArrayList<Poly>();
-      for (Poly poly : polytogon.keySet()) {
+      ArrayList<Tri> mines = new ArrayList<Tri>();
+      for (Tri poly : tritogon.keySet()) {
          if (poly.getDisplayState() == -1) {
             mines.add(poly);
          }

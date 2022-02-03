@@ -1,31 +1,28 @@
 import java.util.*;
+import java.util.stream.*;
 
 public class Line {
-   private Poly[] polys;
+   private Tri[] tris;
    private final double VERTICAL_SLOPE = 100000;
    private final int AREA_MAX = 5000;
    private Point p;
    private Point q;
-   private boolean extUp;
+   private boolean extUp = true;
    private double m;        // slope
    private double b;        // y-intercept
    
    public Line(Point p, Point q) {
       this.p = p;
       this.q = q;
-      this.extUp = true;
       double denom = q.getX() - p.getX();
-      if (denom == 0)
-         this.m = VERTICAL_SLOPE;
-      else
-         this.m = (q.getY() - p.getY()) / denom;
+      this.m = denom == 0 ? VERTICAL_SLOPE : (q.getY() - p.getY()) / denom;
       this.b = p.getY() - this.m * p.getX();
-      this.polys = new Poly[2];
+      this.tris = new Tri[2];
    }
    
    //Lines must create triangles from their extended sides only, to prevent overlap
    public boolean isOnExtendedSide(Point pt) {
-      return (pt.getY() > this.m * pt.getX() + this.b) == this.extUp;
+      return (pt.getY() > this.at(pt.getX())) == this.extUp;
    }
    
    public void extend(boolean up) {
@@ -36,52 +33,43 @@ public class Line {
       return this.extUp;
    }
    
+   // returns y value at given x, ie, line.at(x) = f(x)
+   public int at(int x) {
+      return (int) (x * m + b);
+   }
+   
    //Returns sum of distances to Point from line ends
    public int distanceTo(Point pt) {
-      return (int) (Math.pow(Math.pow(pt.getX() - this.p.getX(), 2) + Math.pow(pt.getY() - this.p.getY(), 2), 0.5)
-         + Math.pow(Math.pow(pt.getX() - this.q.getX(), 2) + Math.pow(pt.getY() - this.q.getY(), 2), 0.5));
+      return (int) (Math.hypot(pt.getX() - this.p.getX(), pt.getY() - this.p.getY())
+                  + Math.hypot(pt.getX() - this.q.getX(), pt.getY() - this.q.getY()));
    }
    
    //Returns area of triangle formed with Point
    public int areaWith(Point pt) {
       return Math.abs((this.p.getX() * (this.q.getY() - pt.getY())
-         + this.q.getX() * (pt.getY() - this.p.getY())
-         + pt.getX() * (this.p.getY() - this.q.getY())) / 2);
+                     + this.q.getX() * (pt.getY() - this.p.getY())
+                     + pt.getX() * (this.p.getY() - this.q.getY())) / 2);
    }
 
    //Gets new Point on the correct side of the line pulled from the list and not outside of lstack
    public Point getNewPoint(ArrayList<Point> plist, HashSet<Point> freshPoints, ArrayDeque<Line> lstack) {
       TreeMap<Integer, Point> distPoint = new TreeMap<>();
-      for (int i = 0; i < plist.size(); i++)
-         distPoint.put(this.distanceTo(plist.get(i)), plist.get(i));       // keep track of how far away each point is
+      for (Point p : plist)
+         distPoint.put(this.distanceTo(p), p);       // keep track of how far away each point is
       for (int i = 1; i < 6; i++) {
-         Point np = distPoint.get(distPoint.firstKey());
-         distPoint.remove(distPoint.firstKey());
+         Point np = distPoint.remove(distPoint.firstKey());
          int area = areaWith(np);
-         if (isOnExtendedSide(np) && area < AREA_MAX && area > 0) {
-            if (freshPoints.remove(np)) {
+         if (isOnExtendedSide(np) && 0 < area && area < AREA_MAX)
+            if (freshPoints.remove(np) || 
+               lstack.stream().anyMatch(l -> l.hasPoint(np) && (l.hasPoint(this.p) || l.hasPoint(this.q))))
                return np;
-            } else if (np.validate(lstack)) {
-               Line testl1 = new Line(this.q, np);
-               Line testl2 = new Line(np, this.p);
-               if (testl1.getSimilarLine(lstack) != null || testl2.getSimilarLine(lstack) != null) {
-                  return np;
-               }
-            }
-         }
       }
       return null;
    }
    
    //Gets line in list that shares points, if applicable
-   public Line getSimilarLine(AbstractCollection<Line> linelist) {
-      for (Line l : linelist) {
-         if ((this.p == l.getP() && this.q == l.getQ())
-            || (this.p == l.getQ() && this.q == l.getP())) {
-            return l;
-         }
-      }
-      return null;
+   public Line getSimilarLine(AbstractCollection<Line> lines) {
+      return lines.stream().filter(l -> l.hasPoint(this.p) && l.hasPoint(this.q)).findFirst().orElse(null);
    }
    
    public double getM() {
@@ -92,13 +80,17 @@ public class Line {
       return b;
    }
    
-   public Poly[] getPolys() {
-      return this.polys;
+   public Tri[] getTris() {
+      return this.tris;
    }
    
-   //Assumes there will be no more than 2 Polys added
-   public void addPoly(Poly p) {
-      this.polys[(this.polys[0] == null) ? 0 : 1] = p;
+   //Assumes there will be no more than 2 Tris added
+   public void addTri(Tri p) {
+      this.tris[(this.tris[0] == null) ? 0 : 1] = p;
+   }
+   
+   public boolean hasPoint(Point p) {
+      return this.p == p || this.q == p;
    }
    
    public Point getP() {
