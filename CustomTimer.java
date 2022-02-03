@@ -60,4 +60,8 @@ public class CustomTimer extends JLabel {
       this.timer.start();
    }
    
+   public void stop() {
+      this.timer.stop();
+   }
+   
 }

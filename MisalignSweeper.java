@@ -166,32 +166,5 @@ public class MisalignSweeper {
       //Schedule a job for the event-dispatching thread
       SwingUtilities.invokeLater(MisalignSweeper::create);
    }
-   
-//    public static String getWinState() {
-//    
-//       if (numMines == 3)
-//          return "Win";
-//       return "None";
-//       
-//    }
-//    public static String getWinState() {
-//       
-//       //checks loss
-//       for (int i = 0; i <= polys.size(); i++) {
-//          if (polys.get(i).getDisplayState() == -2)
-//             return "Loss";     
-//       }
-//       
-//       //checks win
-//       if (numFlags == numMines) {
-//          for (int i = 0; i <= polys.size(); i++) {
-//             if (!polys.get(i).isPressed())
-//                break
-//          }
-//          
-//       }
-//    }      
-//       
-//       
-//          
+      
 }

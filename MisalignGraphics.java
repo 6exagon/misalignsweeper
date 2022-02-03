@@ -19,6 +19,8 @@ public class MisalignGraphics {
    private JLabel mineCounter;
    private JLabel smile;
    
+   public JPanel gamePanel;
+   
    public MisalignGraphics(ArrayList<Line> lines, HashMap<Poly, Polygon> polytogon) {
       this.lines = lines;
       this.polytogon = polytogon;
@@ -57,7 +59,7 @@ public class MisalignGraphics {
       mainPanel.add(cardPanel, cMain);
       
       // Creates game panel
-      JPanel gamePanel = new JPanel() {
+      this.gamePanel = new JPanel() {
          @Override
          public void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -275,11 +277,12 @@ public class MisalignGraphics {
       //System.out.println("numMines: " + MisalignSweeper.numMines);
       //System.out.println("gameWon?: " + gameWon());
       if (gameLost(loseIcon)) {
-         timer.togglePause();
-         c.last(cardPanel);
-         c.previous(cardPanel); //losing screen is the second to last card
+         timer.stop();
+         revealAllMines();
+         //c.last(cardPanel);
+         //c.previous(cardPanel); //losing screen is the second to last card
       } else if (gameWon(winIcon)) {
-         timer.togglePause();
+         timer.stop();
          c.last(cardPanel); //winning screen is the last car
       }  
   }
@@ -303,5 +306,39 @@ public class MisalignGraphics {
          }
       }
       return false;     
-   }  
+   }
+   
+   // Reveals all mines and swtiches to losing screen
+   public void revealAllMines() { 
+      ArrayList<Poly> mines = new ArrayList<Poly>();
+      for (Poly poly : polytogon.keySet()) {
+         if (poly.getDisplayState() == -1) {
+            mines.add(poly);
+         }
+      }
+      CardLayout c = (CardLayout)(cardPanel.getLayout());
+      
+      javax.swing.Timer mineRevealTimer = new javax.swing.Timer(100, new ActionListener() {
+         public void actionPerformed(ActionEvent evt) {
+            if (mines.size() >= 1) {
+               mines.get(0).reveal();
+               mines.remove(0);
+               
+            } else {
+               ((javax.swing.Timer)evt.getSource()).stop();
+               c.last(cardPanel);
+               c.previous(cardPanel);
+//                gamePanel.add(new JLabel() {
+//                   public void paintComponent(Graphics g) {
+//                      super.paintComponent(g);
+//                      g.drawString("YOU LOSE", 200, 200);
+//                   }
+//                });
+            }
+            gamePanel.repaint();
+         }
+      });
+      mineRevealTimer.start();
+  
+   }
 }
