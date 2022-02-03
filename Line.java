@@ -84,7 +84,7 @@ public class Line {
       return this.tris;
    }
    
-   //Assumes there will be no more than 2 Polys added
+   //Assumes there will be no more than 2 Tris added
    public void addTri(Tri p) {
       this.tris[(this.tris[0] == null) ? 0 : 1] = p;
    }

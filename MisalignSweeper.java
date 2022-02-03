@@ -107,7 +107,7 @@ public class MisalignSweeper {
                if (simline != null) {
                   linestack.remove(simline);
                   tri.getLines()[y] = simline;
-                  simline.addPoly(tri);
+                  simline.addTri(tri);
                } else {
                   linestack.add(tri.getLines()[y]);
                   lines.add(tri.getLines()[y]);
