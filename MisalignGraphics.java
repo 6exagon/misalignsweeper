@@ -190,7 +190,6 @@ public class MisalignGraphics {
                MisalignSweeper.numPoints = settings.getPoints();
                MisalignSweeper.numMines = settings.getMines();
                MisalignSweeper.numFlags = MisalignSweeper.numMines;
-               MisalignSweeper.numNears = settings.getNears();
                   
                CardLayout c = (CardLayout)(cardPanel.getLayout());
                smile.setBorder(raised);
