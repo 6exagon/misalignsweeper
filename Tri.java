@@ -56,7 +56,13 @@ public class Tri {
       
       midX -= triHeight/6;
       midY += triHeight*2/9;
-      g2.setFont(new Font(g2.getFont().getName(), g2.getFont().getStyle(), (int)(triHeight * 2/3)));
+      g2.setFont(
+         new Font(g2.getFont().getName(),
+         g2.getFont().getStyle(),
+         (int)(triHeight * 2/3 * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()))));
+      
+      midX *= MisalignGraphics.getXM();
+      midY *= MisalignGraphics.getYM();
       
       g2.drawString(this.surroundingMines + "", midX, midY);
    }
@@ -70,9 +76,12 @@ public class Tri {
          if (edge.spans(midX))
             triHeight = Math.abs(triHeight - edge.at(midX));
       
-      triHeight *= 2/3.0;
+      triHeight *= 2/3.0 * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM());
       midX -= triHeight/2;
       midY -= triHeight/2;
+      
+      midX *= MisalignGraphics.getXM();
+      midY *= MisalignGraphics.getYM();
       
       g2.drawImage(flagImage, midX, midY, (int)triHeight, (int)triHeight, null);
    }

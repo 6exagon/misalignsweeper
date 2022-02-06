@@ -29,10 +29,6 @@ public class Line {
       this.extUp = up;
    }
    
-   public boolean getExt() {
-      return this.extUp;
-   }
-   
    // returns y value at given x, ie, line.at(x) = f(x)
    public int at(int x) {
       return (int) (x * m + b);

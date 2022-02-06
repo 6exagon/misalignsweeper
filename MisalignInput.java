@@ -6,7 +6,7 @@ public class MisalignInput implements MouseListener {
    // Required methods for MouseListener
    @Override
    public void mouseClicked(MouseEvent e) {
-      Tri tri = MisalignSweeper.getClickedTri((int)(e.getX() / MisalignGraphics.xMultiplier), (int)(e.getY() / MisalignGraphics.yMultiplier));
+      Tri tri = MisalignSweeper.getClickedTri((int)(e.getX() / MisalignGraphics.getXM()), (int)(e.getY() / MisalignGraphics.getYM()));
       if (tri == null) {
          System.err.println("Could not find a polygon at that location. :(");
          return;

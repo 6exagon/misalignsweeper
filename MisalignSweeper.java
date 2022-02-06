@@ -32,16 +32,14 @@ public class MisalignSweeper {
    public static void generateBoard() {
       tris.clear();
       lines.clear();
-      triToGon.clear();
       
       ArrayList<Point> points = new ArrayList<>();
       points.add(new Point(220, 250));
       points.add(new Point(280, 250));
       HashSet<Point> freshPoints = new HashSet<>();
       generatePoints(points, freshPoints);
-      System.out.print('a');
       generatePolys(points, freshPoints);
-      generateAWTPolygons();
+      generateAWTPolygons(1, 1);
       generateMines();
       tris.forEach(Tri::updateMines);
    }
@@ -119,15 +117,16 @@ public class MisalignSweeper {
    }
 
    // Converts a Tri into a renderable Polygon
-   private static void generateAWTPolygons() {
+   public static void generateAWTPolygons(double xm, double ym) {
+      triToGon.clear();
       for (Tri tri : tris) {
          int num = 3; //Hardcoded triangles for now
          int[] x = new int[num];
          int[] y = new int[num];
          for (int i = 0; i < num; i++) {
             Point p = tri.getPoint(i);
-            x[i] = p.getX();
-            y[i] = p.getY();
+            x[i] = (int) (p.getX() * xm);
+            y[i] = (int) (p.getY() * ym);
          }
          triToGon.put(tri, new Polygon(x, y, num));
       }
