@@ -11,16 +11,17 @@ public class MisalignSweeper {
    public static int numNears = 6;
    public static final int SEP_DIST = 30;
    
+   private static final HashSet<Poly> polys = new HashSet<>();
    private static final HashSet<Tri> tris = new HashSet<>();
    private static final HashSet<Line> lines = new HashSet<>();
-   private static final HashMap<Tri, Polygon> triToGon = new HashMap<>();
+   private static final HashMap<Poly, Polygon> polyToGon = new HashMap<>();
    private static MisalignGraphics graphics;
    private static final Random rand = new Random();
    
    //Scheduled main method essentially
    public static void create() {
       generateBoard();
-      graphics = new MisalignGraphics(lines, triToGon);
+      graphics = new MisalignGraphics(lines, polyToGon);
       graphics.createAndShowGUI(new MisalignInput(), rand);
    }
 
@@ -31,17 +32,19 @@ public class MisalignSweeper {
    
    // Called whenever the board is generated or re-generated
    public static void generateBoard() {
+      polys.clear();
       tris.clear();
       lines.clear();
-      triToGon.clear();
+      polyToGon.clear();
       
       ArrayList<Point> points = new ArrayList<>();
       HashSet<Point> freshPoints = new HashSet<>();
       generatePoints(points, freshPoints);
-      generatePolys(points, freshPoints);
+      generateTris(points, freshPoints);
+      generatePolys();
       generateAWTPolygons();
       generateMines();
-      tris.forEach(Tri::updateMines);
+      polys.forEach(Poly::updateMines);
    }
 
    // Generates the Points for the game board
@@ -87,7 +90,7 @@ public class MisalignSweeper {
    }
    
    //Generates all Polys
-   private static void generatePolys(ArrayList<Point> pts, HashSet<Point> fps) {
+   private static void generateTris(ArrayList<Point> pts, HashSet<Point> fps) {
       Line startLine = new Line(pts.get(0), pts.get(1));
       ArrayDeque<Line> linestack = new ArrayDeque<Line>();
       Tri initialTriangle = new Tri(startLine, pts, fps, linestack);
@@ -117,36 +120,64 @@ public class MisalignSweeper {
          }
       }
    }
-
-   // Converts a Tri into a renderable Polygon
-   private static void generateAWTPolygons() {
+   
+   // Generates higher-sided polygons from triangles
+   private static void generatePolys() {
       for (Tri tri : tris) {
-         int num = 3; //Hardcoded triangles for now
+         if (polys.stream().anyMatch(p -> p.containsTri(tri)))
+            continue;
+         HashSet<Tri> polysTris = new HashSet<>();
+         ArrayList<Line> polysLines = new ArrayList<>();
+         for (Line linus : tri.getLines())
+            polysLines.add(linus);
+         polysTris.add(tri);
+         for (Line l : tri.getLines()) {   // goes through all adjacent tri's
+            Tri[] lTris = l.getTris();
+            Tri otherTri = lTris[0].equals(tri) ? lTris[1] : lTris[0];
+            if (rand.nextInt(4) != 0 || otherTri == null || otherTri.getPoly() != null)
+               continue;   // 1/4 chance of combining w/ adjacent
+            polysTris.add(otherTri);
+            for (Line linus : otherTri.getLines())
+               if (!polysLines.contains(linus))
+                  polysLines.add(linus);
+            polysLines.remove(l);
+            lines.remove(l);
+         }
+         Poly poly = new Poly(polysTris.toArray(new Tri[polysTris.size()]), polysLines.toArray(new Line[polysLines.size()]));
+         polysTris.forEach(t -> t.addPoly(poly));
+         polys.add(poly);
+      }
+   }
+
+   // Converts a Poly into a renderable Polygon
+   private static void generateAWTPolygons() {
+      for (Poly poly : polys) {
+         int num = poly.numPoints();
          int[] x = new int[num];
          int[] y = new int[num];
          for (int i = 0; i < num; i++) {
-            Point p = tri.getPoint(i);
+            Point p = poly.getPoint(i);
             x[i] = p.getX();
             y[i] = p.getY();
          }
-         triToGon.put(tri, new Polygon(x, y, num));
+         polyToGon.put(poly, new Polygon(x, y, num));
       }
    }
    
    // Places mines into random Polys
    public static void generateMines() {
       for (int i = 0; i < numMines; i++) {
-         Tri tri = tris.stream().skip(rand.nextInt(tris.size())).findFirst().get();
-         if (tri.getDisplayState() != -1)
-            tri.setMine();
+         Poly poly = polys.stream().skip(rand.nextInt(polys.size())).findFirst().get();
+         if (poly.getDisplayState() != -1)
+            poly.setMine();
          else
             i--;
       }
    }
    
    // Returns the polygon surrounding a coordinate pair
-   public static Tri getClickedTri(int x, int y) {
-      return tris.stream().filter(tri -> tri.raycast(x, y) == 1).findAny().orElse(null);
+   public static Poly getClickedPoly(int x, int y) {
+      return polys.stream().filter(poly -> poly.raycast(x, y) == 1).findAny().orElse(null);
    }
 
    public static void main(String[] args) {
