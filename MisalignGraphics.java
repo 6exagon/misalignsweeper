@@ -7,8 +7,8 @@ import javax.swing.border.*;
 public class MisalignGraphics {
    public static final int HEIGHT = 500;
    public static final int WIDTH = 500;
-   public static double xMultiplier = 1.0;
-   public static double yMultiplier = 1.0;
+   private static double xm = 1.0;
+   private static double ym = 1.0;
    public HashSet<Line> lines;
    public HashMap<Poly, Polygon> polyToGon;
    public JFrame frame;
@@ -66,9 +66,9 @@ public class MisalignGraphics {
             checkGameEnd(glassesIcon, frownIcon);
             
             if (!gamePaused) {
-               MisalignGraphics.xMultiplier = this.getWidth() / (double)MisalignGraphics.WIDTH;
-               MisalignGraphics.yMultiplier = this.getHeight() / (double)MisalignGraphics.HEIGHT;
-               g2.scale(MisalignGraphics.xMultiplier, MisalignGraphics.yMultiplier);
+               xm = this.getWidth() / (double)MisalignGraphics.WIDTH;
+               ym = this.getHeight() / (double)MisalignGraphics.HEIGHT;
+               MisalignSweeper.generateAWTPolygons(xm, ym);
                
                // for (Poly poly : polytogon.keySet()) { 
 //                   if (poly.isPressed())
@@ -100,10 +100,14 @@ public class MisalignGraphics {
                      poly.drawNum(g2);
                   else if (poly.isFlagged()) //must draw flag after updating color
                      poly.drawFlag(g2);
-               }           
+               }
+               g2.setColor(Color.BLACK);
                for (Line l : lines) {
-                  g2.setColor(l.getExt() ? Color.RED : Color.BLUE); 
-                  g2.drawLine(l.getP().getX(), l.getP().getY(), l.getQ().getX(), l.getQ().getY());
+                  g2.drawLine(
+                     (int) (l.getP().getX() * xm),
+                     (int) (l.getP().getY() * ym),
+                     (int) (l.getQ().getX() * xm),
+                     (int) (l.getQ().getY() * ym));
                }
             }
          }
@@ -190,7 +194,6 @@ public class MisalignGraphics {
                MisalignSweeper.numPoints = settings.getPoints();
                MisalignSweeper.numMines = settings.getMines();
                MisalignSweeper.numFlags = MisalignSweeper.numMines;
-               MisalignSweeper.numNears = settings.getNears();
                   
                CardLayout c = (CardLayout)(cardPanel.getLayout());
                smile.setBorder(raised);
@@ -256,10 +259,20 @@ public class MisalignGraphics {
       return this.settings;
    }
    
+   //Returns x multiplier
+   public static double getXM() {
+      return xm;
+   }
+   
+   //Returns y multiplier
+   public static double getYM() {
+      return ym;
+   }
+   
    public Color getColor(int level) {
       Color[] colors = {
          Color.GRAY, Color.BLUE, Color.GREEN, Color.RED, new Color(0, 0, 60),
-         Color.MAGENTA, Color.CYAN, Color.BLACK, Color.GRAY, Color.PINK, Color.YELLOW};
+         Color.MAGENTA, Color.CYAN, Color.BLACK, Color.GRAY, Color.PINK, new Color(200, 100, 0)};
       if (level < 11) {
          return colors[level];
       } else if (level < 30) {

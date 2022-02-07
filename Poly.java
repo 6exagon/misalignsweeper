@@ -64,7 +64,13 @@ public class Poly {
       
       midX -= polyHeight/6;
       midY += polyHeight*2/9;
-      g2.setFont(new Font(g2.getFont().getName(), g2.getFont().getStyle(), (int)(polyHeight * 2/3)));
+      g2.setFont(
+         new Font(g2.getFont().getName(), 
+                  g2.getFont().getStyle(), 
+                  (int)(polyHeight * 2/3  * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()))));
+      
+      midX *= MisalignGraphics.getXM();
+      midY *= MisalignGraphics.getYM();
       
       g2.drawString(this.surroundingMines + "", midX, midY);
    }
@@ -78,9 +84,12 @@ public class Poly {
          if (edge.spans(midX))
             polyHeight = Math.abs(polyHeight - edge.at(midX));
       
-      polyHeight *= 2/3.0;
+      polyHeight *= 2/3.0 * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM());
       midX -= polyHeight/2;
       midY -= polyHeight/2;
+      
+      midX *= MisalignGraphics.getXM();
+      midY *= MisalignGraphics.getYM();
       
       g2.drawImage(flagImage, midX, midY, (int)polyHeight, (int)polyHeight, null);
    }
