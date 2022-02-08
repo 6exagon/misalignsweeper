@@ -37,8 +37,7 @@ public class MisalignSweeper {
       polyToGon.clear();
       
       ArrayList<Point> points = new ArrayList<>();
-      points.add(new Point(220, 250));
-      points.add(new Point(280, 250));
+      Collections.addAll(points, new Point(220, 250), new Point(280, 250));
       HashSet<Point> freshPoints = new HashSet<>();
       generatePoints(points, freshPoints);
       generateTris(points, freshPoints);
@@ -69,53 +68,48 @@ public class MisalignSweeper {
    
    //Generates edge Points on board
    private static void generateEdgePoints(ArrayList<Point> pts, HashSet<Point> fps) {
-      for (int x = 5; x < MisalignGraphics.WIDTH - 5; x += SEP_DIST) {
+      for (int x = 5; x <= MisalignGraphics.WIDTH - 5; x += SEP_DIST) {
          Point topPoint = new Point(x, 5);
          Point bottomPoint = new Point(x, MisalignGraphics.HEIGHT - 5);
-         pts.add(topPoint);
-         pts.add(bottomPoint);
-         fps.add(topPoint);
-         fps.add(bottomPoint);
+         Collections.addAll(pts, topPoint, bottomPoint);
+         Collections.addAll(fps, topPoint, bottomPoint);
       }
       for (int y = SEP_DIST + 10; y < MisalignGraphics.HEIGHT - SEP_DIST - 10; y += SEP_DIST) {
          Point leftPoint = new Point(5, y);
          Point rightPoint = new Point(MisalignGraphics.WIDTH - 5, y);
-         pts.add(leftPoint);
-         pts.add(rightPoint);
-         fps.add(leftPoint);
-         fps.add(rightPoint);
+         Collections.addAll(pts, leftPoint, rightPoint);
+         Collections.addAll(fps, leftPoint, rightPoint);
       }
    }
    
    //Generates all Polys
    private static void generateTris(ArrayList<Point> pts, HashSet<Point> fps) {
       Line startLine = new Line(pts.get(0), pts.get(1));
-      ArrayDeque<Line> linestack = new ArrayDeque<Line>();
-      Tri initialTriangle = new Tri(startLine, pts, fps, linestack);
+      ArrayDeque<Line> lineStack = new ArrayDeque<Line>();
+      Tri initialTriangle = new Tri(startLine, pts, fps, lineStack);
       startLine.extend(false);
-      for (Line l : initialTriangle.getLines()) {
-         linestack.add(l);
-         lines.add(l);
-      }
+      Collections.addAll(lineStack, initialTriangle.getLines());
+      Collections.addAll(lines, initialTriangle.getLines());
       tris.add(initialTriangle);
-      while (fps.size() > 0) {
-         Line firstLine = linestack.removeFirst();
+      while (!fps.isEmpty()) {
+         Line firstLine = lineStack.removeFirst();
          try {
-            Tri tri = new Tri(firstLine, pts, fps, linestack);
+            Tri tri = new Tri(firstLine, pts, fps, lineStack);
             tris.add(tri);
             for (int y = 1; y < 3; y++) {
-               Line simline = tri.getLines()[y].getSimilarLine(linestack);
+               Line ythLine = tri.getLines()[y];
+               Line simline = ythLine.getSimilarLine(lineStack);
                if (simline != null) {
-                  linestack.remove(simline);
+                  lineStack.remove(simline);
                   tri.getLines()[y] = simline;
                   simline.addTri(tri);
                } else {
-                  linestack.add(tri.getLines()[y]);
-                  lines.add(tri.getLines()[y]);
+                  lineStack.add(ythLine);
+                  lines.add(ythLine);
                }
             }
          } catch (IndexOutOfBoundsException e) {
-            linestack.add(firstLine);
+            lineStack.add(firstLine);
          }
       }
    }
@@ -126,23 +120,19 @@ public class MisalignSweeper {
          if (polys.stream().anyMatch(p -> p.containsTri(tri)))
             continue;
          HashSet<Tri> polysTris = new HashSet<>();
-         ArrayList<Line> polysLines = new ArrayList<>();
-         for (Line linus : tri.getLines())
-            polysLines.add(linus);
+         HashSet<Line> polysLines = new HashSet<>();
+         Collections.addAll(polysLines, tri.getLines());
          polysTris.add(tri);
          for (Line l : tri.getLines()) {   // goes through all adjacent tri's
-            Tri[] lTris = l.getTris();
-            Tri otherTri = lTris[0].equals(tri) ? lTris[1] : lTris[0];
+            Tri otherTri = l.getTris()[l.getTris()[0] == tri ? 1 : 0];
             if (rand.nextInt(4) != 0 || otherTri == null || otherTri.getPoly() != null)
                continue;   // 1/4 chance of combining w/ adjacent
             polysTris.add(otherTri);
-            for (Line linus : otherTri.getLines())
-               if (!polysLines.contains(linus))
-                  polysLines.add(linus);
+            Collections.addAll(polysLines, otherTri.getLines());
             polysLines.remove(l);
             lines.remove(l);
          }
-         Poly poly = new Poly(polysTris.toArray(new Tri[polysTris.size()]), polysLines.toArray(new Line[polysLines.size()]));
+         Poly poly = new Poly(polysTris.toArray(new Tri[0]), polysLines.toArray(new Line[0]));
          polysTris.forEach(t -> t.addPoly(poly));
          polys.add(poly);
       }

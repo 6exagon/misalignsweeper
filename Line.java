@@ -52,20 +52,13 @@ public class Line {
       TreeMap<Double, Point> distPoint = new TreeMap<>();
       for (Point p : plist)
          distPoint.put(this.distanceTo(p), p);       // keep track of how far away each point is
-      while (distPoint.size() > 0) {
+      while (!distPoint.isEmpty()) {
          Point np = distPoint.remove(distPoint.firstKey());
          double area = areaWith(np);
-         if (isOnExtendedSide(np) && area > 2 && area < AREA_MAX) {
-            if (freshPoints.remove(np)) {
-               return np;
-            } else {
-               Line testl1 = new Line(this.q, np);
-               Line testl2 = new Line(np, this.p);
-               if (testl1.getSimilarLine(lstack) != null || testl2.getSimilarLine(lstack) != null) {
+         if (isOnExtendedSide(np) && area > 2 && area < AREA_MAX)
+            if (lstack.stream().anyMatch(l -> l.hasPoint(np) && (l.hasPoint(this.p) || l.hasPoint(this.q)))
+               || freshPoints.remove(np))
                   return np;
-               }
-            }
-         }
       }
       return null;
    }
@@ -90,6 +83,10 @@ public class Line {
    //Assumes there will be no more than 2 Tris added
    public void addTri(Tri p) {
       this.tris[(this.tris[0] == null) ? 0 : 1] = p;
+   }
+   
+   public Point getOtherPoint(Point point) {
+      return point == this.p ? this.q : this.p;
    }
    
    public boolean hasPoint(Point p) {

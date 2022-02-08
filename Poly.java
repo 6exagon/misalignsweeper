@@ -16,14 +16,8 @@ public class Poly {
    public Poly(Tri[] tris, Line[] lines) {
       this.tris = tris;
       this.lines = lines;
-      HashSet<Point> points = new HashSet<>();
-      for (Line l : lines) {
-         points.add(l.getP());
-         points.add(l.getQ());
-      }
-      this.points = points.toArray(new Point[points.size()]);
+      this.genPoints();
       this.calcMidpoint();
-      this.sortPoints();
    }
    
    public boolean containsTri(Tri tri) {
@@ -84,9 +78,10 @@ public class Poly {
          if (edge.spans(midX))
             polyHeight = Math.abs(polyHeight - edge.at(midX));
       
-      polyHeight *= 2/3.0 * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM());
-      midX -= polyHeight/2;
-      midY -= polyHeight/2;
+      midX -= polyHeight / 2;
+      midY -= polyHeight / 2;
+      
+      polyHeight *= 2/3.0;
       
       midX *= MisalignGraphics.getXM();
       midY *= MisalignGraphics.getYM();
@@ -111,28 +106,27 @@ public class Poly {
       }
    }
    
-   // orders the points cyclically for awt Polygon purposes
-   private void sortPoints() {
-      TreeMap<Double, Point> angleToPoint = new TreeMap<>();
-      for (Point p : this.points)
-         angleToPoint.put(this.getAngle(p), p);
-      this.points = angleToPoint.values().toArray(new Point[this.points.length]);
-      for (int i = 0; i < this.points.length; i++) {
-         Point p1 = this.points[i];
-         Point p2 = this.points[(i + 1) % this.points.length];
-         if (Stream.of(this.lines).anyMatch(l -> l.hasPoint(p1) && l.hasPoint(p2)))
-            continue;
-         this.points[(i + 1) % this.points.length] = this.points[(i + 2) % this.points.length];
-         this.points[(i + 2) % this.points.length] = p2;
-      }
-   }
-   
-   private double getAngle(Point p) {
-      double base = Math.abs(Math.atan((double)(p.getY() - this.midpoint.getY()) / (p.getX() - this.midpoint.getX())));
-      // The inverse tangent only goes between 0 and pi/2, so we need to find out what quadrant it's in and change it.
-      return p.getY() < this.midpoint.getY()
-              ? (p.getX() < this.midpoint.getX() ? Math.PI - base : base)                 // 2nd and 1st Quadrants
-              : (p.getX() < this.midpoint.getX() ? Math.PI + base : 2 * Math.PI - base);  // 3rd and 4th Quadrants
+   // Generates and orders the points cyclically for awt Polygon purposes
+   private void genPoints() {
+      ArrayList<Point> points = new ArrayList<>();
+      Point p = lines[0].getP();
+      Point prevP = lines[0].getQ();
+      Point temp;
+      pointLoop:
+      do {
+         points.add(p);
+         for (Line l : lines) {
+            if (l.hasPoint(p) && !l.hasPoint(prevP)) {
+               prevP = p;
+               p = l.getOtherPoint(p);
+               continue pointLoop;
+            }
+         }
+         temp = p;
+         p = prevP;
+         prevP = temp;
+      } while (p != lines[0].getP());
+      this.points = points.toArray(new Point[0]);
    }
    
    public void reveal() {
@@ -162,10 +156,18 @@ public class Poly {
    
    //Updates surrounding mine (should be done once all mines are placed)
    public void updateMines() {
-      for (Line l : lines)
-         for (Tri t : l.getTris())
-            if (t != null && t.getPoly() != null && t.getPoly() != this)
-               this.surroundingMines += (t.getPoly().getDisplayState() == -1) ? 1 : 0;
+      HashSet<Poly> addedPolys = new HashSet<>();
+      for (Line l : lines) {
+         for (Tri t : l.getTris()) {
+            if (t != null) {
+               Poly poly = t.getPoly();
+               if (poly != null && !addedPolys.contains(poly) && poly != this) {
+                  addedPolys.add(poly);
+                  this.surroundingMines += (poly.getDisplayState() == -1) ? 1 : 0;
+               }
+            }
+         }
+      }
    }
    
    //Returns the number of intersections with line extending from point
