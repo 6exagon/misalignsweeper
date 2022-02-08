@@ -15,7 +15,7 @@ public class Line {
       this.p = p;
       this.q = q;
       double denom = q.getX() - p.getX();
-      this.m = denom == 0 ? VERTICAL_SLOPE : (q.getY() - p.getY()) / denom;
+      this.m = (denom == 0) ? VERTICAL_SLOPE : (q.getY() - p.getY()) / denom;
       this.b = p.getY() - this.m * p.getX();
       this.tris = new Tri[2];
    }
@@ -29,40 +29,43 @@ public class Line {
       this.extUp = up;
    }
    
-   public boolean getExt() {
-      return this.extUp;
-   }
-   
    // returns y value at given x, ie, line.at(x) = f(x)
    public int at(int x) {
       return (int) (x * m + b);
    }
    
    //Returns sum of distances to Point from line ends
-   public int distanceTo(Point pt) {
-      return (int) (Math.hypot(pt.getX() - this.p.getX(), pt.getY() - this.p.getY())
-                  + Math.hypot(pt.getX() - this.q.getX(), pt.getY() - this.q.getY()));
+   public double distanceTo(Point pt) {
+      return Math.hypot(pt.getX() - this.p.getX(), pt.getY() - this.p.getY())
+         + Math.hypot(pt.getX() - this.q.getX(), pt.getY() - this.q.getY());
    }
    
    //Returns area of triangle formed with Point
-   public int areaWith(Point pt) {
+   public double areaWith(Point pt) {
       return Math.abs((this.p.getX() * (this.q.getY() - pt.getY())
                      + this.q.getX() * (pt.getY() - this.p.getY())
-                     + pt.getX() * (this.p.getY() - this.q.getY())) / 2);
+                     + pt.getX() * (this.p.getY() - this.q.getY())) / 2.0);
    }
 
    //Gets new Point on the correct side of the line pulled from the list and not outside of lstack
    public Point getNewPoint(ArrayList<Point> plist, HashSet<Point> freshPoints, ArrayDeque<Line> lstack) {
-      TreeMap<Integer, Point> distPoint = new TreeMap<>();
+      TreeMap<Double, Point> distPoint = new TreeMap<>();
       for (Point p : plist)
          distPoint.put(this.distanceTo(p), p);       // keep track of how far away each point is
-      for (int i = 1; i < 6; i++) {
+      while (distPoint.size() > 0) {
          Point np = distPoint.remove(distPoint.firstKey());
-         int area = areaWith(np);
-         if (isOnExtendedSide(np) && 0 < area && area < AREA_MAX)
-            if (freshPoints.remove(np) || 
-               lstack.stream().anyMatch(l -> l.hasPoint(np) && (l.hasPoint(this.p) || l.hasPoint(this.q))))
+         double area = areaWith(np);
+         if (isOnExtendedSide(np) && area > 2 && area < AREA_MAX) {
+            if (freshPoints.remove(np)) {
                return np;
+            } else {
+               Line testl1 = new Line(this.q, np);
+               Line testl2 = new Line(np, this.p);
+               if (testl1.getSimilarLine(lstack) != null || testl2.getSimilarLine(lstack) != null) {
+                  return np;
+               }
+            }
+         }
       }
       return null;
    }
