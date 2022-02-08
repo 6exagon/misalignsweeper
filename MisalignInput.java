@@ -10,6 +10,9 @@ public class MisalignInput implements MouseListener {
       if (poly == null) {
          System.err.println("Could not find a polygon at that location. :(");
          return;
+      } else if (MisalignGraphics.playingLossAnimation) {
+         System.out.println("MisalignInput - Game already lost :(");
+         return;
       }
       if (e.getButton() == MouseEvent.BUTTON1 && poly.isNormal()) { //left click on open tile
          poly.reveal();

@@ -15,15 +15,6 @@ public class SettingsPanel extends JPanel {
       this.addLabeledSpinner("Number of Points", 200, 10, 1000, 5, c);
       c.gridy = 2;
       this.addLabeledSpinner("Number of Mines", 15, 5, 50, 1, c); 
-      c.gridy = 3;
-      this.addLabeledSpinner("Max Lines Per Point", 6, 3, 25, 1, c);
-//       c.gridy = 4;
-//       this.add(new JLabel(" "), c); //this is bad
-//       c.gridy = 5;
-//       this.add(new JLabel(" "), c); //this is bad (again)
-//       c.gridy = 6;
-//       c.anchor = GridBagConstraints.PAGE_END;  
-//       this.add(new JLabel("Reset game for new settings"), c);
    }
    
    // Adds a panel containing a label and spinner to the settings panel
@@ -50,11 +41,6 @@ public class SettingsPanel extends JPanel {
    // Returns mines spinner value   
    public int getMines() {
       return (Integer)spinners.get(1).getValue();
-   }
-   
-   // Returns connections spinner value
-   public int getNears() {
-      return (Integer)spinners.get(2).getValue();
    }
    
 }     

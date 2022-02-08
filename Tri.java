@@ -26,7 +26,7 @@ public class Tri {
    public Line[] getLines() {
       return this.lines;
    }
-   
+
    // Adds references to Polys in Lines
    public void addTrisToLines() {
      for (Line l : this.lines)

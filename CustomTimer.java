@@ -53,11 +53,14 @@ public class CustomTimer extends JLabel {
    
    // Restarts timer
    public void restart() {
-      this.timer.stop();
       this.secondsPassed = 0;
       this.setText("00:00");
-      this.timerPaused = false;
       this.timer.start();
+   }
+   
+   // Stops the timer
+   public void stop() {
+      this.timer.stop();
    }
    
 }

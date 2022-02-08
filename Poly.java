@@ -134,12 +134,12 @@ public class Poly {
          this.visible = Visibility.PRESSED;
          if (this.surroundingMines == -1) {
             this.surroundingMines = -2;
-            System.out.println("You lost");
-            //lose game
+            if (!MisalignGraphics.playingLossAnimation)
+               System.out.println("You lost"); //prints once (not for every mine during animation)
          } else if (this.surroundingMines == 0)
             for (Line l : lines)
                for (Tri t : l.getTris())
-                  if (t != null && t.getPoly() != this && t.getPoly() != null)
+                  if (t != null && t.getPoly() != this && t.getPoly() != null && t.getPoly().getDisplayState() != -1) //checking for -1 fixes random loss problem
                      t.getPoly().reveal();
       }
    }
