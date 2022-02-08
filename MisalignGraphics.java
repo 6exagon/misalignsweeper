@@ -9,6 +9,8 @@ public class MisalignGraphics {
    public static final int WIDTH = 500;
    public static double xMultiplier = 1.0;
    public static double yMultiplier = 1.0;
+   public static boolean playingLossAnimation = false;
+   public boolean gameWon = false;
    public HashSet<Line> lines;
    public HashMap<Tri, Polygon> tritogon;
    public JFrame frame;
@@ -27,7 +29,7 @@ public class MisalignGraphics {
    }
    
    public void createAndShowGUI(MisalignInput input, Random rand) {
-
+   
       Border lowered = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
       Border raised = BorderFactory.createBevelBorder(BevelBorder.RAISED);
       int iconSize = 30;
@@ -35,7 +37,7 @@ public class MisalignGraphics {
       ImageIcon frownIcon = getScaledImageIcon("minesweeper frown.png", iconSize, -1);
       ImageIcon glassesIcon = getScaledImageIcon("minesweeper glasses.png", iconSize, -1);
       ImageIcon pauseIcon = getScaledImageIcon("pause.png", iconSize, -1);
-
+   
       // Creates window and main mainPanel
       this.frame = new JFrame("Misalignsweeper");
       JPanel mainPanel = new JPanel(new GridBagLayout());
@@ -60,56 +62,59 @@ public class MisalignGraphics {
       
       // Creates game panel
       this.gamePanel = new JPanel() {
-         @Override
-         public void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2 = (Graphics2D) g;
+            @Override
+            public void paintComponent(Graphics g) {
+               super.paintComponent(g);
+               Graphics2D g2 = (Graphics2D) g;
             
-            checkGameEnd(glassesIcon, frownIcon);
+               if (!playingLossAnimation && !gamePaused)
+                  checkGameEnd(glassesIcon, frownIcon);
             
-            if (!gamePaused) {
-               MisalignGraphics.xMultiplier = this.getWidth() / (double)MisalignGraphics.WIDTH;
-               MisalignGraphics.yMultiplier = this.getHeight() / (double)MisalignGraphics.HEIGHT;
-               g2.scale(MisalignGraphics.xMultiplier, MisalignGraphics.yMultiplier);
+               if (!gamePaused) {
+                  MisalignGraphics.xMultiplier = this.getWidth() / (double)MisalignGraphics.WIDTH;
+                  MisalignGraphics.yMultiplier = this.getHeight() / (double)MisalignGraphics.HEIGHT;
+                  g2.scale(MisalignGraphics.xMultiplier, MisalignGraphics.yMultiplier);
                
-               // for (Poly poly : polytogon.keySet()) { 
-//                   if (poly.isPressed())
-//                      g2.setColor(Color.WHITE);
-//                   else if (poly.isFlagged())
-//                      g2.setColor(Color.RED);
-//                   else
-//                      g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));
-//                }
-                  //g2.setColor(colorPoly(poly.getDisplayState())); // does not work
-               for (Tri tri : tritogon.keySet()) {
-                  if (tri.isPressed()) {
-                     switch (tri.getDisplayState()) {
-                        case -2:
-                        case -1:
-                           g2.setColor(Color.BLACK);
-                           break;
-                        default:
-                           g2.setColor(getColor(tri.getDisplayState()));
+                  for (Tri tri : tritogon.keySet()) {
+                     if (tri.isPressed()) {
+                        switch (tri.getDisplayState()) {
+                           case -2:
+                           case -1:
+                              g2.setColor(Color.BLACK);
+                              break;
+                           default:
+                              g2.setColor(getColor(tri.getDisplayState()));
+                        }
+                     } else if (tri.isFlagged()) {
+                        g2.setColor(Color.YELLOW);
+                     } else {
+                        g2.setColor(Color.WHITE);
                      }
-                  } else if (tri.isFlagged()) {
-                     g2.setColor(Color.YELLOW);
-                  } else {
-                     g2.setColor(Color.WHITE);
-                  }
-                  g2.fillPolygon(tritogon.get(tri));
+                     g2.fillPolygon(tritogon.get(tri));
                   
-                  if (tri.isPressed() && tri.getDisplayState() > 0)
-                     tri.drawNum(g2);
-                  else if (tri.isFlagged()) //must draw flag after updating color
-                     tri.drawFlag(g2);
-               }           
-               for (Line l : lines) {
-                  g2.setColor(l.getExt() ? Color.RED : Color.BLUE); 
-                  g2.drawLine(l.getP().getX(), l.getP().getY(), l.getQ().getX(), l.getQ().getY());
+                     if (tri.isPressed() && tri.getDisplayState() > 0)
+                        tri.drawNum(g2);
+                     else if (tri.isFlagged()) //must draw flag after updating color
+                        tri.drawFlag(g2);
+                     
+                  }
+                  for (Line l : lines) {
+                     g2.setColor(Color.BLACK); 
+                     g2.drawLine(l.getP().getX(), l.getP().getY(), l.getQ().getX(), l.getQ().getY());
+                  }
+               
+                  // win and loss text              
+                  g2.setFont(new Font("Monospaced", Font.BOLD, 64));
+                  if (playingLossAnimation) {
+                     g2.setColor(Color.RED);
+                     g2.drawString("You Lose", 100, 100);
+                  } else if (gameWon) {
+                     g2.setColor(Color.GREEN);
+                     g2.drawString("YOU WIN!", 100, 100);
+                  }
                }
             }
-         }
-      };
+         };
       gamePanel.setPreferredSize(new Dimension(MisalignGraphics.WIDTH, MisalignGraphics.HEIGHT)); //add 4 for border?
       cardPanel.add(gamePanel, "gamePanel");
       
@@ -117,24 +122,6 @@ public class MisalignGraphics {
       SettingsPanel settings = new SettingsPanel();
       this.settings = settings;
       cardPanel.add(settings, "settings");
-      
-      // Loss screen
-      JPanel loss = new JPanel();
-      loss.setLayout(new GridBagLayout()); //centers the text
-      loss.setBackground(Color.RED);
-      JLabel lossText = new JLabel("You lose");
-      lossText.setFont(new Font("Monospaced", Font.BOLD, 20));
-      loss.add(lossText);
-      cardPanel.add(loss, "loss");
-      
-      // Win screen
-      JPanel win = new JPanel();
-      win.setLayout(new GridBagLayout());
-      win.setBackground(Color.GREEN);
-      JLabel winText = new JLabel("YOU WIN!");
-      winText.setFont(new Font("Monospaced", Font.BOLD, 30));
-      win.add(winText);
-      cardPanel.add(win, "win");
       
       // Creates panel to hold buttons, timer, mine counter
       JPanel buttonPanel = new JPanel(new GridBagLayout());
@@ -155,15 +142,15 @@ public class MisalignGraphics {
       cButtons.gridx = 0;
       cButtons.anchor = GridBagConstraints.LINE_START;
       buttonPanel.add(timer, cButtons);
-
+   
       // Creates mine counter
       this.mineCounter = new JLabel(String.format("%03d", MisalignSweeper.numFlags)) {
-         @Override
-         public void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            this.setText(MisalignSweeper.numFlags + "");
-         }
-      };
+            @Override
+            public void paintComponent(Graphics g) {
+               super.paintComponent(g);
+               this.setText(MisalignSweeper.numFlags + "");
+            }
+         };
       mineCounter.setForeground(Color.RED);
       mineCounter.setBackground(Color.BLACK);
       mineCounter.setOpaque(true);
@@ -178,33 +165,33 @@ public class MisalignGraphics {
       this.smile = new JLabel(smileIcon);
       smile.setBorder(raised);
       smile.addMouseListener(new MouseAdapter() {
-         @Override
-         public void mousePressed(MouseEvent e) {
-             if (!gamePaused) {
-               smile.setBorder(lowered);
-               timer.restart();
+            @Override
+            public void mousePressed(MouseEvent e) {
+               if (!gamePaused && !playingLossAnimation)
+                  smile.setBorder(lowered);
             }
-         }
-
-         @Override
-         public void mouseReleased(MouseEvent e) {
-            if (!gamePaused) {
-               MisalignSweeper.numPoints = settings.getPoints();
-               MisalignSweeper.numMines = settings.getMines();
-               MisalignSweeper.numFlags = MisalignSweeper.numMines;
-               MisalignSweeper.numNears = settings.getNears();
+         
+            @Override
+            public void mouseReleased(MouseEvent e) {
+               if (!gamePaused && !playingLossAnimation) {
+                  MisalignSweeper.numPoints = settings.getPoints();
+                  MisalignSweeper.numMines = settings.getMines();
+                  MisalignSweeper.numFlags = MisalignSweeper.numMines;
+                  MisalignSweeper.numNears = settings.getNears();
                   
-               CardLayout c = (CardLayout)(cardPanel.getLayout());
-               smile.setBorder(raised);
-               smile.setIcon(smileIcon);
-               MisalignSweeper.generateBoard();
-               mineCounter.setText(String.format("%03d", MisalignSweeper.numFlags));
-               c.show(cardPanel, "gamePanel");
-               mainPanel.repaint();
-               mineCounter.repaint();
+                  CardLayout c = (CardLayout)(cardPanel.getLayout());
+                  smile.setBorder(raised);
+                  smile.setIcon(smileIcon);
+                  gameWon = false;
+                  MisalignSweeper.generateBoard();
+                  mineCounter.setText(String.format("%03d", MisalignSweeper.numFlags));
+                  c.show(cardPanel, "gamePanel");
+                  timer.restart();
+                  mainPanel.repaint();
+                  mineCounter.repaint();
+               }
             }
-         }
-      });       
+         });       
       cButtons.gridx = 1;
       cButtons.anchor = GridBagConstraints.CENTER;
       buttonPanel.add(smile, cButtons);
@@ -213,27 +200,23 @@ public class MisalignGraphics {
       JLabel pause = new JLabel(pauseIcon);
       pause.setBorder(raised);
       pause.addMouseListener(new MouseAdapter() {
-         @Override
-         public void mousePressed(MouseEvent e) {
-            pause.setBorder(lowered);
-            timer.togglePause();
-            CardLayout c = (CardLayout)(cardPanel.getLayout());
-
-            if (gamePaused) {
-               c.show(cardPanel, "gamePanel");
-            } else {
-               c.show(cardPanel, "settings");
+            @Override
+            public void mousePressed(MouseEvent e) {
+               pause.setBorder(lowered);
+               timer.togglePause();
+               CardLayout c = (CardLayout)(cardPanel.getLayout());
+               if (gamePaused)
+                  c.show(cardPanel, "gamePanel");
+               else
+                  c.show(cardPanel, "settings");
+               gamePaused = !gamePaused;
             }
-            
-            //c.next(cardPanel);
-            gamePaused = !gamePaused;
-         }
-
-         @Override
-         public void mouseReleased(MouseEvent e) {
-            pause.setBorder(raised);
-         }
-      });
+         
+            @Override
+            public void mouseReleased(MouseEvent e) {
+               pause.setBorder(raised);
+            }
+         });
       cButtons.gridx = 3;
       cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(pause, cButtons);
@@ -247,17 +230,15 @@ public class MisalignGraphics {
    }
    
    // Resizes an ImageIcon given file path (there's probably a better way to do this)
-   private ImageIcon getScaledImageIcon(String path, int width, int height) {
-      ImageIcon icon = new ImageIcon(getClass().getResource(path));
-      Image image = icon.getImage();
-      Image newImage = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-      return new ImageIcon(newImage);
+   private ImageIcon getScaledImageIcon(String path, int width, int height) {   
+      return new ImageIcon(new ImageIcon(getClass().getResource(path)).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
    }
    
    public SettingsPanel getSettings() {
       return this.settings;
    }
    
+   // Returns color based on adjacent mines
    public Color getColor(int level) {
       Color[] colors = {
          Color.GRAY, Color.BLUE, Color.GREEN, Color.RED, new Color(0, 0, 60),
@@ -271,74 +252,60 @@ public class MisalignGraphics {
       }
    }
    
+   // Checks if the player has won or lost
    public void checkGameEnd(ImageIcon winIcon, ImageIcon loseIcon) {
       CardLayout c = (CardLayout)(cardPanel.getLayout());
-      //System.out.println("checkGameEnd() was run:");
-      //System.out.println("numMines: " + MisalignSweeper.numMines);
-      //System.out.println("gameWon?: " + gameWon());
-      if (gameLost(loseIcon)) {
+      if (gameLost()) {
+         smile.setIcon(loseIcon);
          timer.stop();
          revealAllMines();
-         //c.last(cardPanel);
-         //c.previous(cardPanel); //losing screen is the second to last card
-      } else if (gameWon(winIcon)) {
+      } else if (gameWon()) {
+         smile.setIcon(winIcon);
          timer.stop();
-         c.last(cardPanel); //winning screen is the last car
+         this.gameWon = true;
       }  
-  }
+   }
   
    // Checks if player won the game (all non-mines are revealed) 
-   public boolean gameWon(ImageIcon winIcon) {
-      for (Tri t : tritogon.keySet()) {
+   public boolean gameWon() {
+      for (Tri t : tritogon.keySet())
          if (t.getDisplayState() != -1 && !t.isPressed())
-            return false; //if a non-mine is not reavealed, game continues
-      }
-      smile.setIcon(winIcon);
+            return false;
       return true;
    }
    
-   // Checks if the player lost (clicked a mine)
-   public boolean gameLost(ImageIcon loseIcon) {
-      for (Tri t : tritogon.keySet()) {
-         if (t.getDisplayState() == -2) {
-            smile.setIcon(loseIcon);
+   // Checks if the player lost (revealed a mine)
+   public boolean gameLost() {
+      for (Tri t : tritogon.keySet())
+         if (t.getDisplayState() == -2)
             return true;
-         }
-      }
-      return false;     
+      return false;
    }
    
    // Reveals all mines and swtiches to losing screen
    public void revealAllMines() { 
+      playingLossAnimation = true; // prevents clicking and button presses during loss animation
       ArrayList<Tri> mines = new ArrayList<Tri>();
-      for (Tri poly : tritogon.keySet()) {
-         if (poly.getDisplayState() == -1) {
+      for (Tri poly : tritogon.keySet())
+         if (poly.getDisplayState() == -1)
             mines.add(poly);
-         }
-      }
-      CardLayout c = (CardLayout)(cardPanel.getLayout());
-      
-      javax.swing.Timer mineRevealTimer = new javax.swing.Timer(100, new ActionListener() {
-         public void actionPerformed(ActionEvent evt) {
-            if (mines.size() >= 1) {
-               mines.get(0).reveal();
-               mines.remove(0);
-               
-            } else {
-               ((javax.swing.Timer)evt.getSource()).stop();
-               c.last(cardPanel);
-               c.previous(cardPanel);
-//                gamePanel.add(new JLabel() {
-//                   public void paintComponent(Graphics g) {
-//                      super.paintComponent(g);
-//                      g.drawString("YOU LOSE", 200, 200);
-//                   }
-//                });
+                  
+      int delay = 150; // in milliseconds
+      javax.swing.Timer mineRevealTimer = new javax.swing.Timer(delay, null); //specific Timer name since there's a Timer in both .util and .swing
+      mineRevealTimer.addActionListener(new ActionListener() { //adding listener later lets us stop the timer within the listener more easily
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               if (mines.size() >= 1) {
+                  mines.get(0).reveal();
+                  mines.remove(0); 
+                  gamePanel.repaint();   
+               } else {
+                  playingLossAnimation = false;
+                  mineRevealTimer.stop();
+               }
             }
-            gamePanel.repaint();
-         }
-      });
+         });
       mineRevealTimer.start();
-  
    }
+
 }
