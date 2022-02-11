@@ -5,7 +5,7 @@ import java.awt.*;
 
 public class Poly {
    
-   private final Image flagImage = new ImageIcon(getClass().getResource("flag.png")).getImage();
+   private final Image flagImage = new ImageIcon(getClass().getResource("images/flag.png")).getImage();
    private Tri[] tris;
    private Line[] lines;
    private Point[] points;

@@ -36,10 +36,10 @@ public class MisalignGraphics {
       Border lowered = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
       Border raised = BorderFactory.createBevelBorder(BevelBorder.RAISED);
       int iconSize = 30;
-      ImageIcon smileIcon = getScaledImageIcon("minesweeper smile.png", iconSize, -1);
-      ImageIcon frownIcon = getScaledImageIcon("minesweeper frown.png", iconSize, -1);
-      ImageIcon glassesIcon = getScaledImageIcon("minesweeper glasses.png", iconSize, -1);
-      ImageIcon pauseIcon = getScaledImageIcon("pause.png", iconSize, -1);
+      ImageIcon smileIcon = getScaledImageIcon("images/smile.png", iconSize, -1);
+      ImageIcon frownIcon = getScaledImageIcon("images/dead.png", iconSize, -1);
+      ImageIcon glassesIcon = getScaledImageIcon("images/glasses.png", iconSize, -1);
+      ImageIcon pauseIcon = getScaledImageIcon("images/pause.png", iconSize, -1);
    
       // Creates window and main mainPanel
       this.frame = new JFrame("Misalignsweeper");
