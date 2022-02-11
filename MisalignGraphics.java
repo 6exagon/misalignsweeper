@@ -5,6 +5,7 @@ import java.util.*;
 import javax.swing.border.*;
 
 public class MisalignGraphics {
+
    public static final int HEIGHT = 500;
    public static final int WIDTH = 500;
 
@@ -267,11 +268,11 @@ public class MisalignGraphics {
    // Checks if the player has won or lost
    public void checkGameEnd(ImageIcon winIcon, ImageIcon loseIcon) {
       CardLayout c = (CardLayout)(cardPanel.getLayout());
-      if (gameLost()) {
+      if (this.gameLost()) {
          smile.setIcon(loseIcon);
          timer.stop();
          revealAllMines();
-      } else if (gameWon()) {
+      } else if (this.gameWon()) {
          smile.setIcon(winIcon);
          timer.stop();
          this.gameWon = true;
@@ -280,36 +281,29 @@ public class MisalignGraphics {
   
    // Checks if player won the game (all non-mines are revealed) 
    public boolean gameWon() {
-      for (Poly p : polyToGon.keySet())
-         if (p.getDisplayState() != -1 && !p.isPressed())
-            return false;
-      return true;
+      return polyToGon.keySet().stream().noneMatch(p -> p.getDisplayState() != -1 && !p.isPressed());
    }
    
    // Checks if the player lost (revealed a mine)
    public boolean gameLost() {
-      for (Poly p  : polyToGon.keySet())
-         if (p.getDisplayState() == -2)
-            return true;
-      return false;
+      return polyToGon.keySet().stream().anyMatch(p -> p.getDisplayState() == -2);
    }
    
    // Reveals all mines and swtiches to losing screen
    public void revealAllMines() { 
       playingLossAnimation = true; // prevents clicking and button presses during loss animation
-      ArrayList<Poly> mines = new ArrayList<Poly>();
-      for (Poly poly : polyToGon.keySet())
-         if (poly.getDisplayState() == -1)
-            mines.add(poly);
-                  
+      HashSet<Poly> mines = new HashSet<Poly>(polyToGon.keySet());
+      mines.removeIf(p -> p.getDisplayState() != -1);
+      
       int delay = 100; // in milliseconds
       javax.swing.Timer mineRevealTimer = new javax.swing.Timer(delay, null); //specific Timer name since there's a Timer in both .util and .swing
       mineRevealTimer.addActionListener(new ActionListener() { //adding listener later lets us stop the timer within the listener more easily
          @Override
          public void actionPerformed(ActionEvent e) {
             if (mines.size() >= 1) {
-               mines.get(0).reveal();
-               mines.remove(0); 
+               Poly poly = mines.stream().findAny().get();
+               poly.reveal();
+               mines.remove(poly); 
                gamePanel.repaint();   
             } else {
                playingLossAnimation = false;

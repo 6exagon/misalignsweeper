@@ -52,19 +52,29 @@ public class Poly {
       int midY = this.midpoint.getY();
       
       double polyHeight = 0;
-      for (Line edge : this.lines)
-         if (edge.spans(midX))
+      double polyWidth = 0;
+      for (Line edge : this.lines) {
+         if (edge.spansX(midX))
             polyHeight = Math.abs(polyHeight - edge.at(midX));
+         if (edge.spansY(midY))
+            polyWidth = Math.abs(polyWidth - (midY - edge.getB()) / edge.getM());
+      }
+      double polySize = Math.min(polyHeight, polyWidth);
+//       
+//       midX -= polyHeight/6;
+//       midY += polyHeight*2/9;
+
+      polySize *= (2 / 3.0  * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
       
-      midX -= polyHeight/6;
-      midY += polyHeight*2/9;
-      g2.setFont(
-         new Font(g2.getFont().getName(), 
+      g2.setFont(new Font(g2.getFont().getName(), 
                   g2.getFont().getStyle(), 
-                  (int)(polyHeight * 2/3  * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()))));
+                  (int)(polySize)));
       
       midX *= MisalignGraphics.getXM();
       midY *= MisalignGraphics.getYM();
+      
+      midX -= polySize / 4;  // about 1/2 as wide as tall
+      midY += polySize / 2;
       
       g2.drawString(this.surroundingMines + "", midX, midY);
    }
@@ -74,19 +84,24 @@ public class Poly {
       int midY = this.midpoint.getY();
       
       double polyHeight = 0;
-      for (Line edge : this.lines)
-         if (edge.spans(midX))
+      double polyWidth = 0;
+      for (Line edge : this.lines) {
+         if (edge.spansX(midX))
             polyHeight = Math.abs(polyHeight - edge.at(midX));
+         if (edge.spansY(midY))
+            polyWidth = Math.abs(polyWidth - (midY - edge.getB()) / edge.getM());
+      }
+      double polySize = Math.min(polyHeight, polyWidth);
       
-      midX -= polyHeight / 2;
-      midY -= polyHeight / 2;
-      
-      polyHeight *= 2/3.0;
+      polySize *= (2 / 3.0 * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
       
       midX *= MisalignGraphics.getXM();
       midY *= MisalignGraphics.getYM();
       
-      g2.drawImage(flagImage, midX, midY, (int)polyHeight, (int)polyHeight, null);
+      midX -= polySize / 2;
+      midY -= polySize / 2;
+      
+      g2.drawImage(flagImage, midX, midY, (int)polySize, (int)polySize, null);
    }
    
    private void calcMidpoint() {
@@ -139,7 +154,7 @@ public class Poly {
          } else if (this.surroundingMines == 0)
             for (Line l : lines)
                for (Tri t : l.getTris())
-                  if (t != null && t.getPoly() != this && t.getPoly() != null && t.getPoly().getDisplayState() != -1) //checking for -1 fixes random loss problem
+                  if (t != null && t.getPoly() != this && t.getPoly() != null)
                      t.getPoly().reveal();
       }
    }
@@ -156,6 +171,8 @@ public class Poly {
    
    //Updates surrounding mine (should be done once all mines are placed)
    public void updateMines() {
+      if (this.surroundingMines < 0)
+         return;
       HashSet<Poly> addedPolys = new HashSet<>();
       for (Line l : lines) {
          for (Tri t : l.getTris()) {
@@ -163,7 +180,8 @@ public class Poly {
                Poly poly = t.getPoly();
                if (poly != null && !addedPolys.contains(poly) && poly != this) {
                   addedPolys.add(poly);
-                  this.surroundingMines += (poly.getDisplayState() == -1) ? 1 : 0;
+                  if (poly.getDisplayState() == -1)
+                     this.surroundingMines++;
                }
             }
          }
@@ -172,7 +190,7 @@ public class Poly {
    
    //Returns the number of intersections with line extending from point
    public int raycast(int x, int y) {
-      return (int) Stream.of(lines).filter(l -> l.spans(x) && l.at(x) > y).count();
+      return (int) Stream.of(lines).filter(l -> l.spansX(x) && l.at(x) > y).count();
    }
    
    public boolean isPressed() {

@@ -50,8 +50,7 @@ public class Line {
    //Gets new Point on the correct side of the line pulled from the list and not outside of lstack
    public Point getNewPoint(ArrayList<Point> plist, HashSet<Point> freshPoints, ArrayDeque<Line> lstack) {
       TreeMap<Double, Point> distPoint = new TreeMap<>();
-      for (Point p : plist)
-         distPoint.put(this.distanceTo(p), p);       // keep track of how far away each point is
+      plist.forEach(p -> distPoint.put(this.distanceTo(p), p));       // keep track of how far away each point is
       while (!distPoint.isEmpty()) {
          Point np = distPoint.remove(distPoint.firstKey());
          double area = areaWith(np);
@@ -102,7 +101,11 @@ public class Line {
    }
    
    //Returns if the line's points are on either side of an x coordinate
-   public boolean spans(int x) {
+   public boolean spansX(int x) {
       return (x > this.p.getX()) ^ (x > this.q.getX());
+   }
+   
+   public boolean spansY(int y) {
+      return (y > this.p.getY()) ^ (y > this.q.getY());
    }
 }

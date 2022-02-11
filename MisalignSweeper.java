@@ -5,8 +5,8 @@ import java.util.*;
 
 public class MisalignSweeper {
 
-   public static int numFlags = 15;
-   public static int numMines = 15;
+   public static int numMines = 40;
+   public static int numFlags = numMines;
    public static int numPoints = 150;
    public static final int SEP_DIST = 30;
    
@@ -166,7 +166,7 @@ public class MisalignSweeper {
    
    // Returns the polygon surrounding a coordinate pair
    public static Poly getClickedPoly(int x, int y) {
-      return polys.stream().filter(poly -> poly.raycast(x, y) == 1).findAny().orElse(null);
+      return polys.stream().filter(poly -> poly.raycast(x, y) % 2 == 1).findAny().orElse(null);
    }
 
    public static void main(String[] args) {
