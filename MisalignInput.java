@@ -10,7 +10,7 @@ public class MisalignInput implements MouseListener {
       if (poly == null) {
          System.err.println("Could not find a polygon at that location. :(");
          return;
-      } else if (MisalignGraphics.playingLossAnimation) {
+      } else if (MisalignGraphics.playingLossAnimation || !MisalignGraphics.timer.getSwingTimer().isRunning()) {
          System.out.println("Game already lost :(");
          return;
       }
@@ -25,9 +25,6 @@ public class MisalignInput implements MouseListener {
       } else if (poly.isFlagged()) { // left clicked on flagged tile
          System.out.println("Cannot reveal flagged tile");
       }
-      
-    //  if (MisalignSweeper.getWinState().equals("Win"))
-      //   System.out.println("3 mines / win");
 
    }
 

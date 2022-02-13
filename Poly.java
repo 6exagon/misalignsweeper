@@ -6,6 +6,7 @@ import java.awt.*;
 public class Poly {
    
    private final Image flagImage = new ImageIcon(getClass().getResource("images/flag.png")).getImage();
+   private final Image mineImage = new ImageIcon(getClass().getResource("images/mine.png")).getImage();
    private Tri[] tris;
    private Line[] lines;
    private Point[] points;
@@ -79,7 +80,7 @@ public class Poly {
       g2.drawString(this.surroundingMines + "", midX, midY);
    }
    
-   public void drawFlag(Graphics2D g2) {
+   public void drawImageInPoly(Graphics2D g2, Image img) {
       int midX = this.midpoint.getX();
       int midY = this.midpoint.getY();
       
@@ -101,7 +102,15 @@ public class Poly {
       midX -= polySize / 2;
       midY -= polySize / 2;
       
-      g2.drawImage(flagImage, midX, midY, (int)polySize, (int)polySize, null);
+      g2.drawImage(img, midX, midY, (int)polySize, (int)polySize, null);
+   }
+   
+   public void drawFlag(Graphics2D g2) {
+      drawImageInPoly(g2, flagImage);
+   }
+   
+   public void drawMine(Graphics2D g2) {
+      drawImageInPoly(g2, mineImage);
    }
    
    private void calcMidpoint() {
@@ -148,9 +157,10 @@ public class Poly {
       if (this.visible == Visibility.NORMAL) {
          this.visible = Visibility.PRESSED;
          if (this.surroundingMines == -1) {
-            this.surroundingMines = -2;
-            if (!MisalignGraphics.playingLossAnimation)
+            if (!MisalignGraphics.playingLossAnimation) {
+               this.surroundingMines = -2;
                System.out.println("You lost"); //prints once (not for every mine during animation)
+            }
          } else if (this.surroundingMines == 0)
             for (Line l : lines)
                for (Tri t : l.getTris())

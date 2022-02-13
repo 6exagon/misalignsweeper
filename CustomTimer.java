@@ -3,7 +3,6 @@ import java.awt.event.*;
 import java.awt.Font;
 import java.awt.Color;
 import javax.swing.border.*;
-//import java.util.*;
 
 public class CustomTimer extends JLabel {
    
@@ -61,6 +60,11 @@ public class CustomTimer extends JLabel {
    // Stops the timer
    public void stop() {
       this.timer.stop();
+   }
+   
+   // Retruns the swing Timer within the CustomTimer
+   public Timer getSwingTimer() {
+      return this.timer;
    }
    
 }

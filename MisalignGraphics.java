@@ -20,7 +20,7 @@ public class MisalignGraphics {
    public boolean gamePaused = false;
    private SettingsPanel settings;
    private JPanel cardPanel;
-   private CustomTimer timer;
+   public static CustomTimer timer;
    private JLabel mineCounter;
    private JLabel smile;
    
@@ -81,8 +81,10 @@ public class MisalignGraphics {
                   if (poly.isPressed()) {
                      switch (poly.getDisplayState()) {
                         case -2:
+                           g2.setColor(Color.RED); //mine that was actually clicked is in red
+                           break;
                         case -1:
-                           g2.setColor(Color.BLACK);
+                           g2.setColor(Color.PINK);
                            break;
                         default:
                            g2.setColor(getColor(poly.getDisplayState()));
@@ -98,6 +100,9 @@ public class MisalignGraphics {
                      poly.drawNum(g2);
                   else if (poly.isFlagged()) //must draw flag after updating color
                      poly.drawFlag(g2);
+                  else if (poly.getDisplayState() < 0 && playingLossAnimation) {
+                     poly.drawMine(g2);
+                  }
                }
                g2.setColor(Color.BLACK);
                for (Line l : lines) {
@@ -289,18 +294,18 @@ public class MisalignGraphics {
       return polyToGon.keySet().stream().anyMatch(p -> p.getDisplayState() == -2);
    }
    
-   // Reveals all mines and swtiches to losing screen
+   // Reveals all mines when player loses
    public void revealAllMines() { 
       playingLossAnimation = true; // prevents clicking and button presses during loss animation
       HashSet<Poly> mines = new HashSet<Poly>(polyToGon.keySet());
       mines.removeIf(p -> p.getDisplayState() != -1);
       
-      int delay = 100; // in milliseconds
+      int delay = 50; // in milliseconds
       javax.swing.Timer mineRevealTimer = new javax.swing.Timer(delay, null); //specific Timer name since there's a Timer in both .util and .swing
       mineRevealTimer.addActionListener(new ActionListener() { //adding listener later lets us stop the timer within the listener more easily
          @Override
          public void actionPerformed(ActionEvent e) {
-            if (mines.size() >= 1) {
+            if (mines.size() >= 1 && playingLossAnimation) {
                Poly poly = mines.stream().findAny().get();
                poly.reveal();
                mines.remove(poly); 
@@ -312,6 +317,10 @@ public class MisalignGraphics {
          }
       });
       mineRevealTimer.start();
+   }
+      
+   public CustomTimer getTimer() {
+      return this.timer;
    }
 
 }
