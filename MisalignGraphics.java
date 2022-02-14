@@ -84,7 +84,7 @@ public class MisalignGraphics {
                            g2.setColor(Color.RED); //mine that was actually clicked is in red
                            break;
                         case -1:
-                           g2.setColor(Color.PINK);
+                           g2.setColor(Color.LIGHT_GRAY);
                            break;
                         default:
                            g2.setColor(getColor(poly.getDisplayState()));
