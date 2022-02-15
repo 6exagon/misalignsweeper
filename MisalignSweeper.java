@@ -13,19 +13,17 @@ public class MisalignSweeper {
    private static final HashSet<Poly> polys = new HashSet<>();
    private static final HashSet<Tri> tris = new HashSet<>();
    private static final HashMap<Poly, Polygon> polyToGon = new HashMap<>();
-   private static MisalignGraphics graphics;
    private static final Random rand = new Random();
    
    //Scheduled main method essentially
    public static void create() {
       generateBoard();
-      graphics = new MisalignGraphics(polyToGon);
-      graphics.createAndShowGUI(rand);
+      MisalignGraphics.createAndShowGUI(polyToGon, rand);
    }
 
    // Re-draws the game board without re-generating
    public static void repaint() {
-      graphics.frame.repaint();
+      MisalignGraphics.frame.repaint();
    }
    
    // Called whenever the board is generated or re-generated
@@ -167,10 +165,6 @@ public class MisalignSweeper {
    // Returns the polygon surrounding a coordinate pair
    public static Poly getClickedPoly(int x, int y) {
       return polys.stream().filter(poly -> poly.raycast(x, y) % 2 == 1).findAny().orElse(null);
-   }
-   
-   public static MisalignGraphics getGraphics() {
-      return graphics;
    }
 
    public static void main(String[] args) {

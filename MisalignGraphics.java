@@ -11,26 +11,24 @@ public class MisalignGraphics {
    public static final int HEIGHT = 500;
    public static final int WIDTH = 500;
 
-   public static CustomTimer timer;
    public static boolean playingLossAnimation = false;
+   public static boolean gamePaused = false;
+   public static boolean gameWon = false;
+   public static JLabel mineCounter;
+   public static CustomTimer timer;
+   public static JFrame frame;
+   
+   private static HashMap<Poly, Polygon> polyToGon;
+   private static SettingsPanel settings;
+   private static JPanel gamePanel;
+   private static JPanel cardPanel;
+   private static JLabel smile;
    private static double xm = 1.0;
    private static double ym = 1.0;
-
-   public boolean gamePaused = false;
-   public boolean gameWon = false;
-   public JPanel gamePanel;
-   public JFrame frame;
-   private HashMap<Poly, Polygon> polyToGon;
-   private SettingsPanel settings;
-   private JLabel mineCounter;
-   private JPanel cardPanel;
-   private JLabel smile;
-
-   public MisalignGraphics(HashMap<Poly, Polygon> polyToGon) {
-      this.polyToGon = polyToGon;
-   }
    
-   public void createAndShowGUI(Random rand) {
+   public static void createAndShowGUI(HashMap<Poly, Polygon> polygonMap, Random rand) {
+      polyToGon = polygonMap;
+      
       Border lowered = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
       Border raised = BorderFactory.createBevelBorder(BevelBorder.RAISED);
       int iconSize = 30;
@@ -38,11 +36,11 @@ public class MisalignGraphics {
       ImageIcon frownIcon = getScaledImageIcon("images/dead.png", iconSize, -1);
       ImageIcon glassesIcon = getScaledImageIcon("images/glasses.png", iconSize, -1);
       ImageIcon pauseIcon = getScaledImageIcon("images/pause.png", iconSize, -1);
-      Image flagImage = new ImageIcon(getClass().getResource("images/flag.png")).getImage();
-      Image mineImage = new ImageIcon(getClass().getResource("images/mine.png")).getImage();
+      Image flagImage = new ImageIcon(MisalignGraphics.class.getResource("images/flag.png")).getImage();
+      Image mineImage = new ImageIcon(MisalignGraphics.class.getResource("images/mine.png")).getImage();
    
       // Creates window and main mainPanel
-      this.frame = new JFrame("Misalignsweeper");
+      frame = new JFrame("Misalignsweeper");
       JPanel mainPanel = new JPanel(new GridBagLayout());
       //frame.setResizable(false);
       mainPanel.setBorder(raised);
@@ -66,7 +64,7 @@ public class MisalignGraphics {
       mainPanel.add(cardPanel, cMain);
       
       // Creates game panel
-      this.gamePanel = new JPanel() {
+      gamePanel = new JPanel() {
          @Override
          public void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -125,7 +123,7 @@ public class MisalignGraphics {
       cardPanel.add(gamePanel, "gamePanel");
       
       // Creates settings panel
-      this.settings = new SettingsPanel();
+      settings = new SettingsPanel();
       cardPanel.add(settings, "settings");
       
       // Creates panel to hold buttons, timer, mine counter
@@ -142,14 +140,14 @@ public class MisalignGraphics {
       cButtons.weightx = 1.0;
       
       // Creates timer
-      this.timer = new CustomTimer();
+      timer = new CustomTimer();
       timer.start();
       cButtons.gridx = 0;
       cButtons.anchor = GridBagConstraints.LINE_START;
       buttonPanel.add(timer, cButtons);
    
       // Creates mine counter
-      this.mineCounter = new JLabel(MisalignSweeper.numFlags + "");
+      mineCounter = new JLabel(MisalignSweeper.numFlags + "");
       mineCounter.setForeground(Color.RED);
       mineCounter.setBackground(Color.BLACK);
       mineCounter.setOpaque(true);
@@ -160,8 +158,8 @@ public class MisalignGraphics {
       buttonPanel.add(mineCounter, cButtons);
       
       // Creates smile (reset) button
-      this.frame.setIconImage(smileIcon.getImage());
-      this.smile = new JLabel(smileIcon);
+      frame.setIconImage(smileIcon.getImage());
+      smile = new JLabel(smileIcon);
       smile.setBorder(raised);
       smile.addMouseListener(new MouseAdapter() {
          @Override
@@ -225,7 +223,7 @@ public class MisalignGraphics {
       frame.setVisible(true);
    }
    
-   public Color getColor(int level) {
+   public static Color getColor(int level) {
       Color[] colors = {
          Color.GRAY, Color.BLUE, Color.GREEN, Color.RED, new Color(0, 0, 60),
          Color.MAGENTA, Color.CYAN, Color.BLACK, Color.GRAY, Color.PINK, new Color(200, 100, 0)};
@@ -239,31 +237,30 @@ public class MisalignGraphics {
    }
    
    // Checks if the player has won or lost
-   public void checkGameEnd(ImageIcon winIcon, ImageIcon loseIcon) {
-      CardLayout c = (CardLayout) cardPanel.getLayout();
-      if (this.gameLost()) {
+   public static void checkGameEnd(ImageIcon winIcon, ImageIcon loseIcon) {
+      if (gameLost()) {
          smile.setIcon(loseIcon);
          timer.stop();
          revealAllMines();
-      } else if (this.gameWon()) {
+      } else if (gameWon()) {
          smile.setIcon(winIcon);
          timer.stop();
-         this.gameWon = true;
+         gameWon = true;
       }  
    }
   
    // Checks if player won the game (all non-mines are revealed) 
-   public boolean gameWon() {
+   public static boolean gameWon() {
       return polyToGon.keySet().stream().noneMatch(p -> p.getDisplayState() != -1 && !p.isPressed());
    }
    
    // Checks if the player lost (revealed a mine)
-   public boolean gameLost() {
+   public static boolean gameLost() {
       return polyToGon.keySet().stream().anyMatch(p -> p.getDisplayState() == -2);
    }
    
    // Reveals all mines when player loses
-   public void revealAllMines() { 
+   public static void revealAllMines() { 
       playingLossAnimation = true; // prevents clicking and button presses during loss animation
       HashSet<Poly> mines = new HashSet<Poly>(polyToGon.keySet());
       mines.removeIf(p -> p.getDisplayState() != -1);
@@ -285,20 +282,8 @@ public class MisalignGraphics {
    }
    
    // Resizes an ImageIcon given file path (there's probably a better way to do this)
-   private ImageIcon getScaledImageIcon(String path, int width, int height) {   
-      return new ImageIcon(new ImageIcon(getClass().getResource(path)).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
-   }
-   
-   public SettingsPanel getSettings() {
-      return this.settings;
-   }
-   
-   public JLabel getMineCounter() {
-      return this.mineCounter;
-   }
-   
-   public CustomTimer getTimer() {
-      return this.timer;
+   private static ImageIcon getScaledImageIcon(String path, int width, int height) {   
+      return new ImageIcon(new ImageIcon(MisalignGraphics.class.getResource(path)).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
    }
    
    //Returns x multiplier

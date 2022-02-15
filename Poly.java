@@ -162,7 +162,7 @@ public class Poly {
          this.visible = Visibility.FLAG;
          MisalignSweeper.numFlags--;
       }
-      MisalignSweeper.getGraphics().getMineCounter().setText(MisalignSweeper.numFlags + "");
+      MisalignGraphics.mineCounter.setText(MisalignSweeper.numFlags + "");
    }
    
    //Updates surrounding mine (should be done once all mines are placed)
