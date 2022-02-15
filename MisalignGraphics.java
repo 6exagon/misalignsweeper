@@ -1,38 +1,36 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
 import javax.swing.border.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Random;
 
 public class MisalignGraphics {
 
    public static final int HEIGHT = 500;
    public static final int WIDTH = 500;
 
+   public static CustomTimer timer;
    public static boolean playingLossAnimation = false;
-   public boolean gameWon = false;
    private static double xm = 1.0;
    private static double ym = 1.0;
 
-   public HashSet<Line> lines;
-   public HashMap<Poly, Polygon> polyToGon;
-   public JFrame frame;
    public boolean gamePaused = false;
-   private SettingsPanel settings;
-   private JPanel cardPanel;
-   public static CustomTimer timer;
-   private JLabel mineCounter;
-   private JLabel smile;
-   
+   public boolean gameWon = false;
    public JPanel gamePanel;
+   public JFrame frame;
+   private HashMap<Poly, Polygon> polyToGon;
+   private SettingsPanel settings;
+   private JLabel mineCounter;
+   private JPanel cardPanel;
+   private JLabel smile;
 
-   public MisalignGraphics(HashSet<Line> lines, HashMap<Poly, Polygon> polyToGon) {
-      this.lines = lines;
+   public MisalignGraphics(HashMap<Poly, Polygon> polyToGon) {
       this.polyToGon = polyToGon;
    }
    
-   public void createAndShowGUI(MisalignInput input, Random rand) {
-   
+   public void createAndShowGUI(Random rand) {
       Border lowered = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
       Border raised = BorderFactory.createBevelBorder(BevelBorder.RAISED);
       int iconSize = 30;
@@ -40,6 +38,8 @@ public class MisalignGraphics {
       ImageIcon frownIcon = getScaledImageIcon("images/dead.png", iconSize, -1);
       ImageIcon glassesIcon = getScaledImageIcon("images/glasses.png", iconSize, -1);
       ImageIcon pauseIcon = getScaledImageIcon("images/pause.png", iconSize, -1);
+      Image flagImage = new ImageIcon(getClass().getResource("images/flag.png")).getImage();
+      Image mineImage = new ImageIcon(getClass().getResource("images/mine.png")).getImage();
    
       // Creates window and main mainPanel
       this.frame = new JFrame("Misalignsweeper");
@@ -51,6 +51,8 @@ public class MisalignGraphics {
       // Creates mainPanel that holds cards (gamePanel, settingPanel)
       cardPanel = new JPanel(new CardLayout());
       cardPanel.setBorder(lowered);
+      CardLayout cardLayout = (CardLayout) cardPanel.getLayout();
+      
       GridBagConstraints cMain = new GridBagConstraints(); //constraints for mainPanel
       int insetMain = 5;
       cMain.insets = new Insets(insetMain, insetMain, insetMain, insetMain); //no, there isn't a better constructor
@@ -89,29 +91,23 @@ public class MisalignGraphics {
                         default:
                            g2.setColor(getColor(poly.getDisplayState()));
                      }
-                  } else if (poly.isFlagged()) {
+                  } else if (poly.isFlagged())
                      g2.setColor(Color.YELLOW);
-                  } else {
+                  else
                      g2.setColor(Color.WHITE);
-                  }
+                  
                   g2.fillPolygon(polyToGon.get(poly));
                   
                   if (poly.isPressed() && poly.getDisplayState() > 0)
                      poly.drawNum(g2);
                   else if (poly.isFlagged()) //must draw flag after updating color
-                     poly.drawFlag(g2);
-                  else if (poly.getDisplayState() < 0 && playingLossAnimation) {
-                     poly.drawMine(g2);
-                  }
+                     poly.drawImageInPoly(g2, flagImage);
+                  else if (poly.getDisplayState() < 0 && playingLossAnimation)
+                     poly.drawImageInPoly(g2, mineImage);
                }
                g2.setColor(Color.BLACK);
-               for (Line l : lines) {
-                  g2.drawLine(
-                     (int) (l.getP().getX() * xm),
-                     (int) (l.getP().getY() * ym),
-                     (int) (l.getQ().getX() * xm),
-                     (int) (l.getQ().getY() * ym));
-               }
+               for (Polygon gon : polyToGon.values())
+                  g2.drawPolygon(gon); // render polygons' outlines
                
                // win and loss text              
                g2.setFont(new Font("Monospaced", Font.BOLD, 64));
@@ -129,8 +125,7 @@ public class MisalignGraphics {
       cardPanel.add(gamePanel, "gamePanel");
       
       // Creates settings panel
-      SettingsPanel settings = new SettingsPanel();
-      this.settings = settings;
+      this.settings = new SettingsPanel();
       cardPanel.add(settings, "settings");
       
       // Creates panel to hold buttons, timer, mine counter
@@ -154,13 +149,7 @@ public class MisalignGraphics {
       buttonPanel.add(timer, cButtons);
    
       // Creates mine counter
-      this.mineCounter = new JLabel(String.format("%03d", MisalignSweeper.numFlags)) {
-         @Override
-         public void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            this.setText(MisalignSweeper.numFlags + "");
-         }
-      };
+      this.mineCounter = new JLabel(MisalignSweeper.numFlags + "");
       mineCounter.setForeground(Color.RED);
       mineCounter.setBackground(Color.BLACK);
       mineCounter.setOpaque(true);
@@ -188,13 +177,12 @@ public class MisalignGraphics {
                MisalignSweeper.numMines = settings.getMines();
                MisalignSweeper.numFlags = MisalignSweeper.numMines;
                
-               CardLayout c = (CardLayout)(cardPanel.getLayout());
                smile.setBorder(raised);
                smile.setIcon(smileIcon);
                gameWon = false;
                MisalignSweeper.generateBoard();
-               mineCounter.setText(String.format("%03d", MisalignSweeper.numFlags));
-               c.show(cardPanel, "gamePanel");
+               mineCounter.setText(MisalignSweeper.numFlags + "");
+               cardLayout.show(cardPanel, "gamePanel");
                timer.restart();
                mainPanel.repaint();
                mineCounter.repaint();
@@ -213,11 +201,10 @@ public class MisalignGraphics {
          public void mousePressed(MouseEvent e) {
             pause.setBorder(lowered);
             timer.togglePause();
-            CardLayout c = (CardLayout)(cardPanel.getLayout());
             if (gamePaused)
-               c.show(cardPanel, "gamePanel");
+               cardLayout.show(cardPanel, "gamePanel");
             else
-               c.show(cardPanel, "settings");
+               cardLayout.show(cardPanel, "settings");
             gamePaused = !gamePaused;
          }
       
@@ -231,30 +218,11 @@ public class MisalignGraphics {
       buttonPanel.add(pause, cButtons);
       
       frame.setFocusable(true);
-      gamePanel.addMouseListener(input);
+      gamePanel.addMouseListener(new MisalignInput());
       frame.add(mainPanel);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.pack();
       frame.setVisible(true);
-   }
-   
-   // Resizes an ImageIcon given file path (there's probably a better way to do this)
-   private ImageIcon getScaledImageIcon(String path, int width, int height) {   
-      return new ImageIcon(new ImageIcon(getClass().getResource(path)).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
-   }
-   
-   public SettingsPanel getSettings() {
-      return this.settings;
-   }
-   
-   //Returns x multiplier
-   public static double getXM() {
-      return xm;
-   }
-   
-   //Returns y multiplier
-   public static double getYM() {
-      return ym;
    }
    
    public Color getColor(int level) {
@@ -272,7 +240,7 @@ public class MisalignGraphics {
    
    // Checks if the player has won or lost
    public void checkGameEnd(ImageIcon winIcon, ImageIcon loseIcon) {
-      CardLayout c = (CardLayout)(cardPanel.getLayout());
+      CardLayout c = (CardLayout) cardPanel.getLayout();
       if (this.gameLost()) {
          smile.setIcon(loseIcon);
          timer.stop();
@@ -301,26 +269,45 @@ public class MisalignGraphics {
       mines.removeIf(p -> p.getDisplayState() != -1);
       
       int delay = 50; // in milliseconds
-      javax.swing.Timer mineRevealTimer = new javax.swing.Timer(delay, null); //specific Timer name since there's a Timer in both .util and .swing
-      mineRevealTimer.addActionListener(new ActionListener() { //adding listener later lets us stop the timer within the listener more easily
-         @Override
-         public void actionPerformed(ActionEvent e) {
-            if (mines.size() >= 1 && playingLossAnimation) {
-               Poly poly = mines.stream().findAny().get();
-               poly.reveal();
-               mines.remove(poly); 
-               gamePanel.repaint();   
-            } else {
-               playingLossAnimation = false;
-               mineRevealTimer.stop();
-            }
+      Timer mineRevealTimer = new Timer(delay, null);
+      mineRevealTimer.addActionListener((e) -> { //adding listener later lets us stop the timer within the listener more easily
+         if (mines.size() > 0 && playingLossAnimation) {
+            Poly poly = mines.stream().findAny().get();
+            poly.reveal();
+            mines.remove(poly); 
+            gamePanel.repaint();   
+         } else {
+            playingLossAnimation = false;
+            mineRevealTimer.stop();
          }
       });
       mineRevealTimer.start();
    }
-      
+   
+   // Resizes an ImageIcon given file path (there's probably a better way to do this)
+   private ImageIcon getScaledImageIcon(String path, int width, int height) {   
+      return new ImageIcon(new ImageIcon(getClass().getResource(path)).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+   }
+   
+   public SettingsPanel getSettings() {
+      return this.settings;
+   }
+   
+   public JLabel getMineCounter() {
+      return this.mineCounter;
+   }
+   
    public CustomTimer getTimer() {
       return this.timer;
    }
-
+   
+   //Returns x multiplier
+   public static double getXM() {
+      return xm;
+   }
+   
+   //Returns y multiplier
+   public static double getYM() {
+      return ym;
+   }
 }

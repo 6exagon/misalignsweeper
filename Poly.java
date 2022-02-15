@@ -5,14 +5,13 @@ import java.awt.*;
 
 public class Poly {
    
-   private final Image flagImage = new ImageIcon(getClass().getResource("images/flag.png")).getImage();
-   private final Image mineImage = new ImageIcon(getClass().getResource("images/mine.png")).getImage();
    private Tri[] tris;
    private Line[] lines;
    private Point[] points;
    private Point midpoint;
    private int surroundingMines = 0;
    private Visibility visible = Visibility.NORMAL;
+   private double polySize;
    
    public Poly(Tri[] tris, Line[] lines) {
       this.tris = tris;
@@ -52,30 +51,18 @@ public class Poly {
       int midX = this.midpoint.getX();
       int midY = this.midpoint.getY();
       
-      double polyHeight = 0;
-      double polyWidth = 0;
-      for (Line edge : this.lines) {
-         if (edge.spansX(midX))
-            polyHeight = Math.abs(polyHeight - edge.at(midX));
-         if (edge.spansY(midY))
-            polyWidth = Math.abs(polyWidth - (midY - edge.getB()) / edge.getM());
-      }
-      double polySize = Math.min(polyHeight, polyWidth);
-//       
-//       midX -= polyHeight/6;
-//       midY += polyHeight*2/9;
-
-      polySize *= (2 / 3.0  * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
+      double numSize = polySize;
+      numSize *= (2 / 3.0  * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
       
       g2.setFont(new Font(g2.getFont().getName(), 
                   g2.getFont().getStyle(), 
-                  (int)(polySize)));
+                  (int)(numSize)));
       
       midX *= MisalignGraphics.getXM();
       midY *= MisalignGraphics.getYM();
       
-      midX -= polySize / 4;  // about 1/2 as wide as tall
-      midY += polySize / 2;
+      midX -= numSize / 4;  // about 1/2 as wide as tall
+      midY += numSize / 2;
       
       g2.drawString(this.surroundingMines + "", midX, midY);
    }
@@ -84,6 +71,39 @@ public class Poly {
       int midX = this.midpoint.getX();
       int midY = this.midpoint.getY();
       
+      double imgSize = polySize;
+      imgSize *= (2 / 3.0 * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
+      
+      midX *= MisalignGraphics.getXM();
+      midY *= MisalignGraphics.getYM();
+      
+      midX -= imgSize / 2;
+      midY -= imgSize / 2;
+      
+      g2.drawImage(img, midX, midY, (int)imgSize, (int)imgSize, null);
+   }
+   
+   private void calcMidpoint() {
+      int midX = 0;
+      int midY = 0;
+      if (this.tris.length == 1) { // calculates the centroid if a triangle
+         Tri tri = this.tris[0];
+         Line l1 = new Line(tri.getPoint(0), new Point((tri.getPoint(1).getX() + tri.getPoint(2).getX()) / 2, (tri.getPoint(1).getY() + tri.getPoint(2).getY()) / 2));
+         Line l2 = new Line(tri.getPoint(1), new Point((tri.getPoint(0).getX() + tri.getPoint(2).getX()) / 2, (tri.getPoint(0).getY() + tri.getPoint(2).getY()) / 2));
+         int intersectX = (int)((l2.getB() - l1.getB()) / (l1.getM() - l2.getM()));
+         midX = intersectX;
+         midY = l1.at(intersectX);
+      } else {    // if not a triangle, just take the average of all the points
+         int x = 0, y = 0;
+         for (Point p : this.points) {
+            x += p.getX();
+            y += p.getY();
+         }
+         midX = x / this.numPoints();
+         midY = y / this.numPoints();
+      }
+      this.midpoint = new Point(midX, midY);
+      
       double polyHeight = 0;
       double polyWidth = 0;
       for (Line edge : this.lines) {
@@ -92,42 +112,7 @@ public class Poly {
          if (edge.spansY(midY))
             polyWidth = Math.abs(polyWidth - (midY - edge.getB()) / edge.getM());
       }
-      double polySize = Math.min(polyHeight, polyWidth);
-      
-      polySize *= (2 / 3.0 * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
-      
-      midX *= MisalignGraphics.getXM();
-      midY *= MisalignGraphics.getYM();
-      
-      midX -= polySize / 2;
-      midY -= polySize / 2;
-      
-      g2.drawImage(img, midX, midY, (int)polySize, (int)polySize, null);
-   }
-   
-   public void drawFlag(Graphics2D g2) {
-      drawImageInPoly(g2, flagImage);
-   }
-   
-   public void drawMine(Graphics2D g2) {
-      drawImageInPoly(g2, mineImage);
-   }
-   
-   private void calcMidpoint() {
-      if (this.tris.length == 1) { // calculates the centroid if a triangle
-         Tri tri = this.tris[0];
-         Line l1 = new Line(tri.getPoint(0), new Point((tri.getPoint(1).getX() + tri.getPoint(2).getX()) / 2, (tri.getPoint(1).getY() + tri.getPoint(2).getY()) / 2));
-         Line l2 = new Line(tri.getPoint(1), new Point((tri.getPoint(0).getX() + tri.getPoint(2).getX()) / 2, (tri.getPoint(0).getY() + tri.getPoint(2).getY()) / 2));
-         int intersectX = (int)((l2.getB() - l1.getB()) / (l1.getM() - l2.getM()));
-         this.midpoint = new Point(intersectX, l1.at(intersectX));
-      } else {    // if not a triangle, just take the average of all the points
-         int x = 0, y = 0;
-         for (Point p : this.points) {
-            x += p.getX();
-            y += p.getY();
-         }
-         this.midpoint = new Point(x / this.numPoints(), y / this.numPoints());
-      }
+      this.polySize = Math.min(polyHeight, polyWidth);
    }
    
    // Generates and orders the points cyclically for awt Polygon purposes
@@ -177,6 +162,7 @@ public class Poly {
          this.visible = Visibility.FLAG;
          MisalignSweeper.numFlags--;
       }
+      MisalignSweeper.getGraphics().getMineCounter().setText(MisalignSweeper.numFlags + "");
    }
    
    //Updates surrounding mine (should be done once all mines are placed)
