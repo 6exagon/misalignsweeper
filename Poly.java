@@ -140,6 +140,10 @@ public class Poly {
    
    public void reveal() {
       if (this.visible == Visibility.NORMAL) {
+         if (MisalignSweeper.firstClick) {
+            MisalignSweeper.firstClick = false;
+            MisalignSweeper.generateMines(this);
+         }
          this.visible = Visibility.PRESSED;
          if (this.surroundingMines == -1) {
             if (!MisalignGraphics.playingLossAnimation) {

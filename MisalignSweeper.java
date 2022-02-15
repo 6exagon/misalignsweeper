@@ -5,10 +5,11 @@ import java.util.*;
 
 public class MisalignSweeper {
 
+   public static final int SEP_DIST = 30;
    public static int numMines = 50;
    public static int numFlags = numMines;
    public static int numPoints = 150;
-   public static final int SEP_DIST = 30;
+   public static boolean firstClick = true;
    
    private static final HashSet<Poly> polys = new HashSet<>();
    private static final HashSet<Tri> tris = new HashSet<>();
@@ -41,10 +42,9 @@ public class MisalignSweeper {
       generateTris(points, freshPoints, lines);
       generatePolys(lines);
       generateAWTPolygons(1, 1);
-      generateMines();
-      polys.forEach(Poly::updateMines);
+      firstClick = true;
    }
-
+   
    // Generates the Points for the game board
    private static void generatePoints(ArrayList<Point> pts, HashSet<Point> fps) {
       pointLoop:
@@ -152,14 +152,15 @@ public class MisalignSweeper {
    }
    
    // Places mines into random Polys
-   public static void generateMines() {
+   public static void generateMines(Poly except) {
       for (int i = 0; i < numMines; i++) {
          Poly poly = polys.stream().skip(rand.nextInt(polys.size())).findFirst().get();
-         if (poly.getDisplayState() != -1)
+         if (poly != except && poly.getDisplayState() != -1)
             poly.setMine();
          else
             i--;
       }
+      polys.forEach(Poly::updateMines);
    }
    
    // Returns the polygon surrounding a coordinate pair
