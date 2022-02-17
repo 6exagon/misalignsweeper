@@ -12,7 +12,7 @@ public class SettingsPanel extends JPanel {
       GridBagConstraints c = new GridBagConstraints();
       this.add(new JLabel("Settings"));
       c.gridy = 1;
-      this.addLabeledSpinner("Number of Points", 200, 10, 1000, 5, c);
+      this.addLabeledSpinner("Number of Points", 700, 10, 1000, 5, c);
       c.gridy = 2;
       this.addLabeledSpinner("Number of Mines", MisalignSweeper.numMines, 5, 50, 1, c); 
    }

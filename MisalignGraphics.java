@@ -5,14 +5,10 @@ import java.util.*;
 import javax.swing.border.*;
 
 public class MisalignGraphics {
-
-   public static final int HEIGHT = 500;
-   public static final int WIDTH = 500;
-
    public static boolean playingLossAnimation = false;
    public boolean gameWon = false;
-   private static double xm = 1.0;
-   private static double ym = 1.0;
+   private static double xm = 500.0;
+   private static double ym = 500.0;
 
    public HashSet<Line> lines;
    public HashMap<Poly, Polygon> polyToGon;
@@ -74,8 +70,8 @@ public class MisalignGraphics {
                checkGameEnd(glassesIcon, frownIcon);
 
             if (!gamePaused) {
-               xm = this.getWidth() / (double)MisalignGraphics.WIDTH;
-               ym = this.getHeight() / (double)MisalignGraphics.HEIGHT;
+               xm = this.getWidth();
+               ym = this.getHeight();
                MisalignSweeper.generateAWTPolygons(xm, ym);
                for (Poly poly : polyToGon.keySet()) {
                   if (poly.isPressed()) {
@@ -125,7 +121,7 @@ public class MisalignGraphics {
             }
          }
       };
-      gamePanel.setPreferredSize(new Dimension(MisalignGraphics.WIDTH, MisalignGraphics.HEIGHT)); //add 4 for border?
+      gamePanel.setPreferredSize(new Dimension(500, 500)); //add 4 for border?
       cardPanel.add(gamePanel, "gamePanel");
       
       // Creates settings panel

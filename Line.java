@@ -4,12 +4,13 @@ import java.util.stream.*;
 public class Line {
    private Tri[] tris;
    private final double VERTICAL_SLOPE = 100000;
-   private final int AREA_MAX = 5000;
+   private final double AREA_MAX = 0.015;
    private Point p;
    private Point q;
    private boolean extUp = true;
    private double m;        // slope
    private double b;        // y-intercept
+   private boolean inBounds;
    
    public Line(Point p, Point q) {
       this.p = p;
@@ -18,6 +19,7 @@ public class Line {
       this.m = (denom == 0) ? VERTICAL_SLOPE : (q.getY() - p.getY()) / denom;
       this.b = p.getY() - this.m * p.getX();
       this.tris = new Tri[2];
+      this.inBounds = (this.p.isInBounds() || this.q.isInBounds());
    }
    
    //Lines must create triangles from their extended sides only, to prevent overlap
@@ -30,8 +32,8 @@ public class Line {
    }
    
    // returns y value at given x, ie, line.at(x) = f(x)
-   public int at(int x) {
-      return (int) (x * m + b);
+   public double at(double x) {
+      return x * m + b;
    }
    
    //Returns sum of distances to Point from line ends
@@ -49,15 +51,18 @@ public class Line {
 
    //Gets new Point on the correct side of the line pulled from the list and not outside of lstack
    public Point getNewPoint(ArrayList<Point> plist, HashSet<Point> freshPoints, ArrayDeque<Line> lstack) {
-      TreeMap<Double, Point> distPoint = new TreeMap<>();
-      plist.forEach(p -> distPoint.put(this.distanceTo(p), p));       // keep track of how far away each point is
-      while (!distPoint.isEmpty()) {
-         Point np = distPoint.remove(distPoint.firstKey());
-         double area = areaWith(np);
-         if (isOnExtendedSide(np) && area > 2 && area < AREA_MAX)
-            if (lstack.stream().anyMatch(l -> l.hasPoint(np) && (l.hasPoint(this.p) || l.hasPoint(this.q)))
-               || freshPoints.remove(np))
+      if (this.inBounds) {
+         TreeMap<Double, Point> distPoint = new TreeMap<>();
+         plist.forEach(p -> distPoint.put(this.distanceTo(p), p));       // keep track of how far away each point is
+         while (!distPoint.isEmpty()) {
+            Point np = distPoint.remove(distPoint.firstKey());
+            if (np != this.p && np != this.q && isOnExtendedSide(np) && areaWith(np) < AREA_MAX) {
+               if (lstack.stream().anyMatch(l -> l.hasPoint(np) && (l.hasPoint(this.p) || l.hasPoint(this.q)))
+                  || freshPoints.remove(np)) {
                   return np;
+               }
+            }
+         }
       }
       return null;
    }
@@ -77,6 +82,10 @@ public class Line {
    
    public Tri[] getTris() {
       return this.tris;
+   }
+   
+   public boolean isInBounds() {
+      return this.inBounds;
    }
    
    //Assumes there will be no more than 2 Tris added
@@ -105,6 +114,7 @@ public class Line {
       return (x > this.p.getX()) ^ (x > this.q.getX());
    }
    
+   //Returns if the line's points are on either side of an y coordinate
    public boolean spansY(int y) {
       return (y > this.p.getY()) ^ (y > this.q.getY());
    }

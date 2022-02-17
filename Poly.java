@@ -49,8 +49,8 @@ public class Poly {
    public void drawNum(Graphics2D g2) {
       g2.setColor(Color.WHITE);
       
-      int midX = this.midpoint.getX();
-      int midY = this.midpoint.getY();
+      int midX = (int) this.midpoint.getX();
+      int midY = (int) this.midpoint.getY();
       
       double polyHeight = 0;
       double polyWidth = 0;
@@ -81,8 +81,8 @@ public class Poly {
    }
    
    public void drawImageInPoly(Graphics2D g2, Image img) {
-      int midX = this.midpoint.getX();
-      int midY = this.midpoint.getY();
+      int midX = (int) this.midpoint.getX();
+      int midY = (int) this.midpoint.getY();
       
       double polyHeight = 0;
       double polyWidth = 0;

@@ -7,8 +7,8 @@ public class MisalignSweeper {
 
    public static int numMines = 40;
    public static int numFlags = numMines;
-   public static int numPoints = 150;
-   public static final int SEP_DIST = 30;
+   public static int numPoints = 700;
+   public static final double SEP_DIST = 0.05;
    
    private static final HashSet<Poly> polys = new HashSet<>();
    private static final HashSet<Tri> tris = new HashSet<>();
@@ -34,51 +34,38 @@ public class MisalignSweeper {
       polys.clear();
       tris.clear();
       lines.clear();
-      polyToGon.clear();
       
       ArrayList<Point> points = new ArrayList<>();
-      Collections.addAll(points, new Point(220, 250), new Point(280, 250));
+      Collections.addAll(points, new Point(0.45, 0.5), new Point(0.55, 0.5));
       HashSet<Point> freshPoints = new HashSet<>();
       generatePoints(points, freshPoints);
+      System.out.print('a');
       generateTris(points, freshPoints);
       generatePolys();
-      generateAWTPolygons(1, 1);
+      generateAWTPolygons(500, 500);
       generateMines();
       polys.forEach(Poly::updateMines);
    }
 
    // Generates the Points for the game board
    private static void generatePoints(ArrayList<Point> pts, HashSet<Point> fps) {
+      int x = 0;
       pointLoop:
-      for (int x = 0; x < numPoints; x++) {
-         int xc = rand.nextInt(MisalignGraphics.WIDTH - 2 * SEP_DIST) + SEP_DIST;
-         int yc = rand.nextInt(MisalignGraphics.HEIGHT - 2 * SEP_DIST) + SEP_DIST;
-         Point p = new Point(xc, yc);
+      while (x < numPoints) {
+         Point p = new Point(rand.nextDouble() * 1.4 - 0.2, rand.nextDouble() * 1.4 - 0.2);
+         if (p.isNearBorder()) {
+            continue;
+         }
          for (Point p2 : pts) {
-            if (Math.abs(p.getX() - p2.getX()) + Math.abs(p.getY() - p2.getY()) < SEP_DIST) {
-               x--;
-               continue pointLoop;
+            if (p.isInBounds() == p2.isInBounds()) {
+               if (Math.abs(p.getX() - p2.getX()) + Math.abs(p.getY() - p2.getY()) < SEP_DIST) {
+                  continue pointLoop;
+               }
             }
          }
          pts.add(p);
          fps.add(p);
-      }
-      generateEdgePoints(pts, fps);
-   }
-   
-   //Generates edge Points on board
-   private static void generateEdgePoints(ArrayList<Point> pts, HashSet<Point> fps) {
-      for (int x = 5; x <= MisalignGraphics.WIDTH - 5; x += SEP_DIST) {
-         Point topPoint = new Point(x, 5);
-         Point bottomPoint = new Point(x, MisalignGraphics.HEIGHT - 5);
-         Collections.addAll(pts, topPoint, bottomPoint);
-         Collections.addAll(fps, topPoint, bottomPoint);
-      }
-      for (int y = SEP_DIST + 10; y < MisalignGraphics.HEIGHT - SEP_DIST - 10; y += SEP_DIST) {
-         Point leftPoint = new Point(5, y);
-         Point rightPoint = new Point(MisalignGraphics.WIDTH - 5, y);
-         Collections.addAll(pts, leftPoint, rightPoint);
-         Collections.addAll(fps, leftPoint, rightPoint);
+         x++;
       }
    }
    
@@ -91,7 +78,7 @@ public class MisalignSweeper {
       Collections.addAll(lineStack, initialTriangle.getLines());
       Collections.addAll(lines, initialTriangle.getLines());
       tris.add(initialTriangle);
-      while (!fps.isEmpty()) {
+      while (lineStack.stream().anyMatch(l -> l.isInBounds())) {
          Line firstLine = lineStack.removeFirst();
          try {
             Tri tri = new Tri(firstLine, pts, fps, lineStack);
@@ -140,6 +127,7 @@ public class MisalignSweeper {
 
    // Converts a Poly into a renderable Polygon
    public static void generateAWTPolygons(double xm, double ym) {
+      polyToGon.clear();
       for (Poly poly : polys) {
          int num = poly.numPoints();
          int[] x = new int[num];
