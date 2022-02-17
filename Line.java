@@ -110,12 +110,12 @@ public class Line {
    }
    
    //Returns if the line's points are on either side of an x coordinate
-   public boolean spansX(int x) {
+   public boolean spansX(double x) {
       return (x > this.p.getX()) ^ (x > this.q.getX());
    }
    
    //Returns if the line's points are on either side of an y coordinate
-   public boolean spansY(int y) {
+   public boolean spansY(double y) {
       return (y > this.p.getY()) ^ (y > this.q.getY());
    }
 }
