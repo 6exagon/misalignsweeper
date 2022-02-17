@@ -14,7 +14,7 @@ public class SettingsPanel extends JPanel {
       c.gridy = 1;
       this.addLabeledSpinner("Number of Points", 700, 10, 1000, 5, c);
       c.gridy = 2;
-      this.addLabeledSpinner("Number of Mines", MisalignSweeper.numMines, 5, 50, 1, c); 
+      this.addLabeledSpinner("Number of Mines", MisalignSweeper.numMines, 5, 100, 1, c); 
    }
    
    // Adds a panel containing a label and spinner to the settings panel

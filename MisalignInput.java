@@ -14,11 +14,12 @@ public class MisalignInput implements MouseListener {
          System.out.println("Game already lost :(");
          return;
       }
-      if (e.getButton() == MouseEvent.BUTTON1 && poly.isNormal()) { //left click on open tile
-         poly.reveal();
-         MisalignSweeper.repaint();
-      } else if (e.getButton() == MouseEvent.BUTTON3 && !poly.isPressed()) { //right click on open or flagged tile
+      
+      if (((e.getButton() == MouseEvent.BUTTON3) || (e.getButton() == MouseEvent.BUTTON1 && e.isControlDown())) && !poly.isPressed()) { //right click (or ctrl click) on open or flagged tile
          poly.flag();
+         MisalignSweeper.repaint();
+      } else if (e.getButton() == MouseEvent.BUTTON1 && poly.isNormal()) { //left click on open tile
+         poly.reveal();
          MisalignSweeper.repaint();
       } else if (poly.isPressed()) { // right or left clicked on revealed tile
          System.out.println("Tile already revealed");
