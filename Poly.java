@@ -48,8 +48,8 @@ public class Poly {
    public void drawNum(Graphics2D g2) {
       g2.setColor(Color.WHITE);
       
-      int midX = this.midpoint.getX();
-      int midY = this.midpoint.getY();
+      int midX = (int) this.midpoint.getX();
+      int midY = (int) this.midpoint.getY();
       
       double numSize = polySize;
       numSize *= (2 / 3.0  * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
@@ -68,8 +68,8 @@ public class Poly {
    }
    
    public void drawImageInPoly(Graphics2D g2, Image img) {
-      int midX = this.midpoint.getX();
-      int midY = this.midpoint.getY();
+      int midX = (int) this.midpoint.getX();
+      int midY = (int) this.midpoint.getY();
       
       double imgSize = polySize;
       imgSize *= (2 / 3.0 * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
@@ -92,7 +92,7 @@ public class Poly {
          Line l2 = new Line(tri.getPoint(1), new Point((tri.getPoint(0).getX() + tri.getPoint(2).getX()) / 2, (tri.getPoint(0).getY() + tri.getPoint(2).getY()) / 2));
          int intersectX = (int)((l2.getB() - l1.getB()) / (l1.getM() - l2.getM()));
          midX = intersectX;
-         midY = l1.at(intersectX);
+         midY = (int) l1.at(intersectX);
       } else {    // if not a triangle, just take the average of all the points
          int x = 0, y = 0;
          for (Point p : this.points) {
