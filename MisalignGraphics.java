@@ -174,6 +174,7 @@ public class MisalignGraphics {
                MisalignSweeper.numPoints = settings.getPoints();
                MisalignSweeper.numMines = settings.getMines();
                MisalignSweeper.numFlags = MisalignSweeper.numMines;
+               MisalignSweeper.triToPolyRate = settings.getTriRate();
                
                smile.setBorder(raised);
                smile.setIcon(smileIcon);
@@ -265,7 +266,7 @@ public class MisalignGraphics {
       HashSet<Poly> mines = new HashSet<Poly>(polyToGon.keySet());
       mines.removeIf(p -> p.getDisplayState() != -1);
       
-      int delay = 50; // in milliseconds
+      int delay = 20; // in milliseconds
       Timer mineRevealTimer = new Timer(delay, null);
       mineRevealTimer.addActionListener((e) -> { //adding listener later lets us stop the timer within the listener more easily
          if (mines.size() > 0 && playingLossAnimation) {
