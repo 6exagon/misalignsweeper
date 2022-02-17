@@ -149,7 +149,7 @@ public class MisalignSweeper {
    }
    
    // Returns the polygon surrounding a coordinate pair
-   public static Poly getClickedPoly(int x, int y) {
+   public static Poly getClickedPoly(double x, double y) {
       return polys.stream().filter(poly -> poly.raycast(x, y) % 2 == 1).findAny().orElse(null);
    }
 

@@ -48,8 +48,8 @@ public class Poly {
    public void drawNum(Graphics2D g2) {
       g2.setColor(Color.WHITE);
       
-      int midX = (int) this.midpoint.getX();
-      int midY = (int) this.midpoint.getY();
+      double midX = this.midpoint.getX() * MisalignGraphics.getXM();
+      double midY = this.midpoint.getY() * MisalignGraphics.getYM();
       
       double numSize = polySize;
       numSize *= (2 / 3.0  * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
@@ -58,43 +58,37 @@ public class Poly {
                   g2.getFont().getStyle(), 
                   (int)(numSize)));
       
-      midX *= MisalignGraphics.getXM();
-      midY *= MisalignGraphics.getYM();
-      
       midX -= numSize / 4;  // about 1/2 as wide as tall
       midY += numSize / 2;
       
-      g2.drawString(this.surroundingMines + "", midX, midY);
+      g2.drawString(this.surroundingMines + "", (int) midX, (int) midY);
    }
    
    public void drawImageInPoly(Graphics2D g2, Image img) {
-      int midX = (int) this.midpoint.getX();
-      int midY = (int) this.midpoint.getY();
+      double midX = this.midpoint.getX() * MisalignGraphics.getXM();
+      double midY = this.midpoint.getY() * MisalignGraphics.getYM();
       
       double imgSize = polySize;
       imgSize *= (2 / 3.0 * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
       
-      midX *= MisalignGraphics.getXM();
-      midY *= MisalignGraphics.getYM();
-      
       midX -= imgSize / 2;
       midY -= imgSize / 2;
       
-      g2.drawImage(img, midX, midY, (int)imgSize, (int)imgSize, null);
+      g2.drawImage(img, (int) midX, (int) midY, (int) imgSize, (int) imgSize, null);
    }
    
    private void calcMidpoint() {
-      int midX = 0;
-      int midY = 0;
+      double midX = 0;
+      double midY = 0;
       if (this.tris.length == 1) { // calculates the centroid if a triangle
          Tri tri = this.tris[0];
          Line l1 = new Line(tri.getPoint(0), new Point((tri.getPoint(1).getX() + tri.getPoint(2).getX()) / 2, (tri.getPoint(1).getY() + tri.getPoint(2).getY()) / 2));
          Line l2 = new Line(tri.getPoint(1), new Point((tri.getPoint(0).getX() + tri.getPoint(2).getX()) / 2, (tri.getPoint(0).getY() + tri.getPoint(2).getY()) / 2));
-         int intersectX = (int)((l2.getB() - l1.getB()) / (l1.getM() - l2.getM()));
+         double intersectX = (l2.getB() - l1.getB()) / (l1.getM() - l2.getM());
          midX = intersectX;
-         midY = (int) l1.at(intersectX);
+         midY = l1.at(intersectX);
       } else {    // if not a triangle, just take the average of all the points
-         int x = 0, y = 0;
+         double x = 0, y = 0;
          for (Point p : this.points) {
             x += p.getX();
             y += p.getY();
@@ -189,7 +183,7 @@ public class Poly {
    }
    
    //Returns the number of intersections with line extending from point
-   public int raycast(int x, int y) {
+   public int raycast(double x, double y) {
       return (int) Stream.of(lines).filter(l -> l.spansX(x) && l.at(x) > y).count();
    }
    
