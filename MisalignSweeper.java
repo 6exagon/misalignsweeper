@@ -10,6 +10,7 @@ public class MisalignSweeper {
    public static int numPoints = 700;
    public static final double SEP_DIST = 0.05;
    public static boolean firstClick = true;
+   public static double triToPolyRate = 0.3;
    
    private static final HashSet<Poly> polys = new HashSet<>();
    private static final HashMap<Poly, Polygon> polyToGon = new HashMap<>();
@@ -105,7 +106,7 @@ public class MisalignSweeper {
          polysTris.add(tri);
          for (Line l : tri.getLines()) {   // goes through all adjacent tri's
             Tri otherTri = l.getTris()[l.getTris()[0] == tri ? 1 : 0];
-            if (rand.nextInt(4) != 0 || otherTri == null || otherTri.getPoly() != null)
+            if (rand.nextDouble() < triToPolyRate || otherTri == null || otherTri.getPoly() != null)
                continue;   // 1/4 chance of combining w/ adjacent
             polysTris.add(otherTri);
             Collections.addAll(polysLines, otherTri.getLines());

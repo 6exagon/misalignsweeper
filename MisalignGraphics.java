@@ -38,13 +38,14 @@ public class MisalignGraphics {
       // Creates window and main mainPanel
       frame = new JFrame("Misalignsweeper");
       JPanel mainPanel = new JPanel(new GridBagLayout());
+      
       //frame.setResizable(false);
       mainPanel.setBorder(raised);
       frame.add(mainPanel);
       
       // Creates mainPanel that holds cards (gamePanel, settingPanel)
       cardPanel = new JPanel(new CardLayout());
-      cardPanel.setBorder(lowered);
+      cardPanel.setBorder(new CompoundBorder(lowered, new LineBorder(Color.BLACK, 1)));
       CardLayout cardLayout = (CardLayout) cardPanel.getLayout();
       
       GridBagConstraints cMain = new GridBagConstraints(); //constraints for mainPanel
@@ -171,6 +172,7 @@ public class MisalignGraphics {
                MisalignSweeper.numPoints = settings.getPoints();
                MisalignSweeper.numMines = settings.getMines();
                MisalignSweeper.numFlags = MisalignSweeper.numMines;
+               MisalignSweeper.triToPolyRate = settings.getTriRate();
                
                smile.setBorder(raised);
                smile.setIcon(smileIcon);
@@ -211,7 +213,7 @@ public class MisalignGraphics {
       cButtons.gridx = 3;
       cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(pause, cButtons);
-      
+      frame.setMinimumSize(new Dimension(300, 350));
       frame.setFocusable(true);
       gamePanel.addMouseListener(new MisalignInput());
       frame.add(mainPanel);
@@ -262,7 +264,7 @@ public class MisalignGraphics {
       HashSet<Poly> mines = new HashSet<Poly>(polyToGon.keySet());
       mines.removeIf(p -> p.getDisplayState() != -1);
       
-      int delay = 50; // in milliseconds
+      int delay = 20; // in milliseconds
       Timer mineRevealTimer = new Timer(delay, null);
       mineRevealTimer.addActionListener((e) -> { //adding listener later lets us stop the timer within the listener more easily
          if (mines.size() > 0 && playingLossAnimation) {
