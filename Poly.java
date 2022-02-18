@@ -14,10 +14,11 @@ public class Poly {
    private double polySize;
    
    public Poly(Tri[] tris, Line[] lines) {
+      for (Tri t : tris)
+         t.addPoly(this);
       this.tris = tris;
       this.lines = lines;
       this.genPoints();
-      this.calcMidpoint();
    }
    
    public boolean containsTri(Tri tri) {
@@ -48,56 +49,48 @@ public class Poly {
    public void drawNum(Graphics2D g2) {
       g2.setColor(Color.WHITE);
       
-      double midX = this.midpoint.getX() * MisalignGraphics.getXM();
-      double midY = this.midpoint.getY() * MisalignGraphics.getYM();
+      int midX = (int) (this.midpoint.getX() * MisalignGraphics.getXM());
+      int midY = (int) (this.midpoint.getY() * MisalignGraphics.getYM());
       
-      double numSize = polySize;
-      numSize *= (2 / 3.0  * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
+      int numSize = (int)(polySize * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
       
       g2.setFont(new Font(g2.getFont().getName(), 
                   g2.getFont().getStyle(), 
-                  (int)(numSize)));
+                  numSize));
       
       midX -= numSize / 4;  // about 1/2 as wide as tall
       midY += numSize / 2;
       
-      g2.drawString(this.surroundingMines + "", (int) midX, (int) midY);
+      g2.drawString(this.surroundingMines + "", midX, midY);
    }
    
    public void drawImageInPoly(Graphics2D g2, Image img) {
-      double midX = this.midpoint.getX() * MisalignGraphics.getXM();
-      double midY = this.midpoint.getY() * MisalignGraphics.getYM();
+      int midX = (int) (this.midpoint.getX() * MisalignGraphics.getXM());
+      int midY = (int) (this.midpoint.getY() * MisalignGraphics.getYM());
       
-      double imgSize = polySize;
-      imgSize *= (2 / 3.0 * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
+      int imgSize = (int)(polySize * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
       
       midX -= imgSize / 2;
       midY -= imgSize / 2;
       
-      g2.drawImage(img, (int) midX, (int) midY, (int) imgSize, (int) imgSize, null);
+      g2.drawImage(img, midX, midY, imgSize, imgSize, null);
    }
    
-   private void calcMidpoint() {
-      double midX = 0;
-      double midY = 0;
-      if (this.tris.length == 1) { // calculates the centroid if a triangle
-         Tri tri = this.tris[0];
-         Line l1 = new Line(tri.getPoint(0), new Point((tri.getPoint(1).getX() + tri.getPoint(2).getX()) / 2, (tri.getPoint(1).getY() + tri.getPoint(2).getY()) / 2));
-         Line l2 = new Line(tri.getPoint(1), new Point((tri.getPoint(0).getX() + tri.getPoint(2).getX()) / 2, (tri.getPoint(0).getY() + tri.getPoint(2).getY()) / 2));
-         double intersectX = (l2.getB() - l1.getB()) / (l1.getM() - l2.getM());
-         midX = intersectX;
-         midY = l1.at(intersectX);
-      } else {    // if not a triangle, just take the average of all the points
-         double x = 0, y = 0;
-         for (Point p : this.points) {
-            x += p.getX();
-            y += p.getY();
-         }
-         midX = x / this.numPoints();
-         midY = y / this.numPoints();
+   // Calculates the average of all the points (same as the centroid)
+   public void calcMidpoint() {
+      Point centroid = calcCentroid(this.points);
+      if (MisalignSweeper.getClickedPoly(centroid.getX(), centroid.getY()) != this) {  // if the midpoint isn't in the poly
+         TreeMap<Double, Tri> distTriMap = new TreeMap<>();
+         for (Tri t : this.tris)
+            distTriMap.put(t.getLines()[0].areaWith(t.getPoint(0)), t);
+         this.midpoint = calcCentroid(distTriMap.get(distTriMap.lastKey()).getPoints());
+      } else {
+         this.midpoint = centroid;
       }
-      this.midpoint = new Point(midX, midY);
+      double midX = this.midpoint.getX();
+      double midY = this.midpoint.getY();
       
+      // Calculate poly's size
       double polyHeight = 0;
       double polyWidth = 0;
       for (Line edge : this.lines) {
@@ -106,7 +99,16 @@ public class Poly {
          if (edge.spansY(midY))
             polyWidth = Math.abs(polyWidth - (midY - edge.getB()) / edge.getM());
       }
-      this.polySize = Math.min(polyHeight, polyWidth);
+      this.polySize = Math.min(polyHeight, polyWidth) * 2 / 3.0;
+   }
+   
+   private Point calcCentroid(Point[] points) {
+      double x = 0, y = 0;
+      for (Point p : points) {
+         x += p.getX() / this.numPoints();
+         y += p.getY() / this.numPoints();
+      }
+      return new Point(x, y);
    }
    
    // Generates and orders the points cyclically for awt Polygon purposes
@@ -147,7 +149,7 @@ public class Poly {
          } else if (this.surroundingMines == 0)
             for (Line l : lines)
                for (Tri t : l.getTris())
-                  if (t != null && t.getPoly() != this && t.getPoly() != null)
+                  if (t != null)
                      t.getPoly().reveal();
       }
    }

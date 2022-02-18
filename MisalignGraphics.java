@@ -89,6 +89,7 @@ public class MisalignGraphics {
                      g2.setColor(Color.YELLOW);
                   else
                      g2.setColor(Color.WHITE);
+                     //g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));   // epilepsy mode
                   
                   g2.fillPolygon(polyToGon.get(poly));
                   

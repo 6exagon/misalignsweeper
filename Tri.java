@@ -45,6 +45,10 @@ public class Tri {
       return this.points[index];
    }
    
+   public Point[] getPoints() {
+      return this.points;
+   }
+   
    //Faster than any iteration, conversion to ArrayList, etc.
    public boolean hasLine(Line line) {
       return lines[0] == line || lines[1] == line || lines[2] == line;
