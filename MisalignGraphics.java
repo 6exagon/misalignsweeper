@@ -88,9 +88,11 @@ public class MisalignGraphics {
                      }
                   } else if (poly.isFlagged())
                      g2.setColor(Color.YELLOW);
+                  else if (settings.colorfulModeChecked())
+                     g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));   // epilepsy mode
                   else
                      g2.setColor(Color.WHITE);
-                     //g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));   // epilepsy mode
+
                   
                   g2.fillPolygon(polyToGon.get(poly));
                   
@@ -102,8 +104,10 @@ public class MisalignGraphics {
                      poly.drawImageInPoly(g2, mineImage);
                }
                g2.setColor(Color.BLACK);
-               for (Polygon gon : polyToGon.values())
-                  g2.drawPolygon(gon); // render polygons' outlines
+               if (!settings.noLinesModeChecked()) {
+                  for (Polygon gon : polyToGon.values())
+                     g2.drawPolygon(gon); // render polygons' outlines
+               }
                
                // win and loss text              
                g2.setFont(new Font("Monospaced", Font.BOLD, 64));
@@ -216,6 +220,7 @@ public class MisalignGraphics {
       frame.setMinimumSize(new Dimension(300, 350));
       frame.setFocusable(true);
       gamePanel.addMouseListener(new MisalignInput());
+      frame.addKeyListener(new MisalignInput());
       frame.add(mainPanel);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.pack();
@@ -294,4 +299,10 @@ public class MisalignGraphics {
    public static double getYM() {
       return ym;
    }
+   
+   //Returns SettingsPanel
+   public static SettingsPanel getSettings() {
+      return settings;
+   }
+   
 }

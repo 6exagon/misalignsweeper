@@ -5,18 +5,37 @@ import java.util.ArrayList;
 public class SettingsPanel extends JPanel {
 
    private ArrayList<JSpinner> spinners;
-
+   private GridBagConstraints c;
+   private JCheckBox colorfulModeCheckBox;
+   private JCheckBox noLinesModeCheckBox;
+   
    public SettingsPanel() {
       this.spinners = new ArrayList<JSpinner>();
       this.setLayout(new GridBagLayout());
-      GridBagConstraints c = new GridBagConstraints();
+      this.c = new GridBagConstraints();
       this.add(new JLabel("Settings"));
       c.gridy = 1;
       this.addLabeledSpinner("Number of Points", MisalignSweeper.numPoints, 10, 1000, 5, c);
-      c.gridy = 2;
+      c.gridy++;
       this.addLabeledSpinner("Number of Mines", MisalignSweeper.numMines, 5, 100, 1, c); 
-      c.gridy = 3;
+      c.gridy++;
       this.addLabeledSpinner("Triangle Rate", (int)(MisalignSweeper.triToPolyRate * 10), 0, 10, 1, c); 
+      this.colorfulModeCheckBox = new JCheckBox("Colorful");
+      this.noLinesModeCheckBox = new JCheckBox("No lines");
+   }
+   
+   //Add secret settings to setting menu (colorful mode, no lines mode)
+   public void addSecretSettings() {
+      c.gridy++;
+      this.add(new JLabel("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"), c);
+      c.gridy++;
+      this.add(new JLabel("Secret Settings"), c);
+      c.gridy++;
+      this.add(colorfulModeCheckBox, c);
+      c.gridy++;
+      this.add(noLinesModeCheckBox, c);
+      this.repaint();
+      this.revalidate(); //revalidate needed to see immediate update if in settings when code is entered
    }
    
    // Adds a panel containing a label and spinner to the settings panel
@@ -48,6 +67,16 @@ public class SettingsPanel extends JPanel {
    // Returns tri to poly rate spinner value
    public double getTriRate() {
       return (int)spinners.get(2).getValue() / 10.0;
+   }
+   
+   // Returns if check box is checked
+   public boolean colorfulModeChecked() {
+      return this.colorfulModeCheckBox.isSelected();
+   }
+   
+   // Returns if check box is checked
+   public boolean noLinesModeChecked() {
+      return this.noLinesModeCheckBox.isSelected();
    }
    
 }     
