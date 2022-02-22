@@ -111,12 +111,15 @@ public class MisalignGraphics {
                
                // win and loss text              
                g2.setFont(new Font("Monospaced", Font.BOLD, 64));
+               FontMetrics fm = g2.getFontMetrics();//used to get width of string with current font
                if (playingLossAnimation) {
                   g2.setColor(Color.RED);
-                  g2.drawString("You Lose", 100, 100);
+                  String lossText = "You lose";                  
+                  g2.drawString(lossText, (gamePanel.getWidth() - fm.stringWidth(lossText)) / 2, (gamePanel.getHeight() - fm.getHeight()) / 2);//centered horizontally, just above middle vertically
                } else if (gameWon) {
                   g2.setColor(Color.GREEN);
-                  g2.drawString("YOU WIN!", 100, 100);
+                  String winText = "YOU WIN!";
+                  g2.drawString(winText, (gamePanel.getWidth() - fm.stringWidth(winText)) / 2, (gamePanel.getHeight() - fm.getHeight()) / 2);               
                }
             }
          }
@@ -217,7 +220,7 @@ public class MisalignGraphics {
       cButtons.gridx = 3;
       cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(pause, cButtons);
-      frame.setMinimumSize(new Dimension(300, 350));
+      frame.setMinimumSize(new Dimension(400, 425));
       frame.setFocusable(true);
       gamePanel.addMouseListener(new MisalignInput());
       frame.addKeyListener(new MisalignInput());
