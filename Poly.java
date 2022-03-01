@@ -76,17 +76,16 @@ public class Poly {
       g2.drawImage(img, midX, midY, imgSize, imgSize, null);
    }
    
-   // Calculates the average of all the points (same as the centroid)
+   // Finds the middle of the Poly for rendering things
    public void calcMidpoint() {
       Point centroid = calcCentroid(this.points);
-      if (MisalignSweeper.getClickedPoly(centroid.getX(), centroid.getY()) != this) {  // if the midpoint isn't in the poly
-         TreeMap<Double, Tri> distTriMap = new TreeMap<>();
-         for (Tri t : this.tris)
-            distTriMap.put(t.getLines()[0].areaWith(t.getPoint(0)), t);
-         this.midpoint = calcCentroid(distTriMap.get(distTriMap.lastKey()).getPoints());
-      } else {
-         this.midpoint = centroid;
+      Optional<Tri> bigTri = Optional.empty();  // keep track of biggest tri, if it uses it, for size purposes
+      if (MisalignSweeper.getClickedPoly(centroid.getX(), centroid.getY()) != this) {
+         bigTri = Stream.of(tris).max((t, t2) -> Double.compare(t.area(), t2.area()));
+         centroid = calcCentroid(bigTri.get().getPoints());
       }
+      this.midpoint = centroid;
+
       double midX = this.midpoint.getX();
       double midY = this.midpoint.getY();
       
@@ -102,11 +101,12 @@ public class Poly {
       this.polySize = Math.min(polyHeight, polyWidth) * 2 / 3.0;
    }
    
-   private Point calcCentroid(Point[] points) {
+   // Calculates the average of all the points
+   public static Point calcCentroid(Point[] ps) {
       double x = 0, y = 0;
-      for (Point p : points) {
-         x += p.getX() / this.numPoints();
-         y += p.getY() / this.numPoints();
+      for (Point p : ps) {
+         x += p.getX() / ps.length;
+         y += p.getY() / ps.length;
       }
       return new Point(x, y);
    }

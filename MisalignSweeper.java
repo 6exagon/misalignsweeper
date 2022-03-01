@@ -4,17 +4,18 @@ import java.awt.event.*;
 import java.util.*;
 
 public class MisalignSweeper {
-
+   
+   private static final HashSet<Poly> polys = new HashSet<>();
+   private static final HashMap<Poly, Polygon> polyToGon = new HashMap<>();
+   private static final Random rand = new Random();
+   
    public static int numMines = 50;
    public static int numFlags = numMines;
    public static int numPoints = 700;
    public static final double SEP_DIST = 0.05;
    public static boolean firstClick = true;
    public static double triToPolyRate = 0.3;
-   
-   private static final HashSet<Poly> polys = new HashSet<>();
-   private static final HashMap<Poly, Polygon> polyToGon = new HashMap<>();
-   private static final Random rand = new Random();
+   public static long seed = rand.nextLong();
    
    //Scheduled main method essentially
    public static void create() {
@@ -29,6 +30,8 @@ public class MisalignSweeper {
    
    // Called whenever the board is generated or re-generated
    public static void generateBoard() {
+      seed = rand.nextLong() * System.nanoTime();
+      rand.setSeed(seed);
       polys.clear();
       polyToGon.clear();
       
@@ -106,11 +109,17 @@ public class MisalignSweeper {
          polysTris.add(tri);
          for (Line l : tri.getLines()) {   // goes through all adjacent tri's
             Tri otherTri = l.getTris()[l.getTris()[0] == tri ? 1 : 0];
-            if (rand.nextDouble() < triToPolyRate || otherTri == null || otherTri.getPoly() != null)
-               continue;   // 1/4 chance of combining w/ adjacent
-            polysTris.add(otherTri);
-            Collections.addAll(polysLines, otherTri.getLines());
-            polysLines.remove(l);
+            if (otherTri == null || otherTri.getPoly() != null)
+               continue;
+            // random chance of merging                 auto-merge if too small
+            if (rand.nextDouble() < triToPolyRate || otherTri.area() < 0.001 || tri.area() < 0.001) {
+               polysTris.add(otherTri);
+               for (Line otherLine : otherTri.getLines()) {
+                  if (!polysLines.remove(otherLine)) {  // remove repeats to avoid stray lines
+                     polysLines.add(otherLine);
+                  }
+               }
+            }
          }
          polys.add(new Poly(polysTris.toArray(new Tri[0]), polysLines.toArray(new Line[0])));
       }

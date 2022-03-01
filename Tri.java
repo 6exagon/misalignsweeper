@@ -49,8 +49,22 @@ public class Tri {
       return this.points;
    }
    
+   // Returns the area of this tri
+   public double area() {
+      return this.lines[0].areaWith(this.points[0]);
+   }
+   
    //Faster than any iteration, conversion to ArrayList, etc.
    public boolean hasLine(Line line) {
       return lines[0] == line || lines[1] == line || lines[2] == line;
+   }
+   
+   // Generates a hash for the tri for use in HashSets/Maps
+   public int hashCode() {
+      int hash = 0;
+      for (Point p : this.points) {
+         hash += (int) (500 * p.getX()) << 16 + (int) (500 * p.getY());
+      }
+      return hash;
    }
 }
