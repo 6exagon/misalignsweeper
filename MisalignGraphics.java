@@ -7,60 +7,92 @@ import java.util.HashSet;
 import java.util.Random;
 
 public class MisalignGraphics {
-   public static boolean playingLossAnimation = false;
    private static double xm = 500.0;
    private static double ym = 500.0;
    public static boolean gamePaused = false;
+   public static boolean playingLossAnimation = false;
    public static boolean gameWon = false;
-   public static JLabel mineCounter;
-   public static CustomTimer timer;
-   public static JFrame frame;
-   
    private static HashMap<Poly, Polygon> polyToGon;
-   private static SettingsPanel settings;
-   private static JPanel gamePanel;
-   private static JPanel cardPanel;
-   private static JLabel smile;
    
+   //Constants
+   private static final Border LOWERED = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
+   private static final Border RAISED = BorderFactory.createBevelBorder(BevelBorder.RAISED); 
+   private static final int ICON_SIZE = 30;
+   private static final ImageIcon SMILE_ICON = getScaledImageIcon("images/smile.png", ICON_SIZE, -1); //-1 keeps original w:h ratio
+   private static final ImageIcon FROWN_ICON = getScaledImageIcon("images/dead.png", ICON_SIZE, -1);
+   private static final ImageIcon GLASSES_ICON = getScaledImageIcon("images/glasses.png", ICON_SIZE, -1);
+   private static final ImageIcon PAUSE_ICON = getScaledImageIcon("images/pause.png", ICON_SIZE, -1);
+   private static final Image FLAG_IMAGE = new ImageIcon(MisalignGraphics.class.getResource("images/flag.png")).getImage();
+   private static final Image MINE_IMAGE = new ImageIcon(MisalignGraphics.class.getResource("images/mine.png")).getImage();
+   private static final int LOSS_ANIMATION_DELAY = 25; //in milliseconds
+     
+   //JComponents (swing components)
+   private static JFrame frame;
+   private static JPanel mainPanel;
+   private static JPanel cardPanel;
+   private static JPanel gamePanel;
+   private static SettingsPanel settings;
+   private static JPanel buttonPanel;
+   private static CustomTimer timer;
+   private static JLabel mineCounter;
+   private static JLabel smile;
+   private static JLabel pause; 
+   
+   //Layouts/layout managers for components
+   private static CardLayout cardLayout;
+   private static GridBagConstraints cMain;
+   private static GridBagConstraints cButtons;
+   
+   //Creates the graphics for the whole game
    public static void createAndShowGUI(HashMap<Poly, Polygon> polygonMap, Random rand) {
       polyToGon = polygonMap;
       
-      Border lowered = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
-      Border raised = BorderFactory.createBevelBorder(BevelBorder.RAISED);
-      int iconSize = 30;
-      ImageIcon smileIcon = getScaledImageIcon("images/smile.png", iconSize, -1);
-      ImageIcon frownIcon = getScaledImageIcon("images/dead.png", iconSize, -1);
-      ImageIcon glassesIcon = getScaledImageIcon("images/glasses.png", iconSize, -1);
-      ImageIcon pauseIcon = getScaledImageIcon("images/pause.png", iconSize, -1);
-      Image flagImage = new ImageIcon(MisalignGraphics.class.getResource("images/flag.png")).getImage();
-      Image mineImage = new ImageIcon(MisalignGraphics.class.getResource("images/mine.png")).getImage();
+      createFrame();
+      addCardPanel();
+      addGamePanel(rand);
+      addSettingsPanel();
+      addButtonPanel();
+      addTimer();
+      addMineCounter();
+      addSmile();
+      addPause();
+    }
    
-      // Creates window and main mainPanel
+   //Creates the window and the main panel that contain everything
+   public static void createFrame() {
       frame = new JFrame("Misalignsweeper");
-      JPanel mainPanel = new JPanel(new GridBagLayout());
+      frame.setMinimumSize(new Dimension(400, 425));
+      frame.setFocusable(true);
+      frame.addKeyListener(new MisalignInput());
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       
-      //frame.setResizable(false);
-      mainPanel.setBorder(raised);
+      mainPanel = new JPanel(new GridBagLayout()); //mainPanel contains everything
+      mainPanel.setBorder(RAISED);
       frame.add(mainPanel);
-      
-      // Creates mainPanel that holds cards (gamePanel, settingPanel)
-      cardPanel = new JPanel(new CardLayout());
-      cardPanel.setBorder(new CompoundBorder(lowered, new LineBorder(Color.BLACK, 1)));
-      CardLayout cardLayout = (CardLayout) cardPanel.getLayout();
-      
-      GridBagConstraints cMain = new GridBagConstraints(); //constraints for mainPanel
+            
+      cMain = new GridBagConstraints(); //constraints for mainPanel layout
       int insetMain = 5;
       cMain.insets = new Insets(insetMain, insetMain, insetMain, insetMain); //no, there isn't a better constructor
       cMain.gridwidth = 2;
       cMain.anchor = GridBagConstraints.CENTER;
       cMain.fill = GridBagConstraints.BOTH;
+      cMain.weightx = 1;
+   }
+   
+   // Creates the cardPanel containing the game board and settings
+   public static void addCardPanel() {
+      cardPanel = new JPanel(new CardLayout());
+      cardPanel.setBorder(new CompoundBorder(LOWERED, new LineBorder(Color.BLACK, 1)));
+      cardLayout = (CardLayout) cardPanel.getLayout();
+
+      cMain.weighty = 1;
       cMain.gridx = 0;
       cMain.gridy = 1;
-      cMain.weighty = 1;
-      cMain.weightx = 1;
       mainPanel.add(cardPanel, cMain);
-      
-      // Creates game panel
+   }
+   
+   //Creates panel that game is played on
+   public static void addGamePanel(Random rand) {
       gamePanel = new JPanel() {
          @Override
          public void paintComponent(Graphics g) {
@@ -68,7 +100,7 @@ public class MisalignGraphics {
             Graphics2D g2 = (Graphics2D) g;
          
             if (!playingLossAnimation && !gamePaused)
-               checkGameEnd(glassesIcon, frownIcon);
+               checkGameEnd();
 
             if (!gamePaused) {
                xm = this.getWidth();
@@ -81,7 +113,7 @@ public class MisalignGraphics {
                            g2.setColor(Color.RED); //mine that was actually clicked is in red
                            break;
                         case -1:
-                           g2.setColor(Color.LIGHT_GRAY);
+                           g2.setColor(Color.LIGHT_GRAY); //other mines revealed are light gray
                            break;
                         default:
                            g2.setColor(getColor(poly.getDisplayState()));
@@ -89,20 +121,20 @@ public class MisalignGraphics {
                   } else if (poly.isFlagged())
                      g2.setColor(Color.YELLOW);
                   else if (settings.colorfulModeChecked())
-                     g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256)));   // epilepsy mode
+                     g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256))); //colorful mode
                   else
                      g2.setColor(Color.WHITE);
-
-                  
                   g2.fillPolygon(polyToGon.get(poly));
                   
+                  //draws flag/num/mine in poly after coloring poly
                   if (poly.isPressed() && poly.getDisplayState() > 0)
                      poly.drawNum(g2);
-                  else if (poly.isFlagged()) //must draw flag after updating color
-                     poly.drawImageInPoly(g2, flagImage);
+                  else if (poly.isFlagged())
+                     poly.drawImageInPoly(g2, FLAG_IMAGE);
                   else if (poly.getDisplayState() < 0 && playingLossAnimation)
-                     poly.drawImageInPoly(g2, mineImage);
+                     poly.drawImageInPoly(g2, MINE_IMAGE);
                }
+               
                g2.setColor(Color.BLACK);
                if (!settings.noLinesModeChecked()) {
                   for (Polygon gon : polyToGon.values())
@@ -124,34 +156,42 @@ public class MisalignGraphics {
             }
          }
       };
-      gamePanel.setPreferredSize(new Dimension(500, 500)); //add 4 for border?
-      cardPanel.add(gamePanel, "gamePanel");
-      
-      // Creates settings panel
+      gamePanel.setPreferredSize(new Dimension(500, 500));
+      cardPanel.add(gamePanel, "gamePanel"); 
+   }
+   
+   //Creates settings
+   public static void addSettingsPanel() {
       settings = new SettingsPanel();
       cardPanel.add(settings, "settings");
-      
-      // Creates panel to hold buttons, timer, mine counter
-      JPanel buttonPanel = new JPanel(new GridBagLayout());
-      buttonPanel.setBorder(lowered);
+   }
+   
+   // Creates panel to hold buttons, timer, mine counter
+   public static void addButtonPanel() {
+      buttonPanel = new JPanel(new GridBagLayout());
+      buttonPanel.setBorder(LOWERED);
       cMain.gridx = 0;
       cMain.gridy = 0;
       cMain.weighty = 0;
-      cMain.weightx = 1.0;
       mainPanel.add(buttonPanel, cMain);
-      GridBagConstraints cButtons = new GridBagConstraints();
+      
+      cButtons = new GridBagConstraints(); //constraints for layout within panel
       int insetButtons = 3;
       cButtons.insets = new Insets(insetButtons, insetButtons, insetButtons, insetButtons);
       cButtons.weightx = 1.0;
-      
-      // Creates timer
+   }
+   
+   //Creates in-game timer
+   public static void addTimer() {
       timer = new CustomTimer();
       timer.start();
       cButtons.gridx = 0;
       cButtons.anchor = GridBagConstraints.LINE_START;
       buttonPanel.add(timer, cButtons);
+   }
    
-      // Creates mine counter
+   //Creates mine counter (displays number of flags player has left)
+   public static void addMineCounter() {
       mineCounter = new JLabel(MisalignSweeper.numFlags + "");
       mineCounter.setForeground(Color.RED);
       mineCounter.setBackground(Color.BLACK);
@@ -161,16 +201,18 @@ public class MisalignGraphics {
       cButtons.gridx = 2;
       cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(mineCounter, cButtons);
-      
-      // Creates smile (reset) button
-      frame.setIconImage(smileIcon.getImage());
-      smile = new JLabel(smileIcon);
-      smile.setBorder(raised);
+   }
+   
+   //Creates smile/reset button
+   public static void addSmile() {
+      frame.setIconImage(SMILE_ICON.getImage());
+      smile = new JLabel(SMILE_ICON);
+      smile.setBorder(RAISED);
       smile.addMouseListener(new MouseAdapter() {
          @Override
          public void mousePressed(MouseEvent e) {
             if (!gamePaused && !playingLossAnimation)
-               smile.setBorder(lowered);
+               smile.setBorder(LOWERED);
          }
       
          @Override
@@ -181,29 +223,30 @@ public class MisalignGraphics {
                MisalignSweeper.numFlags = MisalignSweeper.numMines;
                MisalignSweeper.triToPolyRate = settings.getTriRate();
                
-               smile.setBorder(raised);
-               smile.setIcon(smileIcon);
+               smile.setBorder(RAISED);
+               smile.setIcon(SMILE_ICON);
                gameWon = false;
                MisalignSweeper.generateBoard();
                mineCounter.setText(MisalignSweeper.numFlags + "");
                cardLayout.show(cardPanel, "gamePanel");
                timer.restart();
                mainPanel.repaint();
-               mineCounter.repaint();
             }
          }
       });       
       cButtons.gridx = 1;
       cButtons.anchor = GridBagConstraints.CENTER;
       buttonPanel.add(smile, cButtons);
-      
-      // Creates pause button
-      JLabel pause = new JLabel(pauseIcon);
-      pause.setBorder(raised);
+   }
+   
+   //Creates pause button (that toggles between settings and the game)
+   public static void addPause() {
+      pause = new JLabel(PAUSE_ICON);
+      pause.setBorder(RAISED);
       pause.addMouseListener(new MouseAdapter() {
          @Override
          public void mousePressed(MouseEvent e) {
-            pause.setBorder(lowered);
+            pause.setBorder(LOWERED);
             timer.togglePause();
             if (gamePaused)
                cardLayout.show(cardPanel, "gamePanel");
@@ -214,22 +257,22 @@ public class MisalignGraphics {
       
          @Override
          public void mouseReleased(MouseEvent e) {
-            pause.setBorder(raised);
+            pause.setBorder(RAISED);
          }
       });
       cButtons.gridx = 3;
       cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(pause, cButtons);
-      frame.setMinimumSize(new Dimension(400, 425));
-      frame.setFocusable(true);
+      
+
       gamePanel.addMouseListener(new MisalignInput());
-      frame.addKeyListener(new MisalignInput());
-      frame.add(mainPanel);
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       frame.pack();
       frame.setVisible(true);
    }
+
    
+   
+   //Returns what color a revealed poly should be
    public static Color getColor(int level) {
       Color[] colors = {
          Color.GRAY, Color.BLUE, Color.GREEN, Color.RED, new Color(0, 0, 60),
@@ -244,13 +287,13 @@ public class MisalignGraphics {
    }
    
    // Checks if the player has won or lost
-   public static void checkGameEnd(ImageIcon winIcon, ImageIcon loseIcon) {
+   public static void checkGameEnd() {
       if (gameLost()) {
-         smile.setIcon(loseIcon);
+         smile.setIcon(FROWN_ICON);
          timer.stop();
          revealAllMines();
       } else if (gameWon()) {
-         smile.setIcon(winIcon);
+         smile.setIcon(GLASSES_ICON);
          timer.stop();
          gameWon = true;
       }  
@@ -272,8 +315,7 @@ public class MisalignGraphics {
       HashSet<Poly> mines = new HashSet<Poly>(polyToGon.keySet());
       mines.removeIf(p -> p.getDisplayState() != -1);
       
-      int delay = 20; // in milliseconds
-      Timer mineRevealTimer = new Timer(delay, null);
+      Timer mineRevealTimer = new Timer(LOSS_ANIMATION_DELAY, null);
       mineRevealTimer.addActionListener((e) -> { //adding listener later lets us stop the timer within the listener more easily
          if (mines.size() > 0 && playingLossAnimation) {
             Poly poly = mines.stream().findAny().get();
@@ -303,9 +345,24 @@ public class MisalignGraphics {
       return ym;
    }
    
-   //Returns SettingsPanel
+   //Returns frame
+   public static JFrame getFrame() {
+      return frame;
+   }
+   
+   //Returns custom timer
+   public static CustomTimer getTimer() {
+      return timer;
+   }
+   
+   //Returns settings
    public static SettingsPanel getSettings() {
       return settings;
+   }
+   
+   //Returns mine counter
+   public static JLabel getMineCounter() {
+      return mineCounter;
    }
    
 }

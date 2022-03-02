@@ -25,7 +25,7 @@ public class MisalignSweeper {
 
    // Re-draws the game board without re-generating
    public static void repaint() {
-      MisalignGraphics.frame.repaint();
+      MisalignGraphics.getFrame().repaint();
    }
    
    // Called whenever the board is generated or re-generated

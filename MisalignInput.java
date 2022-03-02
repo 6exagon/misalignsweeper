@@ -14,7 +14,7 @@ public class MisalignInput implements MouseListener, KeyListener {
       if (poly == null) {
          System.err.println("Could not find a polygon at that location. :(");
          return;
-      } else if (MisalignGraphics.playingLossAnimation || !MisalignGraphics.timer.getSwingTimer().isRunning()) {
+      } else if (MisalignGraphics.playingLossAnimation || !MisalignGraphics.getTimer().getSwingTimer().isRunning()) {
          System.out.println("Game already lost :(");
          return;
       }

@@ -15,9 +15,9 @@ public class SettingsPanel extends JPanel {
       this.c = new GridBagConstraints();
       this.add(new JLabel("Settings"));
       c.gridy = 1;
-      this.addLabeledSpinner("Number of Points", MisalignSweeper.numPoints, 10, 1000, 5, c);
+      this.addLabeledSpinner("Number of Points", MisalignSweeper.numPoints, 400, 800, 25, c);
       c.gridy++;
-      this.addLabeledSpinner("Number of Mines", MisalignSweeper.numMines, 5, 100, 1, c); 
+      this.addLabeledSpinner("Number of Mines", MisalignSweeper.numMines, 25, 100, 5, c); 
       c.gridy++;
       this.addLabeledSpinner("Triangle Rate", (int)(MisalignSweeper.triToPolyRate * 10), 0, 10, 1, c); 
       this.colorfulModeCheckBox = new JCheckBox("Colorful");
@@ -41,9 +41,7 @@ public class SettingsPanel extends JPanel {
    // Adds a panel containing a label and spinner to the settings panel
    private void addLabeledSpinner(String text, int start, int min, int max, int step, GridBagConstraints c) {
       JPanel labelWithSpinner = new JPanel();
-      
-      JLabel label = new JLabel(text + ":   ");
-      labelWithSpinner.add(label);
+      labelWithSpinner.add(new JLabel(text + ":   "));
       
       JSpinner spin = new JSpinner(new SpinnerNumberModel(start, min, max, step));
       spin.setEditor(new JSpinner.DefaultEditor(spin));
