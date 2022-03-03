@@ -30,7 +30,12 @@ public class MisalignSweeper {
    
    // Called whenever the board is generated or re-generated
    public static void generateBoard() {
-      seed = rand.nextLong() * System.nanoTime();
+      if (SettingsPanel.customSeedEntered) {
+         seed = Long.valueOf(SettingsPanel.seedTextField.getText());
+         SettingsPanel.customSeedEntered = false;
+      } else {
+         seed = rand.nextLong() * System.nanoTime();
+      }
       rand.setSeed(seed);
       polys.clear();
       polyToGon.clear();
@@ -43,6 +48,7 @@ public class MisalignSweeper {
       generatePolys(points, freshPoints);
       generateAWTPolygons(500, 500);
       firstClick = true;
+      
    }
    
    // Generates the Points for the game board

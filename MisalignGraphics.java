@@ -222,6 +222,7 @@ public class MisalignGraphics {
                MisalignSweeper.numMines = settings.getMines();
                MisalignSweeper.numFlags = MisalignSweeper.numMines;
                MisalignSweeper.triToPolyRate = settings.getTriRate();
+               //MisalignSweeper.seed = settings.getSeed();
                
                smile.setBorder(RAISED);
                smile.setIcon(SMILE_ICON);
@@ -250,8 +251,10 @@ public class MisalignGraphics {
             timer.togglePause();
             if (gamePaused)
                cardLayout.show(cardPanel, "gamePanel");
-            else
+            else {
                cardLayout.show(cardPanel, "settings");
+               SettingsPanel.seedTextField.setText("" + MisalignSweeper.seed);
+            }
             gamePaused = !gamePaused;
          }
       
