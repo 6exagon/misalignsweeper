@@ -31,7 +31,11 @@ public class MisalignSweeper {
    // Called whenever the board is generated or re-generated
    public static void generateBoard() {
       if (SettingsPanel.customSeedEntered) {
-         seed = Long.valueOf(SettingsPanel.seedTextField.getText());
+         try {
+            seed = Long.valueOf(SettingsPanel.seedTextField.getText());
+         } catch (NumberFormatException e) {
+            System.err.println("Illegal seed");   
+         }
          SettingsPanel.customSeedEntered = false;
       } else {
          seed = rand.nextLong() * System.nanoTime();
