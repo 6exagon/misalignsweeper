@@ -11,6 +11,7 @@ public class Line {
    private double m;        // slope
    private double b;        // y-intercept
    private boolean inBounds;
+   private Point midpoint;
    
    public Line(Point p, Point q) {
       this.p = p;
@@ -20,6 +21,7 @@ public class Line {
       this.b = p.getY() - this.m * p.getX();
       this.tris = new Tri[2];
       this.inBounds = (this.p.isInBounds() || this.q.isInBounds());
+      this.midpoint = new Point((this.p.getX() + this.q.getX()) / 2, (this.p.getY() + this.q.getY()) / 2);
    }
    
    //Lines must create triangles from their extended sides only, to prevent overlap
@@ -31,34 +33,37 @@ public class Line {
       this.extUp = up;
    }
    
-   // returns y value at given x, ie, line.at(x) = f(x)
+   // Returns y value at given x, ie, line.at(x) = f(x)
    public double at(double x) {
       return x * m + b;
    }
    
-   //Returns sum of distances to Point from line ends
+   //Returns (squared) distance to Point from line's midpoint
    public double distanceTo(Point pt) {
-      return Math.hypot(pt.getX() - this.p.getX(), pt.getY() - this.p.getY())
-         + Math.hypot(pt.getX() - this.q.getX(), pt.getY() - this.q.getY());
+      return Math.pow(pt.getX() - this.midpoint.getX(), 2) +
+             Math.pow(pt.getY() - this.midpoint.getY(), 2);
    }
    
-   //Returns area of triangle formed with Point
+   //Returns the area of triangle formed with Point
    public double areaWith(Point pt) {
-      return Math.abs((this.p.getX() * (this.q.getY() - pt.getY())
-                     + this.q.getX() * (pt.getY() - this.p.getY())
-                     + pt.getX() * (this.p.getY() - this.q.getY())) / 2.0);
+      return Math.abs(this.p.getX() * (this.q.getY() - pt.getY())
+                    + this.q.getX() * (pt.getY() - this.p.getY())
+                    + pt.getX() * (this.p.getY() - this.q.getY())) / 2;
    }
 
    //Gets new Point on the correct side of the line pulled from the list and not outside of lstack
-   public Point getNewPoint(ArrayList<Point> plist, HashSet<Point> freshPoints, ArrayDeque<Line> lstack) {
+   public Point getNewPoint(ArrayList<Point> plist, ArrayDeque<Line> lstack) {
       if (this.inBounds) {
          TreeMap<Double, Point> distPoint = new TreeMap<>();
          plist.forEach(p -> distPoint.put(this.distanceTo(p), p));       // keep track of how far away each point is
          while (!distPoint.isEmpty()) {
-            Point np = distPoint.remove(distPoint.firstKey());
-            if (np != this.p && np != this.q && isOnExtendedSide(np) && areaWith(np) < AREA_MAX) {
-               if (lstack.stream().anyMatch(l -> l.hasPoint(np) && (l.hasPoint(this.p) || l.hasPoint(this.q)))
-                  || freshPoints.remove(np)) {
+            Point np = distPoint.remove(distPoint.firstKey());    // go through points closest to farthest
+            if (!this.hasPoint(np) && isOnExtendedSide(np) && areaWith(np) < AREA_MAX) {
+               if (np.isFresh()) {
+                  np.setNotFresh();
+                  return np;
+               }
+               if (lstack.stream().anyMatch(l -> l.hasPoint(np) && (l.hasPoint(this.p) || l.hasPoint(this.q)))) {
                   return np;
                }
             }

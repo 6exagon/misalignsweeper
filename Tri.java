@@ -10,8 +10,8 @@ public class Tri {
    private Point[] points;
    
    //Correctly initializes using Line and list of points to pull from
-   public Tri(Line start, ArrayList<Point> pts, HashSet<Point> fps, ArrayDeque<Line> lstack) throws IndexOutOfBoundsException {
-      Point pt = start.getNewPoint(pts, fps, lstack);
+   public Tri(Line start, ArrayList<Point> pts, ArrayDeque<Line> lstack) throws IndexOutOfBoundsException {
+      Point pt = start.getNewPoint(pts, lstack);
       if (pt == null)
          throw new IndexOutOfBoundsException();
       Line l2 = new Line(start.getQ(), pt);

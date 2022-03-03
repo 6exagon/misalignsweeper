@@ -15,7 +15,7 @@ public class MisalignSweeper {
    public static final double SEP_DIST = 0.05;
    public static boolean firstClick = true;
    public static double triToPolyRate = 0.3;
-   public static long seed = rand.nextLong();
+   public static long seed;
    
    //Scheduled main method essentially
    public static void create() {
@@ -40,52 +40,54 @@ public class MisalignSweeper {
       polys.clear();
       polyToGon.clear();
       
-      ArrayList<Point> points = new ArrayList<>();
-      HashSet<Point> freshPoints = new HashSet<>();
-      Collections.addAll(points, new Point(0.45, 0.5), new Point(0.55, 0.5));
-      
-      generatePoints(points, freshPoints);
-      generatePolys(points, freshPoints);
+      generatePolys();
       generateAWTPolygons(500, 500);
       firstClick = true;
       
    }
    
    // Generates the Points for the game board
-   private static void generatePoints(ArrayList<Point> pts, HashSet<Point> fps) {
+   private static ArrayList<Point> generatePoints() {
+      ArrayList<Point> points = new ArrayList<>();
+      Collections.addAll(points, new Point(0.45, 0.5), new Point(0.55, 0.5));
+      points.forEach(Point::setNotFresh);
+      
       pointLoop:
       for (int x = 0; x < numPoints;) {
          Point p = new Point(rand.nextDouble() * 1.4 - 0.2, rand.nextDouble() * 1.4 - 0.2);
          if (p.isNearBorder()) {
             continue;
          }
-         for (Point p2 : pts) {
+         for (Point p2 : points) {
             if (p.isInBounds() == p2.isInBounds()) {
                if (Math.abs(p.getX() - p2.getX()) + Math.abs(p.getY() - p2.getY()) < SEP_DIST) {
                   continue pointLoop;
                }
             }
          }
-         pts.add(p);
-         fps.add(p);
+         points.add(p);
          x++;
       }
+      return points;
    }
    
    //Generates all Tris
-   private static HashSet<Tri> generateTris(ArrayList<Point> pts, HashSet<Point> fps) {
+   private static HashSet<Tri> generateTris() {
+      ArrayList<Point> pts = generatePoints();
+   
       HashSet<Tri> tris = new HashSet<>();
       Line startLine = new Line(pts.get(0), pts.get(1));
       ArrayDeque<Line> lineStack = new ArrayDeque<>();
-      Tri initialTriangle = new Tri(startLine, pts, fps, lineStack);
+      Tri initialTriangle = new Tri(startLine, pts, lineStack);
       Collections.addAll(lineStack, initialTriangle.getLines());
       startLine.extend(false);
       tris.add(initialTriangle);
       while (lineStack.stream().anyMatch(Line::isInBounds)) {
          Line firstLine = lineStack.removeFirst();
          try {
-            Tri tri = new Tri(firstLine, pts, fps, lineStack);
+            Tri tri = new Tri(firstLine, pts, lineStack);
             tris.add(tri);
+            // Make line references match those in the line stack
             for (int y = 1; y < 3; y++) {
                Line ythLine = tri.getLines()[y];
                Line simLine = ythLine.getSimilarLine(lineStack);
@@ -105,8 +107,8 @@ public class MisalignSweeper {
    }
    
    // Generates higher-sided polygons from triangles
-   private static void generatePolys(ArrayList<Point> points, HashSet<Point> freshPoints) {
-      for (Tri tri : generateTris(points, freshPoints)) {
+   private static void generatePolys() {
+      for (Tri tri : generateTris()) {
          if (tri.getPoly() != null)
             continue;
          HashSet<Tri> polysTris = new HashSet<>();
@@ -118,7 +120,7 @@ public class MisalignSweeper {
             if (otherTri == null || otherTri.getPoly() != null)
                continue;
             // random chance of merging                 auto-merge if too small
-            if (rand.nextDouble() < triToPolyRate || otherTri.area() < 0.001 || tri.area() < 0.001) {
+            if (rand.nextDouble() >= triToPolyRate || otherTri.area() < 0.001 || tri.area() < 0.001) {
                polysTris.add(otherTri);
                for (Line otherLine : otherTri.getLines()) {
                   if (!polysLines.remove(otherLine)) {  // remove repeats to avoid stray lines

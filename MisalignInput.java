@@ -11,26 +11,17 @@ public class MisalignInput implements MouseListener, KeyListener {
    @Override
    public void mouseClicked(MouseEvent e) {
       Poly poly = MisalignSweeper.getClickedPoly(e.getX() / MisalignGraphics.getXM(), e.getY() / MisalignGraphics.getYM());
-      if (poly == null) {
-         System.err.println("Could not find a polygon at that location. :(");
-         return;
-      } else if (MisalignGraphics.playingLossAnimation || !MisalignGraphics.getTimer().getSwingTimer().isRunning()) {
-         System.out.println("Game already lost :(");
-         return;
-      }
       
-      if (((e.getButton() == MouseEvent.BUTTON3) || (e.getButton() == MouseEvent.BUTTON1 && e.isControlDown())) && !poly.isPressed()) { //right click (or ctrl click) on open or flagged tile
-         poly.flag();
-         MisalignSweeper.repaint();
-      } else if (e.getButton() == MouseEvent.BUTTON1 && poly.isNormal()) { //left click on open tile
-         poly.reveal();
-         MisalignSweeper.repaint();
-      } else if (poly.isPressed()) { // right or left clicked on revealed tile
-         System.out.println("Tile already revealed");
-      } else if (poly.isFlagged()) { // left clicked on flagged tile
-         System.out.println("Cannot reveal flagged tile");
+      if (poly == null || MisalignGraphics.playingLossAnimation || !MisalignGraphics.getTimer().getSwingTimer().isRunning()) {
+         return;
       }
-
+      // right click (or ctrl click) on open or flagged tile
+      if (((e.getButton() == MouseEvent.BUTTON3) || (e.getButton() == MouseEvent.BUTTON1 && e.isControlDown()))) {
+         poly.flag();
+      } else if (e.getButton() == MouseEvent.BUTTON1) { // left click on open tile
+         poly.reveal();
+      }
+      MisalignSweeper.repaint();
    }
    
    @Override
