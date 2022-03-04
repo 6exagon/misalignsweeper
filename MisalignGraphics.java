@@ -277,8 +277,8 @@ public class MisalignGraphics {
    
    //Returns what color a revealed poly should be
    public static Color getColor(int level) {
-      Color[] colors = {
-         Color.GRAY, Color.BLUE, Color.GREEN, Color.RED, new Color(0, 0, 60),
+      Color[] colors = {         // Dark green
+         Color.GRAY, Color.BLUE, new Color(9, 137, 58), Color.RED, new Color(0, 0, 60),
          Color.MAGENTA, Color.CYAN, Color.BLACK, Color.GRAY, Color.PINK, new Color(200, 100, 0)};
       if (level < 11) {
          return colors[level];
