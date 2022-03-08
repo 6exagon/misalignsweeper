@@ -21,6 +21,10 @@ public class Line {
       this.b = p.getY() - this.m * p.getX();
       this.tris = new Tri[2];
       this.inBounds = (this.p.isInBounds() || this.q.isInBounds());
+      if (!this.inBounds && Math.floor(p.getX()) != Math.floor(q.getX()) && Math.floor(p.getY()) != Math.floor(q.getY())) {
+         double wallX = (Math.floor(p.getX()) == Math.ceil(q.getX())) ? Math.floor(p.getX()) : Math.floor(q.getX());
+         this.inBounds = (this.at(wallX) > 0 && this.at(wallX) < 1);
+      }
       this.midpoint = new Point((this.p.getX() + this.q.getX()) / 2, (this.p.getY() + this.q.getY()) / 2);
    }
    

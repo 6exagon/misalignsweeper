@@ -10,7 +10,7 @@ public class MisalignInput implements MouseListener, KeyListener {
    // Required methods for MouseListener
    @Override
    public void mouseClicked(MouseEvent e) {
-      Poly poly = MisalignSweeper.getClickedPoly(e.getX() / MisalignGraphics.getXM(), e.getY() / MisalignGraphics.getYM());
+      Poly poly = Misalignsweeper.getClickedPoly(e.getX() / MisalignGraphics.getXM(), e.getY() / MisalignGraphics.getYM());
       
       if (poly == null || MisalignGraphics.playingLossAnimation || !MisalignGraphics.getTimer().getSwingTimer().isRunning()) {
          return;
@@ -21,7 +21,7 @@ public class MisalignInput implements MouseListener, KeyListener {
       } else if (e.getButton() == MouseEvent.BUTTON1) { // left click on open tile
          poly.reveal();
       }
-      MisalignSweeper.repaint();
+      Misalignsweeper.repaint();
    }
    
    @Override
@@ -39,7 +39,7 @@ public class MisalignInput implements MouseListener, KeyListener {
             konamiCodeEntered = true;
             System.out.println("CODE ENTERED");
             MisalignGraphics.getSettings().addSecretSettings();
-            MisalignSweeper.repaint();
+            Misalignsweeper.repaint();
          } 
          i++;
       } else if (!(keyText.equals("Up") && i == 2))//accounts for pressing Up more than twice to start

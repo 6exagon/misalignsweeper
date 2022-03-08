@@ -47,10 +47,11 @@ public class MisalignGraphics {
    public static void createAndShowGUI(HashMap<Poly, Polygon> polygonMap, Random rand) {
       polyToGon = polygonMap;
       
+      settings = new SettingsPanel();
       createFrame();
       addCardPanel();
       addGamePanel(rand);
-      addSettingsPanel();
+      cardPanel.add(settings, "settings");
       addButtonPanel();
       addTimer();
       addMineCounter();
@@ -83,7 +84,7 @@ public class MisalignGraphics {
    // Creates the cardPanel containing the game board and settings
    public static void addCardPanel() {
       cardPanel = new JPanel(new CardLayout());
-      cardPanel.setBorder(new CompoundBorder(LOWERED, new LineBorder(Color.BLACK, 1)));
+      cardPanel.setBorder(new CompoundBorder(LOWERED, new LineBorder(settings.getColor(0), 1)));
       cardLayout = (CardLayout) cardPanel.getLayout();
 
       cMain.weighty = 1;
@@ -96,12 +97,6 @@ public class MisalignGraphics {
    public static void addGamePanel(Random rand) {
       gamePanel = new GamePanel(polyToGon, rand);
       cardPanel.add(gamePanel, "gamePanel"); 
-   }
-   
-   //Creates settings
-   public static void addSettingsPanel() {
-      settings = new SettingsPanel();
-      cardPanel.add(settings, "settings");
    }
    
    // Creates panel to hold buttons, timer, mine counter
@@ -130,9 +125,9 @@ public class MisalignGraphics {
    
    //Creates mine counter (displays number of flags player has left)
    public static void addMineCounter() {
-      mineCounter = new JLabel(MisalignSweeper.numFlags + "");
-      mineCounter.setForeground(Color.RED);
-      mineCounter.setBackground(Color.BLACK);
+      mineCounter = new JLabel(Misalignsweeper.numFlags + "");
+      mineCounter.setForeground(settings.getColor(7));
+      mineCounter.setBackground(settings.getColor(8));
       mineCounter.setOpaque(true);
       mineCounter.setBorder(BorderFactory.createEmptyBorder(2, 5, 0, 5));
       mineCounter.setFont(new Font("Consolas", Font.PLAIN, 20));
@@ -156,17 +151,17 @@ public class MisalignGraphics {
          @Override
          public void mouseReleased(MouseEvent e) {
             if (!gamePaused && !playingLossAnimation) {
-               MisalignSweeper.numPoints = settings.getPoints();
-               MisalignSweeper.numMines = settings.getMines();
-               MisalignSweeper.numFlags = MisalignSweeper.numMines;
-               MisalignSweeper.triToPolyRate = settings.getTriRate();
-               //MisalignSweeper.seed = settings.getSeed();
+               Misalignsweeper.numPoints = settings.getPoints();
+               Misalignsweeper.numMines = settings.getMines();
+               Misalignsweeper.numFlags = Misalignsweeper.numMines;
+               Misalignsweeper.triToPolyRate = settings.getTriRate();
+               //Misalignsweeper.seed = settings.getSeed();
                
                smile.setBorder(RAISED);
                smile.setIcon(SMILE_ICON);
                gameWon = false;
-               MisalignSweeper.generateBoard();
-               mineCounter.setText(MisalignSweeper.numFlags + "");
+               Misalignsweeper.generateBoard();
+               mineCounter.setText(Misalignsweeper.numFlags + "");
                cardLayout.show(cardPanel, "gamePanel");
                timer.restart();
                mainPanel.repaint();
@@ -191,7 +186,7 @@ public class MisalignGraphics {
                cardLayout.show(cardPanel, "gamePanel");
             else {
                cardLayout.show(cardPanel, "settings");
-               SettingsPanel.seedTextField.setText("" + MisalignSweeper.seed);
+               SettingsPanel.seedTextField.setText("" + Misalignsweeper.seed);
             }
             gamePaused = !gamePaused;
          }
@@ -214,16 +209,7 @@ public class MisalignGraphics {
    
    //Returns what color a revealed poly should be
    public static Color getColor(int level) {
-      Color[] colors = {
-         Color.GRAY, Color.BLUE, Color.GREEN, Color.RED, new Color(0, 0, 60),
-         Color.MAGENTA, Color.CYAN, Color.BLACK, Color.GRAY, Color.PINK, new Color(200, 100, 0)};
-      if (level < 11) {
-         return colors[level];
-      } else if (level < 30) {
-         return new Color(256 - level * 8, 300 - level * 10, 0);
-      } else {
-         return Color.WHITE;
-      }
+      return (level == 0) ? settings.getColor(9) : settings.getColor((level - 1) % 10 + 10);
    }
    
    // Checks if the player has won or lost

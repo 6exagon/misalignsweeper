@@ -24,7 +24,7 @@ public class GamePanel extends JPanel {
       if (!MisalignGraphics.gamePaused) {
          MisalignGraphics.setXM(this.getWidth());
          MisalignGraphics.setYM(this.getHeight());
-         MisalignSweeper.generateAWTPolygons(MisalignGraphics.getXM(), MisalignGraphics.getYM());
+         Misalignsweeper.generateAWTPolygons(MisalignGraphics.getXM(), MisalignGraphics.getYM());
          for (Poly poly : polyToGon.keySet()) {
             displayPolyColor(poly, g2);
             drawImageInMine(poly, g2);
@@ -40,20 +40,20 @@ public class GamePanel extends JPanel {
       if (poly.isPressed()) {
          switch (poly.getDisplayState()) {
             case -2:
-               g2.setColor(Color.RED); //mine that was actually clicked is in red
+               g2.setColor(MisalignGraphics.getSettings().getColor(1)); //mine that was actually clicked is in red
                break;
             case -1:
-               g2.setColor(Color.LIGHT_GRAY); //other mines revealed are light gray
+               g2.setColor(MisalignGraphics.getSettings().getColor(2)); //other mines revealed are light gray
                break;
             default:
                g2.setColor(MisalignGraphics.getColor(poly.getDisplayState()));
          }
       } else if (poly.isFlagged())
-         g2.setColor(Color.YELLOW);
+         g2.setColor(MisalignGraphics.getSettings().getColor(3));
       else if (MisalignGraphics.getSettings().colorfulModeChecked())
          g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256))); //colorful mode
       else
-         g2.setColor(Color.WHITE);
+         g2.setColor(MisalignGraphics.getSettings().getColor(4));
       g2.fillPolygon(polyToGon.get(poly));
    }
 
@@ -61,18 +61,20 @@ public class GamePanel extends JPanel {
 
    public void drawImageInMine(Poly poly, Graphics2D g2) {
       //draws flag/num/mine in poly after coloring poly
-      if (poly.isPressed() && poly.getDisplayState() > 0)
-         poly.drawNum(g2);
-      else if (poly.isFlagged())
+      if (poly.isPressed() && poly.getDisplayState() > 0) {
+         g2.setColor(MisalignGraphics.getSettings().getColor(20));
+         poly.drawNum(g2);  
+      } else if (poly.isFlagged()) {
          poly.drawImageInPoly(g2, MisalignGraphics.FLAG_IMAGE);
-      else if (poly.getDisplayState() < 0 && MisalignGraphics.playingLossAnimation)
+      } else if (poly.getDisplayState() < 0 && MisalignGraphics.playingLossAnimation) {
          poly.drawImageInPoly(g2, MisalignGraphics.MINE_IMAGE);   
+      }
    }
 
 
 
    public void drawPolyOutline(HashMap<Poly, Polygon> polyToGon, Graphics2D g2) {
-      g2.setColor(Color.BLACK);
+      g2.setColor(MisalignGraphics.getSettings().getColor(0));
       if (!MisalignGraphics.getSettings().noLinesModeChecked()) {
          for (Polygon gon : polyToGon.values())
             g2.drawPolygon(gon); // render polygons' outlines
@@ -84,12 +86,12 @@ public class GamePanel extends JPanel {
       g2.setFont(new Font("Monospaced", Font.BOLD, 64));
       FontMetrics fm = g2.getFontMetrics();//used to get width of string with current font
       if (MisalignGraphics.playingLossAnimation) {
-         g2.setColor(Color.RED);
-         String lossText = "You lose";                  
+         g2.setColor(MisalignGraphics.getSettings().getColor(5));
+         String lossText = "YOU LOSE";                  
          g2.drawString(lossText, (this.getWidth() - fm.stringWidth(lossText)) / 2, (this.getHeight() - fm.getHeight()) / 2);//centered horizontally, just above middle vertically
       } else if (MisalignGraphics.gameWon()) {
-         g2.setColor(Color.GREEN);
-         String winText = "YOU WIN!";
+         g2.setColor(MisalignGraphics.getSettings().getColor(6));
+         String winText = "YOU WIN";
          g2.drawString(winText, (this.getWidth() - fm.stringWidth(winText)) / 2, (this.getHeight() - fm.getHeight()) / 2);               
       }
    }
