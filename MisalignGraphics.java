@@ -18,12 +18,12 @@ public class MisalignGraphics {
    private static final Border LOWERED = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
    private static final Border RAISED = BorderFactory.createBevelBorder(BevelBorder.RAISED); 
    private static final int ICON_SIZE = 30;
-   private static final ImageIcon SMILE_ICON = getScaledImageIcon("images/smile.png", ICON_SIZE, -1); //-1 keeps original w:h ratio
-   private static final ImageIcon FROWN_ICON = getScaledImageIcon("images/dead.png", ICON_SIZE, -1);
-   private static final ImageIcon GLASSES_ICON = getScaledImageIcon("images/glasses.png", ICON_SIZE, -1);
-   private static final ImageIcon PAUSE_ICON = getScaledImageIcon("images/pause.png", ICON_SIZE, -1);
-   private static final Image FLAG_IMAGE = new ImageIcon(MisalignGraphics.class.getResource("images/flag.png")).getImage();
-   private static final Image MINE_IMAGE = new ImageIcon(MisalignGraphics.class.getResource("images/mine.png")).getImage();
+   public static final ImageIcon SMILE_ICON = getScaledImageIcon("images/smile.png", ICON_SIZE, -1); //-1 keeps original w:h ratio
+   public static final ImageIcon FROWN_ICON = getScaledImageIcon("images/dead.png", ICON_SIZE, -1);
+   public static final ImageIcon GLASSES_ICON = getScaledImageIcon("images/glasses.png", ICON_SIZE, -1);
+   public static final ImageIcon PAUSE_ICON = getScaledImageIcon("images/pause.png", ICON_SIZE, -1);
+   public static final Image FLAG_IMAGE = new ImageIcon(MisalignGraphics.class.getResource("images/flag.png")).getImage();
+   public static final Image MINE_IMAGE = new ImageIcon(MisalignGraphics.class.getResource("images/mine.png")).getImage();
    private static final int LOSS_ANIMATION_DELAY = 25; //in milliseconds
      
    //JComponents (swing components)
@@ -68,11 +68,12 @@ public class MisalignGraphics {
       
       mainPanel = new JPanel(new GridBagLayout()); //mainPanel contains everything
       mainPanel.setBorder(RAISED);
+      
       frame.add(mainPanel);
             
       cMain = new GridBagConstraints(); //constraints for mainPanel layout
-      int insetMain = 5;
-      cMain.insets = new Insets(insetMain, insetMain, insetMain, insetMain); //no, there isn't a better constructor
+      int iMain = 5;
+      cMain.insets = new Insets(iMain, iMain, iMain, iMain); //no, there isn't a better constructor
       cMain.gridwidth = 2;
       cMain.anchor = GridBagConstraints.CENTER;
       cMain.fill = GridBagConstraints.BOTH;
@@ -93,70 +94,7 @@ public class MisalignGraphics {
    
    //Creates panel that game is played on
    public static void addGamePanel(Random rand) {
-      gamePanel = new JPanel() {
-         @Override
-         public void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2 = (Graphics2D) g;
-         
-            if (!playingLossAnimation && !gamePaused)
-               checkGameEnd();
-
-            if (!gamePaused) {
-               xm = this.getWidth();
-               ym = this.getHeight();
-               MisalignSweeper.generateAWTPolygons(xm, ym);
-               for (Poly poly : polyToGon.keySet()) {
-                  if (poly.isPressed()) {
-                     switch (poly.getDisplayState()) {
-                        case -2:
-                           g2.setColor(Color.RED); //mine that was actually clicked is in red
-                           break;
-                        case -1:
-                           g2.setColor(Color.LIGHT_GRAY); //other mines revealed are light gray
-                           break;
-                        default:
-                           g2.setColor(getColor(poly.getDisplayState()));
-                     }
-                  } else if (poly.isFlagged())
-                     g2.setColor(Color.YELLOW);
-                  else if (settings.colorfulModeChecked())
-                     g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256))); //colorful mode
-                  else
-                     g2.setColor(Color.WHITE);
-                  g2.fillPolygon(polyToGon.get(poly));
-                  
-                  //draws flag/num/mine in poly after coloring poly
-                  if (poly.isPressed() && poly.getDisplayState() > 0)
-                     poly.drawNum(g2);
-                  else if (poly.isFlagged())
-                     poly.drawImageInPoly(g2, FLAG_IMAGE);
-                  else if (poly.getDisplayState() < 0 && playingLossAnimation)
-                     poly.drawImageInPoly(g2, MINE_IMAGE);
-               }
-               
-               g2.setColor(Color.BLACK);
-               if (!settings.noLinesModeChecked()) {
-                  for (Polygon gon : polyToGon.values())
-                     g2.drawPolygon(gon); // render polygons' outlines
-               }
-               
-               // win and loss text              
-               g2.setFont(new Font("Monospaced", Font.BOLD, 64));
-               FontMetrics fm = g2.getFontMetrics();//used to get width of string with current font
-               if (playingLossAnimation) {
-                  g2.setColor(Color.RED);
-                  String lossText = "You lose";                  
-                  g2.drawString(lossText, (gamePanel.getWidth() - fm.stringWidth(lossText)) / 2, (gamePanel.getHeight() - fm.getHeight()) / 2);//centered horizontally, just above middle vertically
-               } else if (gameWon) {
-                  g2.setColor(Color.GREEN);
-                  String winText = "YOU WIN!";
-                  g2.drawString(winText, (gamePanel.getWidth() - fm.stringWidth(winText)) / 2, (gamePanel.getHeight() - fm.getHeight()) / 2);               
-               }
-            }
-         }
-      };
-      gamePanel.setPreferredSize(new Dimension(500, 500));
+      gamePanel = new GamePanel(polyToGon, rand);
       cardPanel.add(gamePanel, "gamePanel"); 
    }
    
@@ -176,8 +114,8 @@ public class MisalignGraphics {
       mainPanel.add(buttonPanel, cMain);
       
       cButtons = new GridBagConstraints(); //constraints for layout within panel
-      int insetButtons = 3;
-      cButtons.insets = new Insets(insetButtons, insetButtons, insetButtons, insetButtons);
+      int iButtons = 3;
+      cButtons.insets = new Insets(iButtons, iButtons, iButtons, iButtons);
       cButtons.weightx = 1.0;
    }
    
@@ -266,7 +204,6 @@ public class MisalignGraphics {
       cButtons.gridx = 3;
       cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(pause, cButtons);
-      
 
       gamePanel.addMouseListener(new MisalignInput());
       frame.pack();
@@ -368,4 +305,10 @@ public class MisalignGraphics {
       return mineCounter;
    }
    
+   public static void setXM(double value) {
+      xm = value;
+   }  
+   public static void setYM(double value) {
+      ym = value;
+   }
 }

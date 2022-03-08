@@ -62,7 +62,7 @@ public class CustomTimer extends JLabel {
       this.timer.stop();
    }
    
-   // Retruns the swing Timer within the CustomTimer
+   // Returns the swing Timer within the CustomTimer
    public Timer getSwingTimer() {
       return this.timer;
    }
