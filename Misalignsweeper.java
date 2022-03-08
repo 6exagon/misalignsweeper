@@ -3,7 +3,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class MisalignSweeper {
+public class Misalignsweeper {
    
    private static final HashSet<Poly> polys = new HashSet<>();
    private static final HashMap<Poly, Polygon> polyToGon = new HashMap<>();
@@ -172,6 +172,6 @@ public class MisalignSweeper {
 
    public static void main(String[] args) {
       //Schedule a job for the event-dispatching thread
-      SwingUtilities.invokeLater(MisalignSweeper::create);
+      SwingUtilities.invokeLater(Misalignsweeper::create);
    }
 }

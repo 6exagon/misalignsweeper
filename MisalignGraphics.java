@@ -47,10 +47,11 @@ public class MisalignGraphics {
    public static void createAndShowGUI(HashMap<Poly, Polygon> polygonMap, Random rand) {
       polyToGon = polygonMap;
       
+      settings = new SettingsPanel();
       createFrame();
       addCardPanel();
       addGamePanel(rand);
-      addSettingsPanel();
+      cardPanel.add(settings, "settings");
       addButtonPanel();
       addTimer();
       addMineCounter();
@@ -82,7 +83,7 @@ public class MisalignGraphics {
    // Creates the cardPanel containing the game board and settings
    public static void addCardPanel() {
       cardPanel = new JPanel(new CardLayout());
-      cardPanel.setBorder(new CompoundBorder(LOWERED, new LineBorder(Color.BLACK, 1)));
+      cardPanel.setBorder(new CompoundBorder(LOWERED, new LineBorder(settings.getColor(0), 1)));
       cardLayout = (CardLayout) cardPanel.getLayout();
 
       cMain.weighty = 1;
@@ -105,37 +106,39 @@ public class MisalignGraphics {
             if (!gamePaused) {
                xm = this.getWidth();
                ym = this.getHeight();
-               MisalignSweeper.generateAWTPolygons(xm, ym);
+               Misalignsweeper.generateAWTPolygons(xm, ym);
                for (Poly poly : polyToGon.keySet()) {
                   if (poly.isPressed()) {
                      switch (poly.getDisplayState()) {
                         case -2:
-                           g2.setColor(Color.RED); //mine that was actually clicked is in red
+                           g2.setColor(settings.getColor(1)); //mine that was actually clicked is in red
                            break;
                         case -1:
-                           g2.setColor(Color.LIGHT_GRAY); //other mines revealed are light gray
+                           g2.setColor(settings.getColor(2)); //other mines revealed are light gray
                            break;
                         default:
                            g2.setColor(getColor(poly.getDisplayState()));
                      }
                   } else if (poly.isFlagged())
-                     g2.setColor(Color.YELLOW);
+                     g2.setColor(settings.getColor(3));
                   else if (settings.colorfulModeChecked())
                      g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256))); //colorful mode
                   else
-                     g2.setColor(Color.WHITE);
+                     g2.setColor(settings.getColor(4));
                   g2.fillPolygon(polyToGon.get(poly));
                   
                   //draws flag/num/mine in poly after coloring poly
-                  if (poly.isPressed() && poly.getDisplayState() > 0)
+                  if (poly.isPressed() && poly.getDisplayState() > 0) {
+                     g2.setColor(settings.getColor(20));
                      poly.drawNum(g2);
-                  else if (poly.isFlagged())
+                  } else if (poly.isFlagged()) {
                      poly.drawImageInPoly(g2, FLAG_IMAGE);
-                  else if (poly.getDisplayState() < 0 && playingLossAnimation)
+                  } else if (poly.getDisplayState() < 0 && playingLossAnimation) {
                      poly.drawImageInPoly(g2, MINE_IMAGE);
+                  }
                }
                
-               g2.setColor(Color.BLACK);
+               g2.setColor(settings.getColor(0));
                if (!settings.noLinesModeChecked()) {
                   for (Polygon gon : polyToGon.values())
                      g2.drawPolygon(gon); // render polygons' outlines
@@ -145,12 +148,12 @@ public class MisalignGraphics {
                g2.setFont(new Font("Monospaced", Font.BOLD, 64));
                FontMetrics fm = g2.getFontMetrics();//used to get width of string with current font
                if (playingLossAnimation) {
-                  g2.setColor(Color.RED);
-                  String lossText = "You lose";                  
+                  g2.setColor(settings.getColor(5));
+                  String lossText = "YOU LOSE";                  
                   g2.drawString(lossText, (gamePanel.getWidth() - fm.stringWidth(lossText)) / 2, (gamePanel.getHeight() - fm.getHeight()) / 2);//centered horizontally, just above middle vertically
                } else if (gameWon) {
-                  g2.setColor(Color.GREEN);
-                  String winText = "YOU WIN!";
+                  g2.setColor(settings.getColor(6));
+                  String winText = "YOU WIN";
                   g2.drawString(winText, (gamePanel.getWidth() - fm.stringWidth(winText)) / 2, (gamePanel.getHeight() - fm.getHeight()) / 2);               
                }
             }
@@ -158,12 +161,6 @@ public class MisalignGraphics {
       };
       gamePanel.setPreferredSize(new Dimension(500, 500));
       cardPanel.add(gamePanel, "gamePanel"); 
-   }
-   
-   //Creates settings
-   public static void addSettingsPanel() {
-      settings = new SettingsPanel();
-      cardPanel.add(settings, "settings");
    }
    
    // Creates panel to hold buttons, timer, mine counter
@@ -192,9 +189,9 @@ public class MisalignGraphics {
    
    //Creates mine counter (displays number of flags player has left)
    public static void addMineCounter() {
-      mineCounter = new JLabel(MisalignSweeper.numFlags + "");
-      mineCounter.setForeground(Color.RED);
-      mineCounter.setBackground(Color.BLACK);
+      mineCounter = new JLabel(Misalignsweeper.numFlags + "");
+      mineCounter.setForeground(settings.getColor(7));
+      mineCounter.setBackground(settings.getColor(8));
       mineCounter.setOpaque(true);
       mineCounter.setBorder(BorderFactory.createEmptyBorder(2, 5, 0, 5));
       mineCounter.setFont(new Font("Consolas", Font.PLAIN, 20));
@@ -218,17 +215,17 @@ public class MisalignGraphics {
          @Override
          public void mouseReleased(MouseEvent e) {
             if (!gamePaused && !playingLossAnimation) {
-               MisalignSweeper.numPoints = settings.getPoints();
-               MisalignSweeper.numMines = settings.getMines();
-               MisalignSweeper.numFlags = MisalignSweeper.numMines;
-               MisalignSweeper.triToPolyRate = settings.getTriRate();
-               //MisalignSweeper.seed = settings.getSeed();
+               Misalignsweeper.numPoints = settings.getPoints();
+               Misalignsweeper.numMines = settings.getMines();
+               Misalignsweeper.numFlags = Misalignsweeper.numMines;
+               Misalignsweeper.triToPolyRate = settings.getTriRate();
+               //Misalignsweeper.seed = settings.getSeed();
                
                smile.setBorder(RAISED);
                smile.setIcon(SMILE_ICON);
                gameWon = false;
-               MisalignSweeper.generateBoard();
-               mineCounter.setText(MisalignSweeper.numFlags + "");
+               Misalignsweeper.generateBoard();
+               mineCounter.setText(Misalignsweeper.numFlags + "");
                cardLayout.show(cardPanel, "gamePanel");
                timer.restart();
                mainPanel.repaint();
@@ -253,7 +250,7 @@ public class MisalignGraphics {
                cardLayout.show(cardPanel, "gamePanel");
             else {
                cardLayout.show(cardPanel, "settings");
-               SettingsPanel.seedTextField.setText("" + MisalignSweeper.seed);
+               SettingsPanel.seedTextField.setText("" + Misalignsweeper.seed);
             }
             gamePaused = !gamePaused;
          }
@@ -277,16 +274,7 @@ public class MisalignGraphics {
    
    //Returns what color a revealed poly should be
    public static Color getColor(int level) {
-      Color[] colors = {         // Dark green
-         Color.GRAY, Color.BLUE, new Color(9, 137, 58), Color.RED, new Color(0, 0, 60),
-         Color.MAGENTA, Color.CYAN, Color.BLACK, Color.GRAY, Color.PINK, new Color(200, 100, 0)};
-      if (level < 11) {
-         return colors[level];
-      } else if (level < 30) {
-         return new Color(256 - level * 8, 300 - level * 10, 0);
-      } else {
-         return Color.WHITE;
-      }
+      return (level == 0) ? settings.getColor(9) : settings.getColor((level - 1) % 10 + 10);
    }
    
    // Checks if the player has won or lost

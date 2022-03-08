@@ -47,8 +47,6 @@ public class Poly {
    }
    
    public void drawNum(Graphics2D g2) {
-      g2.setColor(Color.WHITE);
-      
       int midX = (int) (this.midpoint.getX() * MisalignGraphics.getXM());
       int midY = (int) (this.midpoint.getY() * MisalignGraphics.getYM());
       
@@ -80,7 +78,7 @@ public class Poly {
    public void calcMidpoint() {
       Point centroid = calcCentroid(this.points);
       Optional<Tri> bigTri = Optional.empty();  // keep track of biggest tri, if it uses it, for size purposes
-      if (MisalignSweeper.getClickedPoly(centroid.getX(), centroid.getY()) != this) {
+      if (Misalignsweeper.getClickedPoly(centroid.getX(), centroid.getY()) != this) {
          bigTri = Stream.of(tris).max((t, t2) -> Double.compare(t.area(), t2.area()));
          centroid = calcCentroid(bigTri.get().getPoints());
       }
@@ -136,9 +134,9 @@ public class Poly {
    
    public void reveal() {
       if (this.visible == Visibility.NORMAL) {
-         if (MisalignSweeper.firstClick) {
-            MisalignSweeper.firstClick = false;
-            MisalignSweeper.generateMines(this);
+         if (Misalignsweeper.firstClick) {
+            Misalignsweeper.firstClick = false;
+            Misalignsweeper.generateMines(this);
          }
          this.visible = Visibility.PRESSED;
          if (this.surroundingMines == -1) {
@@ -157,12 +155,12 @@ public class Poly {
    public void flag() {
       if (this.visible == Visibility.FLAG) {
          this.visible = Visibility.NORMAL;
-         MisalignSweeper.numFlags++;
-      } else if (MisalignSweeper.numFlags != 0 && this.visible == Visibility.NORMAL) {
+         Misalignsweeper.numFlags++;
+      } else if (Misalignsweeper.numFlags != 0 && this.visible == Visibility.NORMAL) {
          this.visible = Visibility.FLAG;
-         MisalignSweeper.numFlags--;
+         Misalignsweeper.numFlags--;
       }
-      MisalignGraphics.getMineCounter().setText(MisalignSweeper.numFlags + "");
+      MisalignGraphics.getMineCounter().setText(Misalignsweeper.numFlags + "");
    }
    
    //Updates surrounding mine (should be done once all mines are placed)
