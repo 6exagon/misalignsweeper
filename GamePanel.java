@@ -37,7 +37,7 @@ public class GamePanel extends JPanel {
       
    }
 
-   //Fills poly with correct color bacsed on display state and settings
+   //Fills poly with correct color based on display state and settings
    public void displayPolyColor(Poly poly, Graphics2D g2) {
       if (poly.isPressed()) {
          switch (poly.getDisplayState()) {

@@ -15,8 +15,8 @@ public class MisalignGraphics {
    private static HashMap<Poly, Polygon> polyToGon;
    
    //Constants
-   private static final Border LOWERED = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
-   private static final Border RAISED = BorderFactory.createBevelBorder(BevelBorder.RAISED); 
+   private static final Border LOWERED = BorderFactory.createBevelBorder(BevelBorder.LOWERED, Color.YELLOW, Color.MAGENTA); //NEEDS COLOR (replace yellow with outline, magenta with shadow)
+   private static final Border RAISED = BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.YELLOW, Color.MAGENTA); //NEEDS COLOR (above but for raised bevel)
    private static final int ICON_SIZE = 30;
    public static final ImageIcon SMILE_ICON = getScaledImageIcon("images/smile.png", ICON_SIZE, -1); //-1 keeps original w:h ratio
    public static final ImageIcon FROWN_ICON = getScaledImageIcon("images/dead.png", ICON_SIZE, -1);
@@ -69,6 +69,7 @@ public class MisalignGraphics {
       
       mainPanel = new JPanel(new GridBagLayout()); //mainPanel contains everything
       mainPanel.setBorder(RAISED);
+      mainPanel.setBackground(Color.BLUE); //NEEDS COLOR (match with color that's repainted on release of pause)
       
       frame.add(mainPanel);
             
@@ -103,6 +104,7 @@ public class MisalignGraphics {
    public static void addButtonPanel() {
       buttonPanel = new JPanel(new GridBagLayout());
       buttonPanel.setBorder(LOWERED);
+      buttonPanel.setBackground(Color.RED); //NEEDS COLOR (match with color that's repainted on release of pause)
       cMain.gridx = 0;
       cMain.gridy = 0;
       cMain.weighty = 0;
@@ -194,11 +196,17 @@ public class MisalignGraphics {
          public void mouseReleased(MouseEvent e) {
             pause.setBorder(RAISED);
             
-            //sets counter and timer color to match theme
+            //sets colors to match theme
             mineCounter.setForeground(settings.getColor(7));
             mineCounter.setBackground(settings.getColor(8));
             timer.setForeground(settings.getColor(7));
             timer.setBackground(settings.getColor(8));
+            buttonPanel.setBackground(Color.RED); //NEEDS COLOR (color of panel with button and the background color of buttons)
+            mainPanel.setBackground(Color.BLUE); //NEEDS COLOR (color of the space between the game and button panel)
+            
+            
+            
+            
             
          }
       });
