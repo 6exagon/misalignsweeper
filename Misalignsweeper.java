@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.stream.*;
 
 public class Misalignsweeper {
    
@@ -14,7 +15,7 @@ public class Misalignsweeper {
    public static int numPoints = 700;
    public static final double SEP_DIST = 0.05;
    public static boolean firstClick = true;
-   public static double triToPolyRate = 0.3;
+   public static double triToPolyRate = 0.8;
    public static long seed;
    
    //Scheduled main method essentially
@@ -119,23 +120,39 @@ public class Misalignsweeper {
          HashSet<Line> polysLines = new HashSet<>();
          Collections.addAll(polysLines, tri.getLines());
          polysTris.add(tri);
-         for (Line l : tri.getLines()) {   // goes through all adjacent tri's
-            Tri otherTri = l.getTris()[l.getTris()[0] == tri ? 1 : 0];
-            if (otherTri == null || otherTri.getPoly() != null)
-               continue;
-            // random chance of merging                 auto-merge if too small
-            if (rand.nextDouble() >= triToPolyRate || otherTri.area() < 0.001 || tri.area() < 0.001) {
-               polysTris.add(otherTri);
-               for (Line otherLine : otherTri.getLines()) {
-                  if (!polysLines.remove(otherLine)) {  // remove repeats to avoid stray lines
-                     polysLines.add(otherLine);
-                  }
-               }
-            }
-         }
+         
+         // Adds the tris on the outskirts of the poly several times
+         for (int i = 0; i <= rand.nextInt(3) + rand.nextInt(3); i++)
+            addSurroundingTrisToPoly(polysTris, polysLines, false);
+         addSurroundingTrisToPoly(polysTris, polysLines, true); // run through to catch the corners
+         
          polys.add(new Poly(polysTris.toArray(new Tri[0]), polysLines.toArray(new Line[0])));
       }
       polys.forEach(Poly::calcMidpoint);
+   }
+   
+   // Each round of poly-nation
+   private static void addSurroundingTrisToPoly(HashSet<Tri> polysTris, HashSet<Line> polysLines, boolean onlyCorners) {
+      HashSet<Line> lineShell = new HashSet<>(polysLines);
+      for (Line line : lineShell) {   // goes through all adjacent tri's
+         Tri otherTri = line.getTris()[polysTris.contains(line.getTris()[0]) ? 1 : 0];
+         if (otherTri == null || otherTri.getPoly() != null || polysTris.contains(otherTri))
+            continue;
+         
+         Point newPoint = otherTri.getThirdPoint(line); // prevents looping back around on itself
+         if (polysLines.stream().anyMatch(l -> l.hasPoint(newPoint)) && !onlyCorners)
+            continue;
+                           //    random chance of merging          auto-merge if too small
+         if (!onlyCorners ? (rand.nextDouble() >= triToPolyRate || otherTri.area() < 0.001)
+                          : Stream.of(line.getTris()).anyMatch(Tri::isCorner)) { // either side is a corner
+            polysTris.add(otherTri);
+            for (Line otherLine : otherTri.getLines()) {
+               if (!polysLines.remove(otherLine)) {  // remove repeats to avoid stray lines
+                  polysLines.add(otherLine);
+               }
+            }
+         }
+      }
    }
 
    // Converts a Poly into a renderable Polygon
