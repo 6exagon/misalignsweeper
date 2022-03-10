@@ -49,6 +49,15 @@ public class Tri {
       return this.points;
    }
    
+   public boolean isCorner() {
+      return Stream.of(this.lines).filter(Line::isInBounds).count() == 1;
+   }
+   
+   // Gets the point in this Tri that isn't on the line
+   public Point getThirdPoint(Line l) {
+      return Stream.of(this.points).filter(p -> !l.hasPoint(p)).findFirst().orElse(null);
+   }
+   
    // Returns the area of this tri
    public double area() {
       return this.lines[0].areaWith(this.points[0]);
