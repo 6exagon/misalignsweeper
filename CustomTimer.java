@@ -26,10 +26,10 @@ public class CustomTimer extends JLabel {
       };
       this.timer = new Timer(delay, taskPerformer);
       this.timerPaused = false;
-      this.setForeground(Color.RED);
+      this.setForeground(MisalignGraphics.getSettings().getColor(7));
       this.setFont(new Font("Consolas", Font.PLAIN, 20)); //might eventually change to custom 7 sgement font
       this.setText("00:00"); 
-      this.setBackground(Color.BLACK);
+      this.setBackground(MisalignGraphics.getSettings().getColor(8));
       this.setOpaque(true);
       this.setBorder(BorderFactory.createEmptyBorder(2, 5, 0, 5));
    }

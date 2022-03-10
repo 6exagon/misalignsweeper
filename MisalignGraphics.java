@@ -155,7 +155,6 @@ public class MisalignGraphics {
                Misalignsweeper.numMines = settings.getMines();
                Misalignsweeper.numFlags = Misalignsweeper.numMines;
                Misalignsweeper.triToPolyRate = settings.getTriRate();
-               //Misalignsweeper.seed = settings.getSeed();
                
                smile.setBorder(RAISED);
                smile.setIcon(SMILE_ICON);
@@ -194,6 +193,13 @@ public class MisalignGraphics {
          @Override
          public void mouseReleased(MouseEvent e) {
             pause.setBorder(RAISED);
+            
+            //sets counter and timer color to match theme
+            mineCounter.setForeground(settings.getColor(7));
+            mineCounter.setBackground(settings.getColor(8));
+            timer.setForeground(settings.getColor(7));
+            timer.setBackground(settings.getColor(8));
+            
          }
       });
       cButtons.gridx = 3;
