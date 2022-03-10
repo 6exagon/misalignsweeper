@@ -72,7 +72,7 @@ public class Tri {
    public int hashCode() {
       int hash = 0;
       for (Point p : this.points) {
-         hash += (int) (500 * p.getX()) << 16 + (int) (500 * p.getY());
+         hash += (int) (512 * p.getX()) << 16 + (int) (512 * p.getY());
       }
       return hash;
    }

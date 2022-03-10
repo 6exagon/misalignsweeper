@@ -127,4 +127,9 @@ public class Line {
    public boolean spansY(double y) {
       return (y > this.p.getY()) ^ (y > this.q.getY());
    }
+   
+   public int hashCode() {
+      return (int) (512 * p.getX()) << 16 + (int) (512 * p.getY())
+           + (int) (512 * q.getX()) << 16 + (int) (512 * q.getY());
+   }
 }
