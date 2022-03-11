@@ -29,7 +29,7 @@ public class SettingsPanel extends JPanel {
       c.gridy = 4;
       this.addLabeledTextField("Seed: ", "" + Misalignsweeper.seed);
       c.gridy = 5;
-      this.addLabeledSpinner("Theme", 1, 1, 4, 1, c);
+      this.addLabeledSpinner("Theme", 1, 1, 5, 1, c);
       this.colorfulModeCheckBox = new JCheckBox("Colorful");
       this.noLinesModeCheckBox = new JCheckBox("No lines");
       try {
