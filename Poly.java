@@ -142,7 +142,6 @@ public class Poly {
          if (this.surroundingMines == -1) {
             if (!MisalignGraphics.playingLossAnimation) {
                this.surroundingMines = -2;
-               System.out.println("You lost"); //prints once (not for every mine during animation)
             }
          } else if (this.surroundingMines == 0)
             for (Line l : lines)

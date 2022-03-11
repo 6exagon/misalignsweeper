@@ -27,7 +27,7 @@ public class MisalignInput implements MouseListener, KeyListener {
    @Override
    public void keyPressed(KeyEvent e) {
       String keyText = e.getKeyText(e.getKeyCode());
-      //System.out.println(keyText);
+      System.out.println(keyText);
       if (!konamiCodeEntered)
          checkKonami(keyText);
    }
@@ -37,7 +37,6 @@ public class MisalignInput implements MouseListener, KeyListener {
       if (keyText == code[i]) {
          if (i + 1 == code.length) {
             konamiCodeEntered = true;
-            System.out.println("CODE ENTERED");
             MisalignGraphics.getSettings().addSecretSettings();
             Misalignsweeper.repaint();
          } 

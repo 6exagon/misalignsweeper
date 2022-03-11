@@ -20,15 +20,12 @@ public class SettingsPanel extends JPanel {
       this.setLayout(new GridBagLayout());
       this.c = new GridBagConstraints();
       this.add(new JLabel("Settings"));
-      c.gridy = 1;
+      c.gridy = 0;
       this.addLabeledSpinner("Number of Points", Misalignsweeper.numPoints, 600, 800, 25, c);
-      c.gridy = 2;
-      this.addLabeledSpinner("Number of Mines", Misalignsweeper.numMines, 25, 100, 5, c); 
-      c.gridy = 3;
-      this.addLabeledSpinner("Triangle Rate", (int)(Misalignsweeper.triToPolyRate * 10), 0, 10, 1, c); 
-      c.gridy = 4;
+      this.addLabeledSpinner("Number of Mines", Misalignsweeper.numMines, 25, 100, 5, c);
+      this.addLabeledSpinner("Triangle Rate", (int)(Misalignsweeper.triToPolyRate * 10), 0, 10, 1, c);
+      this.addLabeledSpinner("Polygon Iteration", Misalignsweeper.polyIteration, 2, 4, 1, c);
       this.addLabeledTextField("Seed: ", "" + Misalignsweeper.seed);
-      c.gridy = 5;
       this.addLabeledSpinner("Theme", 1, 1, 5, 1, c);
       this.colorfulModeCheckBox = new JCheckBox("Colorful");
       this.noLinesModeCheckBox = new JCheckBox("No lines");
@@ -41,13 +38,13 @@ public class SettingsPanel extends JPanel {
    
    //Add secret settings to setting menu (colorful mode, no lines mode)
    public void addSecretSettings() {
-      c.gridy = 6;
+      c.gridy++;
       this.add(new JLabel("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"), c);
-      c.gridy = 7;
+      c.gridy++;
       this.add(new JLabel("Secret Settings"), c);
-      c.gridy = 8;
+      c.gridy++;
       this.add(colorfulModeCheckBox, c);
-      c.gridy = 9;
+      c.gridy++;
       this.add(noLinesModeCheckBox, c);
       this.repaint();
       this.revalidate(); //revalidate needed to see immediate update if in settings when code is entered
@@ -60,10 +57,11 @@ public class SettingsPanel extends JPanel {
       
       JSpinner spin = new JSpinner(new SpinnerNumberModel(start, min, max, step));
       spin.setEditor(new JSpinner.DefaultEditor(spin));
-      spin.setPreferredSize(new Dimension(44, 30));
+      spin.setPreferredSize(new Dimension(60, 30));
       
       labelWithSpinner.add(spin);
       spinners.add(spin);
+      c.gridy++;
       this.add(labelWithSpinner, c);      
    }
    
@@ -86,6 +84,7 @@ public class SettingsPanel extends JPanel {
       labelWithTextField.add(new JLabel(labelText));
       labelWithTextField.add(seedTextField);
       labelWithTextField.add(seedSubmitButton);
+      c.gridy++;
       this.add(labelWithTextField, c);   
    }
    
@@ -110,7 +109,7 @@ public class SettingsPanel extends JPanel {
    
    //Gets correct color given palette
    public Color getColor(int index) {
-      return colors[(Integer) spinners.get(3).getValue() - 1][index];
+      return colors[(Integer) spinners.get(4).getValue() - 1][index];
    }
    
    // Returns points spinner value
@@ -126,6 +125,11 @@ public class SettingsPanel extends JPanel {
    // Returns tri to poly rate spinner value
    public double getTriRate() {
       return (int) spinners.get(2).getValue() / 10.0;
+   }
+   
+   // Returns the width of the bell curve on polygon generation
+   public int getPolyIteration() {
+      return (Integer)spinners.get(3).getValue();
    }
    
    // Returns if colorful mode is enabled

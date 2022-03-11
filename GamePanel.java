@@ -12,6 +12,7 @@ public class GamePanel extends JPanel {
       this.polyToGon = polyToGon;
       this.rand = rand;
       this.setPreferredSize(new Dimension(500, 500));
+      this.setFont(new Font("Impact", Font.PLAIN, 64));
    }
    
    //Draws the game board
@@ -81,7 +82,7 @@ public class GamePanel extends JPanel {
 
    //Displays win or loss text (centered horizontally, just above the middle vertically)
    public void displayResult(Graphics2D g2) {
-      g2.setFont(new Font("Monospaced", Font.BOLD, 64));
+      g2.setFont(new Font(g2.getFont().getName(), g2.getFont().getStyle(), 64));
       FontMetrics fm = g2.getFontMetrics();//used to get width of string with current font
       if (MisalignGraphics.playingLossAnimation) {
          g2.setColor(MisalignGraphics.getSettings().getColor(5));

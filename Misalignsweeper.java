@@ -13,6 +13,7 @@ public class Misalignsweeper {
    public static int numMines = 50;
    public static int numFlags = numMines;
    public static int numPoints = 700;
+   public static int polyIteration = 3;
    public static final double SEP_DIST = 0.05;
    public static boolean firstClick = true;
    public static double triToPolyRate = 0.8;
@@ -35,7 +36,7 @@ public class Misalignsweeper {
          try {
             seed = Long.valueOf(SettingsPanel.seedTextField.getText());
          } catch (NumberFormatException e) {
-            System.err.println("Illegal seed");   
+            seed = 0;
          }
          SettingsPanel.customSeedEntered = false;
       } else {
@@ -122,8 +123,9 @@ public class Misalignsweeper {
          polysTris.add(tri);
          
          // Adds the tris on the outskirts of the poly several times
-         for (int i = 0; i <= rand.nextInt(3) + rand.nextInt(3); i++)
+         for (int i = 0; i <= rand.nextInt(polyIteration) + rand.nextInt(polyIteration); i++) {
             addSurroundingTrisToPoly(polysTris, polysLines, false);
+         }
          addSurroundingTrisToPoly(polysTris, polysLines, true); // run through to catch the corners
          
          polys.add(new Poly(polysTris.toArray(new Tri[0]), polysLines.toArray(new Line[0])));

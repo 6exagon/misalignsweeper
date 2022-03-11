@@ -132,7 +132,7 @@ public class MisalignGraphics {
       mineCounter.setBackground(settings.getColor(8));
       mineCounter.setOpaque(true);
       mineCounter.setBorder(BorderFactory.createEmptyBorder(2, 5, 0, 5));
-      mineCounter.setFont(new Font("Consolas", Font.PLAIN, 20));
+      mineCounter.setFont(new Font("Courier New", Font.BOLD, 26));
       cButtons.gridx = 2;
       cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(mineCounter, cButtons);
@@ -157,6 +157,7 @@ public class MisalignGraphics {
                Misalignsweeper.numMines = settings.getMines();
                Misalignsweeper.numFlags = Misalignsweeper.numMines;
                Misalignsweeper.triToPolyRate = settings.getTriRate();
+               Misalignsweeper.polyIteration = settings.getPolyIteration();
                
                smile.setBorder(RAISED);
                smile.setIcon(SMILE_ICON);
