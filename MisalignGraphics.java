@@ -199,7 +199,6 @@ public class MisalignGraphics {
       
          @Override
          public void mouseReleased(MouseEvent e) {
-            pause.setBorder(raisedBorder);
             
             //sets colors to match theme
             mineCounter.setForeground(settings.getColor(7));
@@ -212,10 +211,8 @@ public class MisalignGraphics {
             loweredBorder = BorderFactory.createBevelBorder(BevelBorder.LOWERED, settings.getColor(23), settings.getColor(24));
             raisedBorder = BorderFactory.createBevelBorder(BevelBorder.RAISED, settings.getColor(23), settings.getColor(24));
             
-            buttonPanel.remove(smile);
-            buttonPanel.remove(pause);
-            addSmile();
-            addPause();
+            smile.setBorder(raisedBorder);
+            pause.setBorder(raisedBorder);
          }
       });
       cButtons.gridx = 3;
