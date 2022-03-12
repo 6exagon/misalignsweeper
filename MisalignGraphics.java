@@ -15,8 +15,6 @@ public class MisalignGraphics {
    private static HashMap<Poly, Polygon> polyToGon;
    
    //Constants
-   private static final Border LOWERED = BorderFactory.createBevelBorder(BevelBorder.LOWERED, Color.YELLOW, Color.MAGENTA); //NEEDS COLOR (replace yellow with outline, magenta with shadow)
-   private static final Border RAISED = BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.YELLOW, Color.MAGENTA); //NEEDS COLOR (above but for raised bevel)
    private static final int ICON_SIZE = 30;
    public static final ImageIcon SMILE_ICON = getScaledImageIcon("images/smile.png", ICON_SIZE, -1); //-1 keeps original w:h ratio
    public static final ImageIcon FROWN_ICON = getScaledImageIcon("images/dead.png", ICON_SIZE, -1);
@@ -36,7 +34,10 @@ public class MisalignGraphics {
    private static CustomTimer timer;
    private static JLabel mineCounter;
    private static JLabel smile;
-   private static JLabel pause; 
+   private static JLabel pause;
+   private static Border loweredBorder;
+   private static Border raisedBorder;
+
    
    //Layouts/layout managers for components
    private static CardLayout cardLayout;
@@ -48,6 +49,9 @@ public class MisalignGraphics {
       polyToGon = polygonMap;
       
       settings = new SettingsPanel();
+      loweredBorder = BorderFactory.createBevelBorder(BevelBorder.LOWERED, settings.getColor(23), settings.getColor(24));
+      raisedBorder = BorderFactory.createBevelBorder(BevelBorder.RAISED, settings.getColor(23), settings.getColor(24));
+      
       createFrame();
       addCardPanel();
       addGamePanel(rand);
@@ -68,8 +72,8 @@ public class MisalignGraphics {
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       
       mainPanel = new JPanel(new GridBagLayout()); //mainPanel contains everything
-      mainPanel.setBorder(RAISED);
-      mainPanel.setBackground(Color.BLUE); //NEEDS COLOR (match with color that's repainted on release of pause)
+      mainPanel.setBorder(raisedBorder);
+      mainPanel.setBackground(settings.getColor(21)); // match with color that's repainted on release of pause
       
       frame.add(mainPanel);
             
@@ -85,7 +89,7 @@ public class MisalignGraphics {
    // Creates the cardPanel containing the game board and settings
    public static void addCardPanel() {
       cardPanel = new JPanel(new CardLayout());
-      cardPanel.setBorder(new CompoundBorder(LOWERED, new LineBorder(settings.getColor(0), 1)));
+      cardPanel.setBorder(new CompoundBorder(loweredBorder, new LineBorder(settings.getColor(0), 1)));
       cardLayout = (CardLayout) cardPanel.getLayout();
 
       cMain.weighty = 1;
@@ -103,8 +107,8 @@ public class MisalignGraphics {
    // Creates panel to hold buttons, timer, mine counter
    public static void addButtonPanel() {
       buttonPanel = new JPanel(new GridBagLayout());
-      buttonPanel.setBorder(LOWERED);
-      buttonPanel.setBackground(Color.RED); //NEEDS COLOR (match with color that's repainted on release of pause)
+      buttonPanel.setBorder(loweredBorder);
+      buttonPanel.setBackground(settings.getColor(22)); // match with color that's repainted on release of pause
       cMain.gridx = 0;
       cMain.gridy = 0;
       cMain.weighty = 0;
@@ -142,12 +146,12 @@ public class MisalignGraphics {
    public static void addSmile() {
       frame.setIconImage(SMILE_ICON.getImage());
       smile = new JLabel(SMILE_ICON);
-      smile.setBorder(RAISED);
+      smile.setBorder(raisedBorder);
       smile.addMouseListener(new MouseAdapter() {
          @Override
          public void mousePressed(MouseEvent e) {
             if (!gamePaused && !playingLossAnimation)
-               smile.setBorder(LOWERED);
+               smile.setBorder(loweredBorder);
          }
       
          @Override
@@ -159,7 +163,7 @@ public class MisalignGraphics {
                Misalignsweeper.triToPolyRate = settings.getTriRate();
                Misalignsweeper.polyIteration = settings.getPolyIteration();
                
-               smile.setBorder(RAISED);
+               smile.setBorder(raisedBorder);
                smile.setIcon(SMILE_ICON);
                gameWon = false;
                Misalignsweeper.generateBoard();
@@ -178,11 +182,11 @@ public class MisalignGraphics {
    //Creates pause button (that toggles between settings and the game)
    public static void addPause() {
       pause = new JLabel(PAUSE_ICON);
-      pause.setBorder(RAISED);
+      pause.setBorder(raisedBorder);
       pause.addMouseListener(new MouseAdapter() {
          @Override
          public void mousePressed(MouseEvent e) {
-            pause.setBorder(LOWERED);
+            pause.setBorder(loweredBorder);
             timer.togglePause();
             if (gamePaused)
                cardLayout.show(cardPanel, "gamePanel");
@@ -195,20 +199,23 @@ public class MisalignGraphics {
       
          @Override
          public void mouseReleased(MouseEvent e) {
-            pause.setBorder(RAISED);
+            pause.setBorder(raisedBorder);
             
             //sets colors to match theme
             mineCounter.setForeground(settings.getColor(7));
             mineCounter.setBackground(settings.getColor(8));
             timer.setForeground(settings.getColor(7));
             timer.setBackground(settings.getColor(8));
-            buttonPanel.setBackground(Color.RED); //NEEDS COLOR (color of panel with button and the background color of buttons)
-            mainPanel.setBackground(Color.BLUE); //NEEDS COLOR (color of the space between the game and button panel)
+            buttonPanel.setBackground(settings.getColor(22)); // color of panel with button and the background color of buttons
+            mainPanel.setBackground(settings.getColor(21)); // color of the space between the game and button panel
             
+            loweredBorder = BorderFactory.createBevelBorder(BevelBorder.LOWERED, settings.getColor(23), settings.getColor(24));
+            raisedBorder = BorderFactory.createBevelBorder(BevelBorder.RAISED, settings.getColor(23), settings.getColor(24));
             
-            
-            
-            
+            buttonPanel.remove(smile);
+            buttonPanel.remove(pause);
+            addSmile();
+            addPause();
          }
       });
       cButtons.gridx = 3;

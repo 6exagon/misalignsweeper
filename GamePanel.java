@@ -82,17 +82,17 @@ public class GamePanel extends JPanel {
 
    //Displays win or loss text (centered horizontally, just above the middle vertically)
    public void displayResult(Graphics2D g2) {
-      g2.setFont(new Font(g2.getFont().getName(), g2.getFont().getStyle(), 64));
-      FontMetrics fm = g2.getFontMetrics();//used to get width of string with current font
-      if (MisalignGraphics.playingLossAnimation) {
-         g2.setColor(MisalignGraphics.getSettings().getColor(5));
-         String lossText = "YOU LOSE";                  
-         g2.drawString(lossText, (this.getWidth() - fm.stringWidth(lossText)) / 2, (this.getHeight() - fm.getHeight()) / 2);
-      } else if (MisalignGraphics.gameWon()) {
-         g2.setColor(MisalignGraphics.getSettings().getColor(6));
-         String winText = "YOU WIN";
-         g2.drawString(winText, (this.getWidth() - fm.stringWidth(winText)) / 2, (this.getHeight() - fm.getHeight()) / 2);               
+      g2.setFont(g2.getFont().deriveFont(70f));
+      FontMetrics fm = g2.getFontMetrics();
+      boolean won = MisalignGraphics.gameWon();
+      if (MisalignGraphics.playingLossAnimation || won) {
+         String endText = won ? "YOU WIN" : "YOU LOSE";
+         int tx = (this.getWidth() - fm.stringWidth(endText)) / 2;
+         int ty = (this.getHeight() - fm.getHeight()) / 2;
+         g2.setColor(MisalignGraphics.getSettings().getColor(8));
+         g2.drawString(endText, tx - 2, ty + 2);  // draw shadow
+         g2.setColor(MisalignGraphics.getSettings().getColor(won ? 6 : 5));
+         g2.drawString(endText, tx, ty);
       }
    }
-   
 }

@@ -25,7 +25,7 @@ public class SettingsPanel extends JPanel {
       this.addLabeledSpinner("Number of Mines", Misalignsweeper.numMines, 25, 100, 5, c);
       this.addLabeledSpinner("Triangle Rate", (int)(Misalignsweeper.triToPolyRate * 10), 0, 10, 1, c);
       this.addLabeledSpinner("Polygon Iteration", Misalignsweeper.polyIteration, 2, 4, 1, c);
-      this.addLabeledTextField("Seed: ", "" + Misalignsweeper.seed);
+      this.addLabeledTextField("Seed:", "" + Misalignsweeper.seed);
       this.addLabeledSpinner("Theme", 1, 1, 5, 1, c);
       this.colorfulModeCheckBox = new JCheckBox("Colorful");
       this.noLinesModeCheckBox = new JCheckBox("No lines");
@@ -53,11 +53,11 @@ public class SettingsPanel extends JPanel {
    // Adds a panel containing a label and spinner to the settings panel
    private void addLabeledSpinner(String text, int start, int min, int max, int step, GridBagConstraints c) {
       JPanel labelWithSpinner = new JPanel();
-      labelWithSpinner.add(new JLabel(text + ":   "));
+      labelWithSpinner.add(new JLabel(text + ":"));
       
       JSpinner spin = new JSpinner(new SpinnerNumberModel(start, min, max, step));
       spin.setEditor(new JSpinner.DefaultEditor(spin));
-      spin.setPreferredSize(new Dimension(60, 30));
+      spin.setPreferredSize(new Dimension(50, 30));
       
       labelWithSpinner.add(spin);
       spinners.add(spin);

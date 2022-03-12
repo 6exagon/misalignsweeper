@@ -51,10 +51,8 @@ public class Poly {
       int midY = (int) (this.midpoint.getY() * MisalignGraphics.getYM());
       
       int numSize = (int)(polySize * Math.min(MisalignGraphics.getXM(), MisalignGraphics.getYM()));
-      
-      g2.setFont(new Font(g2.getFont().getName(), 
-                  g2.getFont().getStyle(), 
-                  numSize));
+      // Set the font size to fit in the Poly
+      g2.setFont(g2.getFont().deriveFont((float) numSize));
       
       midX -= numSize / 4;  // about 1/2 as wide as tall
       midY += numSize / 2;

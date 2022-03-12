@@ -3,7 +3,7 @@ import java.util.*;
 
 public class MisalignInput implements MouseListener, KeyListener {
    
-   public static final String[] code = {"Up", "Up", "Down", "Down", "Left", "Right", "Left", "Right"};
+   public static final int[] code = {38, 38, 40, 40, 37, 39, 37, 39};
    public static int i = 0;
    public static boolean konamiCodeEntered = false;
    
@@ -26,22 +26,21 @@ public class MisalignInput implements MouseListener, KeyListener {
    
    @Override
    public void keyPressed(KeyEvent e) {
-      String keyText = e.getKeyText(e.getKeyCode());
-      System.out.println(keyText);
-      if (!konamiCodeEntered)
-         checkKonami(keyText);
+      if (!konamiCodeEntered) {
+         checkKonami(e.getKeyCode());
+      }
    }
    
    //Checks if the Konami Code has been entered
-   private void checkKonami(String keyText) {
-      if (keyText == code[i]) {
+   private void checkKonami(int keyCode) {
+      if (keyCode == code[i]) {
          if (i + 1 == code.length) {
             konamiCodeEntered = true;
             MisalignGraphics.getSettings().addSecretSettings();
             Misalignsweeper.repaint();
          } 
          i++;
-      } else if (!(keyText.equals("Up") && i == 2))//accounts for pressing Up more than twice to start
+      } else if (keyCode != 38 && i == 2)//accounts for pressing Up more than twice to start
          i = 0;
    }
 
