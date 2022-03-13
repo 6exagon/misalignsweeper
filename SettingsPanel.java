@@ -13,6 +13,7 @@ public class SettingsPanel extends JPanel {
    private JCheckBox colorfulModeCheckBox;
    private JCheckBox noLinesModeCheckBox;
    public static boolean customSeedEntered = false;
+   private static final Random rand = new Random();
    private Color[][] colors;
    
    public SettingsPanel(){
@@ -29,11 +30,7 @@ public class SettingsPanel extends JPanel {
       this.addLabeledSpinner("Theme", 1, 1, 5, 1, c);
       this.colorfulModeCheckBox = new JCheckBox("Colorful");
       this.noLinesModeCheckBox = new JCheckBox("No lines");
-      try {
-         readColors("palette.ppm");
-      } catch (FileNotFoundException e) {
-         colors = new Color[21][4];
-      }
+      readColors("palette.ppm");
    }
    
    //Add secret settings to setting menu (colorful mode, no lines mode)
@@ -89,7 +86,7 @@ public class SettingsPanel extends JPanel {
    }
    
    //Reads color palette from (ASCII) .ppm image
-   private void readColors(String filename) throws FileNotFoundException {
+   private void readColors(String filename) {
       Scanner sc = new Scanner(getClass().getResourceAsStream(filename));
       if (!sc.next().equals("P3")) {
          return;
@@ -109,6 +106,9 @@ public class SettingsPanel extends JPanel {
    
    //Gets correct color given palette
    public Color getColor(int index) {
+      if ((index == 0 || index == 4) && this.colorfulModeCheckBox.isSelected()) {
+         return new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
+      }
       return colors[(Integer) spinners.get(4).getValue() - 1][index];
    }
    
@@ -130,11 +130,6 @@ public class SettingsPanel extends JPanel {
    // Returns the width of the bell curve on polygon generation
    public int getPolyIteration() {
       return (Integer)spinners.get(3).getValue();
-   }
-   
-   // Returns if colorful mode is enabled
-   public boolean colorfulModeChecked() {
-      return this.colorfulModeCheckBox.isSelected();
    }
    
    // Returns if no lines mode is enabled

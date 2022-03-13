@@ -53,8 +53,6 @@ public class GamePanel extends JPanel {
          }
       } else if (poly.isFlagged())
          g2.setColor(MisalignGraphics.getSettings().getColor(3));
-      else if (MisalignGraphics.getSettings().colorfulModeChecked())
-         g2.setColor(new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256))); //colorful mode
       else
          g2.setColor(MisalignGraphics.getSettings().getColor(4)); //unrevealed tile color
       g2.fillPolygon(polyToGon.get(poly));
