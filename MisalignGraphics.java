@@ -150,13 +150,15 @@ public class MisalignGraphics {
       smile.addMouseListener(new MouseAdapter() {
          @Override
          public void mousePressed(MouseEvent e) {
-            if (!gamePaused && !playingLossAnimation)
+            if (!gamePaused)
                smile.setBorder(loweredBorder);
          }
       
          @Override
          public void mouseReleased(MouseEvent e) {
-            if (!gamePaused && !playingLossAnimation) {
+            if (!gamePaused) {
+               playingLossAnimation = false;
+               
                Misalignsweeper.numPoints = settings.getPoints();
                Misalignsweeper.numMines = settings.getMines();
                Misalignsweeper.numFlags = Misalignsweeper.numMines;
@@ -187,6 +189,10 @@ public class MisalignGraphics {
          @Override
          public void mousePressed(MouseEvent e) {
             pause.setBorder(loweredBorder);
+         }
+      
+         @Override
+         public void mouseReleased(MouseEvent e) {
             timer.togglePause();
             if (gamePaused)
                cardLayout.show(cardPanel, "gamePanel");
@@ -195,10 +201,6 @@ public class MisalignGraphics {
                SettingsPanel.seedTextField.setText("" + Misalignsweeper.seed);
             }
             gamePaused = !gamePaused;
-         }
-      
-         @Override
-         public void mouseReleased(MouseEvent e) {
             
             //sets colors to match theme
             mineCounter.setForeground(settings.getColor(7));

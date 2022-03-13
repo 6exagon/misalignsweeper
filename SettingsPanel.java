@@ -90,7 +90,7 @@ public class SettingsPanel extends JPanel {
    
    //Reads color palette from (ASCII) .ppm image
    private void readColors(String filename) throws FileNotFoundException {
-      Scanner sc = new Scanner(new File(filename));
+      Scanner sc = new Scanner(getClass().getResourceAsStream(filename));
       if (!sc.next().equals("P3")) {
          return;
       }

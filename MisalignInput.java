@@ -9,7 +9,7 @@ public class MisalignInput implements MouseListener, KeyListener {
    
    // Required methods for MouseListener
    @Override
-   public void mouseClicked(MouseEvent e) {
+   public void mousePressed(MouseEvent e) {
       Poly poly = Misalignsweeper.getClickedPoly(e.getX() / MisalignGraphics.getXM(), e.getY() / MisalignGraphics.getYM());
       
       if (poly == null || MisalignGraphics.playingLossAnimation || !MisalignGraphics.getTimer().getSwingTimer().isRunning()) {
@@ -45,7 +45,7 @@ public class MisalignInput implements MouseListener, KeyListener {
    }
 
    @Override
-   public void mousePressed(MouseEvent e) { }
+   public void mouseClicked(MouseEvent e) { }
 
    @Override
    public void mouseReleased(MouseEvent e) { }
