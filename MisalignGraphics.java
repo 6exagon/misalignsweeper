@@ -38,7 +38,6 @@ public class MisalignGraphics {
    private static Border loweredBorder;
    private static Border raisedBorder;
 
-   
    //Layouts/layout managers for components
    private static CardLayout cardLayout;
    private static GridBagConstraints cMain;
@@ -61,29 +60,30 @@ public class MisalignGraphics {
       addMineCounter();
       addSmile();
       addPause();
+      showGame();
     }
    
-   //Creates the window and the main panel that contain everything
+   // Creates the window and the main panel that contains everything
    public static void createFrame() {
       frame = new JFrame("Misalignsweeper");
-      frame.setMinimumSize(new Dimension(400, 425));
+      frame.setMinimumSize(new Dimension(400, 445));
       frame.setFocusable(true);
       frame.addKeyListener(new MisalignInput());
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       
-      mainPanel = new JPanel(new GridBagLayout()); //mainPanel contains everything
+      mainPanel = new JPanel(new GridBagLayout()); 
       mainPanel.setBorder(raisedBorder);
       mainPanel.setBackground(settings.getColor(21)); // match with color that's repainted on release of pause
       
       frame.add(mainPanel);
             
-      cMain = new GridBagConstraints(); //constraints for mainPanel layout
+      cMain = new GridBagConstraints(); // constraints for mainPanel layout
       int iMain = 5;
-      cMain.insets = new Insets(iMain, iMain, iMain, iMain); //no, there isn't a better constructor
+      cMain.insets = new Insets(iMain, iMain, iMain, iMain); // no, there isn't a better constructor
       cMain.gridwidth = 2;
       cMain.anchor = GridBagConstraints.CENTER;
       cMain.fill = GridBagConstraints.BOTH;
-      cMain.weightx = 1;
+      cMain.weightx = 1; // needed for main panel to fit width of screen on resize
    }
    
    // Creates the cardPanel containing the game board and settings
@@ -98,7 +98,7 @@ public class MisalignGraphics {
       mainPanel.add(cardPanel, cMain);
    }
    
-   //Creates panel that game is played on
+   // Creates panel that game is played on
    public static void addGamePanel(Random rand) {
       gamePanel = new GamePanel(polyToGon, rand);
       cardPanel.add(gamePanel, "gamePanel"); 
@@ -114,13 +114,13 @@ public class MisalignGraphics {
       cMain.weighty = 0;
       mainPanel.add(buttonPanel, cMain);
       
-      cButtons = new GridBagConstraints(); //constraints for layout within panel
+      cButtons = new GridBagConstraints(); // constraints for layout within button panel
       int iButtons = 3;
       cButtons.insets = new Insets(iButtons, iButtons, iButtons, iButtons);
       cButtons.weightx = 1.0;
    }
    
-   //Creates in-game timer
+   // Creates in-game timer
    public static void addTimer() {
       timer = new CustomTimer();
       timer.start();
@@ -129,20 +129,20 @@ public class MisalignGraphics {
       buttonPanel.add(timer, cButtons);
    }
    
-   //Creates mine counter (displays number of flags player has left)
+   // Creates mine counter (displays number of flags player has left)
    public static void addMineCounter() {
       mineCounter = new JLabel(Misalignsweeper.numFlags + "");
       mineCounter.setForeground(settings.getColor(7));
       mineCounter.setBackground(settings.getColor(8));
       mineCounter.setOpaque(true);
-      mineCounter.setBorder(BorderFactory.createEmptyBorder(2, 5, 0, 5));
+      mineCounter.setBorder(BorderFactory.createEmptyBorder(2, 5, 0, 5)); // small internal padding
       mineCounter.setFont(new Font("Courier New", Font.BOLD, 26));
       cButtons.gridx = 2;
       cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(mineCounter, cButtons);
    }
    
-   //Creates smile/reset button
+   // Creates smile/reset button
    public static void addSmile() {
       frame.setIconImage(SMILE_ICON.getImage());
       smile = new JLabel(SMILE_ICON);
@@ -159,6 +159,7 @@ public class MisalignGraphics {
             if (!gamePaused) {
                playingLossAnimation = false;
                
+               // takes settings for next game from settings menu
                Misalignsweeper.numPoints = settings.getPoints();
                Misalignsweeper.numMines = settings.getMines();
                Misalignsweeper.numFlags = Misalignsweeper.numMines;
@@ -181,7 +182,7 @@ public class MisalignGraphics {
       buttonPanel.add(smile, cButtons);
    }
    
-   //Creates pause button (that toggles between settings and the game)
+   // Creates pause button (that toggles between settings and game)
    public static void addPause() {
       pause = new JLabel(PAUSE_ICON);
       pause.setBorder(raisedBorder);
@@ -202,13 +203,13 @@ public class MisalignGraphics {
             }
             gamePaused = !gamePaused;
             
-            //sets colors to match theme
+            // sets colors to match theme
             mineCounter.setForeground(settings.getColor(7));
             mineCounter.setBackground(settings.getColor(8));
             timer.setForeground(settings.getColor(7));
             timer.setBackground(settings.getColor(8));
-            buttonPanel.setBackground(settings.getColor(22)); // color of panel with button and the background color of buttons
-            mainPanel.setBackground(settings.getColor(21)); // color of the space between the game and button panel
+            buttonPanel.setBackground(settings.getColor(22)); // color of panel with buttons and the background color of buttons
+            mainPanel.setBackground(settings.getColor(21)); // color of the outside space/space between game and button panel
             
             loweredBorder = BorderFactory.createBevelBorder(BevelBorder.LOWERED, settings.getColor(23), settings.getColor(24));
             raisedBorder = BorderFactory.createBevelBorder(BevelBorder.RAISED, settings.getColor(23), settings.getColor(24));
@@ -220,15 +221,16 @@ public class MisalignGraphics {
       cButtons.gridx = 3;
       cButtons.anchor = GridBagConstraints.LINE_END;
       buttonPanel.add(pause, cButtons);
-
+   }
+   
+   // Adds input listener to the game panel then shows the window
+   public static void showGame() {
       gamePanel.addMouseListener(new MisalignInput());
       frame.pack();
       frame.setVisible(true);
    }
-
    
-   
-   //Returns what color a revealed poly should be
+   // Returns what color a revealed poly should be
    public static Color getColor(int level) {
       return (level == 0) ? settings.getColor(9) : settings.getColor((level - 1) % 10 + 10);
    }
@@ -263,7 +265,7 @@ public class MisalignGraphics {
       mines.removeIf(p -> p.getDisplayState() != -1);
       
       Timer mineRevealTimer = new Timer(LOSS_ANIMATION_DELAY, null);
-      mineRevealTimer.addActionListener((e) -> { //adding listener later lets us stop the timer within the listener more easily
+      mineRevealTimer.addActionListener((e) -> { // adding listener later lets us stop the timer within the listener more easily
          if (mines.size() > 0 && playingLossAnimation) {
             Poly poly = mines.stream().findAny().get();
             poly.reveal();
@@ -282,39 +284,42 @@ public class MisalignGraphics {
       return new ImageIcon(new ImageIcon(MisalignGraphics.class.getResource(path)).getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
    }
    
-   //Returns x multiplier
+   // Returns x multiplier
    public static double getXM() {
       return xm;
    }
    
-   //Returns y multiplier
+   // Returns y multiplier
    public static double getYM() {
       return ym;
    }
    
-   //Returns frame
+   // Returns frame
    public static JFrame getFrame() {
       return frame;
    }
    
-   //Returns custom timer
+   // Returns custom timer
    public static CustomTimer getTimer() {
       return timer;
    }
    
-   //Returns settings
+   // Returns settings panel
    public static SettingsPanel getSettings() {
       return settings;
    }
    
-   //Returns mine counter
+   // Returns mine counter
    public static JLabel getMineCounter() {
       return mineCounter;
    }
    
+   // Sets x multiplier
    public static void setXM(double value) {
       xm = value;
    }  
+   
+   // Sets y multiplier
    public static void setYM(double value) {
       ym = value;
    }

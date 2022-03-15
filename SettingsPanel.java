@@ -33,7 +33,7 @@ public class SettingsPanel extends JPanel {
       readColors("palette.ppm");
    }
    
-   //Add secret settings to setting menu (colorful mode, no lines mode)
+   // Add secret settings to setting menu (colorful mode, no lines mode)
    public void addSecretSettings() {
       c.gridy++;
       this.add(new JLabel("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"), c);
@@ -44,7 +44,7 @@ public class SettingsPanel extends JPanel {
       c.gridy++;
       this.add(noLinesModeCheckBox, c);
       this.repaint();
-      this.revalidate(); //revalidate needed to see immediate update if in settings when code is entered
+      this.revalidate(); // revalidate needed to see immediate update if in settings when code is entered
    }
    
    // Adds a panel containing a label and spinner to the settings panel
@@ -54,7 +54,7 @@ public class SettingsPanel extends JPanel {
       
       JSpinner spin = new JSpinner(new SpinnerNumberModel(start, min, max, step));
       spin.setEditor(new JSpinner.DefaultEditor(spin));
-      spin.setPreferredSize(new Dimension(50, 30));
+      spin.setPreferredSize(new Dimension(45, 30));
       
       labelWithSpinner.add(spin);
       spinners.add(spin);
@@ -62,9 +62,9 @@ public class SettingsPanel extends JPanel {
       this.add(labelWithSpinner, c);      
    }
    
-   //Adds textbox where a seed can be enetered/copied
+   // Adds textbox where a seed can be enetered/copied
    private void addLabeledTextField(String labelText, String fieldText) {
-      JPanel labelWithTextField = new JPanel(); //combines label, textfield, and button into one panel
+      JPanel labelWithTextField = new JPanel(); // combines label, textfield, and button into one panel
       seedTextField = new JTextField(fieldText);
       JButton seedSubmitButton = new JButton("Submit");
       seedSubmitButton.addActionListener(new ActionListener() {
@@ -73,7 +73,8 @@ public class SettingsPanel extends JPanel {
             customSeedEntered = true;
          }
       });
-      //just button formatting
+      
+      // button formatting
       seedSubmitButton.setFocusPainted(false);
       seedSubmitButton.setContentAreaFilled(false);
       seedSubmitButton.setMargin(new Insets(0,2,0,2));
