@@ -1,3 +1,4 @@
+import java.awt.Cursor;
 import java.awt.event.*;
 import java.util.*;
 
@@ -22,6 +23,16 @@ public class MisalignInput implements MouseListener, KeyListener {
          poly.reveal();
       }
       Misalignsweeper.repaint();
+   }
+   
+   @Override
+   public void mouseEntered(MouseEvent e) {
+      MisalignGraphics.getGamePanel().setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+   }
+   
+   @Override
+   public void mouseExited(MouseEvent e) {
+      MisalignGraphics.getGamePanel().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
    }
    
    // Reads key press and compares to Komani Code
@@ -52,11 +63,11 @@ public class MisalignInput implements MouseListener, KeyListener {
    @Override
    public void mouseReleased(MouseEvent e) { }
 
-   @Override
-   public void mouseEntered(MouseEvent e) { }
-
-   @Override
-   public void mouseExited(MouseEvent e) { }
+//    @Override
+//    public void mouseEntered(MouseEvent e) { }
+// 
+//    @Override
+//    public void mouseExited(MouseEvent e) { }
    
    @Override
    public void keyTyped(KeyEvent e) { }

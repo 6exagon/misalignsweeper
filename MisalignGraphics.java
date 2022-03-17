@@ -28,7 +28,7 @@ public class MisalignGraphics {
    private static JFrame frame;
    private static JPanel mainPanel;
    private static JPanel cardPanel;
-   private static JPanel gamePanel;
+   private static GamePanel gamePanel;
    private static SettingsPanel settings;
    private static JPanel buttonPanel;
    private static CustomTimer timer;
@@ -70,6 +70,7 @@ public class MisalignGraphics {
       frame.setFocusable(true);
       frame.addKeyListener(new MisalignInput());
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      //frame.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
       
       mainPanel = new JPanel(new GridBagLayout()); 
       mainPanel.setBorder(raisedBorder);
@@ -228,6 +229,7 @@ public class MisalignGraphics {
       gamePanel.addMouseListener(new MisalignInput());
       frame.pack();
       frame.setVisible(true);
+      frame.setLocationRelativeTo(null);
    }
    
    // Returns what color a revealed poly should be
@@ -297,6 +299,11 @@ public class MisalignGraphics {
    // Returns frame
    public static JFrame getFrame() {
       return frame;
+   }
+   
+   // Returns game panel
+   public static GamePanel getGamePanel() {
+      return gamePanel;
    }
    
    // Returns custom timer
